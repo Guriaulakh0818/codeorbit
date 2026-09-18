@@ -49,7 +49,7 @@ public class StudentLibraryServiceImpl implements StudentLibraryService {
         log.info("Retrieved {} purchased e-book(s) in library for student ID: {}", purchasedEbooks.size(), principal.getId());
 
         return purchasedEbooks.stream()
-                .map(this::mapToEbookResponseDto)
+                .map((Ebook ebook) -> mapToEbookResponseDto(ebook))
                 .toList();
     }
 
