@@ -13,7 +13,7 @@
 - **E-Book Storefront & Catalog**: Filter by subjects (Java 21, DSA, React/Spring Boot, SQL & Index Tuning, OS & Networks, Placement Prep, Capstone SRS Blueprints).
 - **Interactive PDF Preview Modal**: Students can inspect first 3 sample pages, table of contents, and curriculum before purchasing.
 - **Cart & Dynamic Discounts**: Promo code engine (e.g. `ENGINEER50` for 50% discount).
-- **Razorpay Checkout**: Seamless payment order creation, UPI / QR / Card / NetBanking support, and cryptographic HMAC-SHA256 signature verification.
+- **Cashfree Checkout**: Seamless payment order creation, UPI / QR / Card / NetBanking support, and automatic order verification.
 - **Student Library & In-App Reader**: Direct access to purchased handbooks, reading progress tracking, theme options (Dark / Sepia / Light), and font resizers.
 - **PDF Security & Watermarking**: DRM protection with student-specific license stamps and authorized download tokens.
 - **Instructor Marketplace**: Authors submit e-books for review and earn **80% royalty** with live sales analytics.
@@ -28,7 +28,7 @@
 | **Frontend** | React 18, Vite, Tailwind CSS, Lucide Icons, React Router DOM, Canvas Confetti |
 | **Backend** | Java 21, Spring Boot 3.3, Spring Security 6 (Stateless JWT), Spring Data JPA |
 | **Database** | MySQL 8.0 / Embedded H2 (for instant zero-friction local run) |
-| **Payment Gateway** | Razorpay (Order generation & Webhook/Signature verification) |
+| **Payment Gateway** | Cashfree Payments PG (Order session, Webhook, and Drop UI Modal) |
 | **File Storage** | Private local / cloud object storage with authorized access endpoints |
 
 ---

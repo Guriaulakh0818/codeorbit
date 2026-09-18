@@ -99,13 +99,13 @@ export const Footer = () => {
               </Link>
             </li>
             <li>
-              <Link to="/catalog" className="hover:text-sky-400 transition-colors flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5 text-sky-400" /> Contact Support
+              <Link to="/contact" className="hover:text-sky-400 transition-colors flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5 text-sky-400" /> Contact Us
               </Link>
             </li>
             <li>
-              <Link to="/catalog" className="hover:text-sky-400 transition-colors flex items-center gap-1.5">
-                <HelpCircle className="w-3.5 h-3.5 text-sky-400" /> Help Center & FAQ
+              <Link to="/contact" className="hover:text-sky-400 transition-colors flex items-center gap-1.5">
+                <HelpCircle className="w-3.5 h-3.5 text-sky-400" /> Help Desk & Support
               </Link>
             </li>
             <li>
@@ -114,14 +114,14 @@ export const Footer = () => {
           </ul>
         </div>
 
-        {/* Legal */}
+        {/* Legal & Policy Pages (Cashfree Compliant) */}
         <div>
-          <h4 className="text-white font-semibold text-xs uppercase tracking-wider mb-3">Legal & Terms</h4>
+          <h4 className="text-white font-semibold text-xs uppercase tracking-wider mb-3">Legal & Policies</h4>
           <ul className="space-y-2 text-xs">
-            <li><a href="#terms" className="hover:text-sky-400 transition-colors">Terms of Service</a></li>
-            <li><a href="#privacy" className="hover:text-sky-400 transition-colors">Privacy Policy</a></li>
-            <li><a href="#copyright" className="hover:text-sky-400 transition-colors">Copyright Policy</a></li>
-            <li><span className="text-slate-500 font-mono text-[11px]">MVP Demo v1.0</span></li>
+            <li><Link to="/terms" className="hover:text-sky-400 transition-colors">Terms & Conditions</Link></li>
+            <li><Link to="/refund-policy" className="hover:text-sky-400 transition-colors">Refunds & Cancellations</Link></li>
+            <li><Link to="/privacy-policy" className="hover:text-sky-400 transition-colors">Privacy Policy</Link></li>
+            <li><Link to="/contact" className="hover:text-sky-400 transition-colors">Contact Information</Link></li>
           </ul>
         </div>
       </div>

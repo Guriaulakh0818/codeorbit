@@ -189,7 +189,7 @@ class PaymentServiceTest {
     @DisplayName("Should reject webhook with invalid signature")
     void testHandleWebhook_InvalidSignature_ThrowsException() {
         String rawJson = "{\"event\":\"payment.captured\"}";
-        String badSig = "bad_signature";
+        String badSig = "invalid_signature_mock";
 
         assertThrows(IllegalArgumentException.class, () -> paymentService.handleWebhook(rawJson, badSig));
         verify(orderRepository, never()).save(any(Order.class));

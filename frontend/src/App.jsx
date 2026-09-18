@@ -14,6 +14,10 @@ import { StudentDashboardPage } from './pages/StudentDashboardPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
+import { ContactUsPage } from './pages/ContactUsPage';
+import { TermsConditionsPage } from './pages/TermsConditionsPage';
+import { RefundPolicyPage } from './pages/RefundPolicyPage';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 
 // Protected Route Guard
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -76,6 +80,13 @@ function MainLayout() {
               </ProtectedRoute>
             }
           />
+
+          {/* Policy Pages for Cashfree Whitelisting */}
+          <Route path="/contact" element={<ContactUsPage />} />
+          <Route path="/terms" element={<TermsConditionsPage />} />
+          <Route path="/refund-policy" element={<RefundPolicyPage />} />
+          <Route path="/cancellation-refund-policy" element={<RefundPolicyPage />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
 
           {/* Auth Pages */}
           <Route path="/login" element={<LoginPage />} />

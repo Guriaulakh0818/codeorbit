@@ -851,8 +851,7 @@ export const AdminDashboardPage = () => {
                     <th className="p-4">Student Details</th>
                     <th className="p-4">Purchased E-Books</th>
                     <th className="p-4">Total (INR)</th>
-                    <th className="p-4">Payment Status</th>
-                    <th className="p-4">Razorpay ID</th>
+                    <th className="p-4">Payment Ref / Gateway ID</th>
                     <th className="p-4 text-right">Details</th>
                   </tr>
                 </thead>
@@ -931,7 +930,7 @@ export const AdminDashboardPage = () => {
                           </td>
 
                           <td className="p-4 font-mono text-[11px] text-slate-400">
-                            {ord.razorpayPaymentId || ord.razorpayOrderId || <span className="text-slate-600">—</span>}
+                            {ord.cashfreePaymentId || ord.cashfreeOrderId || ord.razorpayPaymentId || ord.razorpayOrderId || <span className="text-slate-600">—</span>}
                           </td>
 
                           <td className="p-4 text-right">
@@ -1015,8 +1014,8 @@ export const AdminDashboardPage = () => {
                 </span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-slate-800/60">
-                <span className="text-slate-400">Razorpay Payment ID</span>
-                <span className="font-mono text-slate-300">{selectedOrderDetails.razorpayPaymentId || 'N/A'}</span>
+                <span className="text-slate-400">Cashfree / Gateway Payment ID</span>
+                <span className="font-mono text-slate-300">{selectedOrderDetails.cashfreePaymentId || selectedOrderDetails.razorpayPaymentId || 'N/A'}</span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-slate-800/60">
                 <span className="text-slate-400">Placed On</span>

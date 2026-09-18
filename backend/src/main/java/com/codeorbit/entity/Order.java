@@ -71,20 +71,24 @@ public class Order {
         this.orderNumber = orderNumber;
         this.user = user;
         this.totalAmount = totalAmount;
-        this.currency = "INR";
-        this.status = status != null ? status : OrderStatus.PENDING;
+        this.status = status;
     }
 
     @PrePersist
-    protected void onCreate() {
+    public void onPrePersist() {
         if (this.createdAt == null) {
             this.createdAt = LocalDateTime.now();
         }
-        this.updatedAt = LocalDateTime.now();
+        if (this.status == null) {
+            this.status = OrderStatus.PENDING;
+        }
+        if (this.currency == null) {
+            this.currency = "INR";
+        }
     }
 
     @PreUpdate
-    protected void onUpdate() {
+    public void onPreUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
 

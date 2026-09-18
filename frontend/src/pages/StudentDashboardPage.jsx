@@ -444,7 +444,7 @@ export const StudentDashboardPage = () => {
                       </td>
                       <td className="p-4 font-mono font-bold text-white">₹{ord.totalAmount}</td>
                       <td className="p-4 font-mono text-[11px] text-slate-400">
-                        {ord.razorpayPaymentId || ord.razorpayOrderId || '—'}
+                        {ord.cashfreePaymentId || ord.cashfreeOrderId || ord.razorpayPaymentId || ord.razorpayOrderId || '—'}
                       </td>
                       <td className="p-4">
                         {getStatusBadge(ord.status)}
