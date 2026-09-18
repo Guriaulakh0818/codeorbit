@@ -1,0 +1,39 @@
+# Environment Variables & Secrets (NEVER COMMIT)
+.env
+.env.local
+.env.*.local
+*.env
+
+# Build Output
+backend/target/
+frontend/dist/
+frontend/dist-ssr/
+
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Local Storage & Uploads
+storage/
+backend/storage/
+*.pdf
+
+# IDE & Editor Configs
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.settings/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS Files
+.DS_Store
+Thumbs.db

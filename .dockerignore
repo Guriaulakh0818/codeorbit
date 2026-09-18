@@ -1,0 +1,24 @@
+# Ignore git and local environment files
+.git/
+.gitignore
+.env
+.env.*
+*.md
+.env.example
+
+# Build outputs and dependencies
+backend/target/
+frontend/dist/
+frontend/node_modules/
+node_modules/
+
+# Local data & uploaded files
+storage/
+backend/storage/
+*.pdf
+*.log
+
+# IDE files
+.idea/
+.vscode/
+*.iml

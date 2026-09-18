@@ -1,0 +1,17 @@
+# Build and IDE artifacts
+target/
+.mvn/
+.idea/
+*.iml
+.vscode/
+
+# Local data & environment secrets
+.env
+.env.*
+*.log
+storage/
+storage/private/pdfs/
+
+# OS files
+.DS_Store
+Thumbs.db
