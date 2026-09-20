@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, 
   BookOpen, 
@@ -20,6 +20,7 @@ import {
   Terminal,
   ArrowRight
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import { coursesApi } from '../services/coursesApi';
 import { studentLearningApi } from '../services/studentLearningApi';
 import { useLearningProgress } from '../context/LearningProgressContext';
@@ -29,6 +30,8 @@ import { triggerConfetti } from '../utils/confettiHelper';
 
 export const CourseDetailPage = () => {
   const { courseSlug } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   const {
     isLessonCompleted,
@@ -49,6 +52,12 @@ export const CourseDetailPage = () => {
 
   const handleClaimCertificate = async () => {
     if (!courseSlug || claimingCertificate) return;
+
+    if (!user) {
+      navigate(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+
     setClaimingCertificate(true);
     setClaimError(null);
     try {

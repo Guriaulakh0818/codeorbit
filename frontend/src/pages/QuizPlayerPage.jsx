@@ -133,8 +133,15 @@ export const QuizPlayerPage = () => {
     }));
   };
 
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
   const handleSubmitQuiz = async () => {
     if (!quiz || submitting) return;
+
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
 
     setSubmitting(true);
     setSubmissionError(null);
@@ -153,8 +160,7 @@ export const QuizPlayerPage = () => {
       const res = await studentLearningApi.submitQuiz(quiz.id, payload, courseSlug, quizSlug);
       if (res.success && res.data) {
         setSubmissionResult(res.data);
-        // Refresh course-level progress if logged in
-        if (user && courseSlug) {
+        if (courseSlug) {
           fetchCourseProgress(courseSlug);
         }
       } else {
@@ -690,6 +696,43 @@ export const QuizPlayerPage = () => {
               </div>
             </div>
 
+          </div>
+        )}
+
+        {/* Student Login Required Modal */}
+        {showLoginModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white rounded-3xl border border-slate-200 p-8 max-w-md w-full shadow-2xl text-center space-y-5">
+              <div className="w-14 h-14 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto shadow-2xs">
+                <GraduationCap className="w-7 h-7" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-black text-slate-900">Student Login Required</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Assessment submit karne aur verified <strong>Certificate of Completion</strong> earn karne ke liye login karna zaroori hai.
+                </p>
+              </div>
+              <div className="space-y-2.5 pt-2">
+                <Link
+                  to={`/login?redirect=${encodeURIComponent(window.location.pathname)}`}
+                  className="w-full inline-flex items-center justify-center gap-2 py-3 px-5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
+                >
+                  <LogIn className="w-4 h-4" /> Login to Complete Course
+                </Link>
+                <Link
+                  to={`/register?redirect=${encodeURIComponent(window.location.pathname)}`}
+                  className="w-full inline-flex items-center justify-center gap-2 py-3 px-5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 transition-colors"
+                >
+                  Create Free Account (30 Seconds)
+                </Link>
+                <button
+                  onClick={() => setShowLoginModal(false)}
+                  className="text-xs text-slate-400 hover:text-slate-600 font-semibold cursor-pointer pt-1 block w-full"
+                >
+                  Cancel & Continue Reviewing
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
