@@ -40,6 +40,7 @@ import { useLibrary } from '../context/LibraryContext';
 import { CATEGORIES } from '../data/ebooksData';
 import { PdfPreviewModal } from '../components/PdfPreviewModal';
 import { adminApi } from '../services/adminApi';
+import { AdminCurriculumManager } from '../components/admin/AdminCurriculumManager';
 
 export const AdminDashboardPage = () => {
   const { user, logout } = useAuth();
@@ -460,6 +461,7 @@ export const AdminDashboardPage = () => {
       {/* Navigation Tabs */}
       <div className="flex border-b border-slate-800 gap-2 text-xs font-semibold overflow-x-auto pb-1">
         {[
+          { id: 'curriculum', label: 'Curriculum & Tracks (Courses/Lessons/Quizzes)', count: null },
           { id: 'manage-ebooks', label: 'E-Book Management', count: storeEbooks.length },
           { id: 'overview', label: 'Store Overview & Metrics', count: null },
           { id: 'orders', label: 'Student Orders & PDF Licenses', count: metrics.totalOrders },
@@ -483,6 +485,11 @@ export const AdminDashboardPage = () => {
           </button>
         ))}
       </div>
+
+      {/* TAB 0: CURRICULUM & COURSE TRACKS MANAGEMENT */}
+      {activeTab === 'curriculum' && (
+        <AdminCurriculumManager />
+      )}
 
       {/* TAB 1: E-BOOK MANAGEMENT */}
       {activeTab === 'manage-ebooks' && (

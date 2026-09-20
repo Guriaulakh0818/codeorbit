@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LibraryProvider } from './context/LibraryContext';
 import { CartProvider } from './context/CartContext';
+import { LearningProgressProvider } from './context/LearningProgressContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { CartDrawer } from './components/CartDrawer';
@@ -18,6 +19,12 @@ import { ContactUsPage } from './pages/ContactUsPage';
 import { TermsConditionsPage } from './pages/TermsConditionsPage';
 import { RefundPolicyPage } from './pages/RefundPolicyPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+
+import { CoursesPage } from './pages/CoursesPage';
+import { CourseDetailPage } from './pages/CourseDetailPage';
+import { LessonReaderPage } from './pages/LessonReaderPage';
+import { QuizPlayerPage } from './pages/QuizPlayerPage';
+import { CertificateVerifyPage } from './pages/CertificateVerifyPage';
 
 // Protected Route Guard
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -50,6 +57,13 @@ function MainLayout() {
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<HomePage onBuyNow={() => setIsCheckoutOpen(true)} />} />
+          <Route path="/courses" element={<CoursesPage />} />
+          <Route path="/courses/:courseSlug" element={<CourseDetailPage />} />
+          <Route path="/courses/:courseSlug/lessons/:lessonSlug" element={<LessonReaderPage />} />
+          <Route path="/courses/:courseSlug/quizzes/:quizSlug" element={<QuizPlayerPage />} />
+          <Route path="/certificates/verify/:certificateCode" element={<CertificateVerifyPage />} />
+          <Route path="/certificates/verify" element={<CertificateVerifyPage />} />
+          <Route path="/verify/:certificateCode" element={<CertificateVerifyPage />} />
           <Route path="/catalog" element={<CatalogPage onBuyNow={() => setIsCheckoutOpen(true)} />} />
           <Route path="/ebook/:id" element={<EbookDetailPage onBuyNow={() => setIsCheckoutOpen(true)} />} />
           
@@ -109,7 +123,9 @@ export function App() {
       <AuthProvider>
         <LibraryProvider>
           <CartProvider>
-            <MainLayout />
+            <LearningProgressProvider>
+              <MainLayout />
+            </LearningProgressProvider>
           </CartProvider>
         </LibraryProvider>
       </AuthProvider>

@@ -91,6 +91,9 @@ public class SecurityConfig {
                         // Public Catalog Browsing (GET only)
                         .requestMatchers(HttpMethod.GET, "/api/ebooks/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/ebooks/categories").permitAll()
+                        // Public Learning Platform Browsing & Certificate Verification (GET only)
+                        .requestMatchers(HttpMethod.GET, "/api/courses/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/certificates/verify/**").permitAll()
                         // Dev tools & system
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/error").permitAll()

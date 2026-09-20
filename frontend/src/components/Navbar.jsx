@@ -104,6 +104,26 @@ export const Navbar = () => {
             </Link>
 
             <Link 
+              to="/courses" 
+              className={`px-3 py-2 rounded-lg transition-colors flex items-center gap-1.5 ${
+                isActive('/courses') ? 'text-white bg-slate-800/80' : 'hover:text-white hover:bg-slate-800/50'
+              }`}
+            >
+              <GraduationCap className="w-3.5 h-3.5 text-sky-400" />
+              Courses
+            </Link>
+
+            <Link 
+              to="/certificates/verify" 
+              className={`px-3 py-2 rounded-lg transition-colors flex items-center gap-1.5 ${
+                location.pathname.startsWith('/certificates/verify') ? 'text-white bg-slate-800/80' : 'hover:text-white hover:bg-slate-800/50'
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-sky-400" />
+              Verify
+            </Link>
+
+            <Link 
               to="/catalog" 
               className={`px-3 py-2 rounded-lg transition-colors flex items-center gap-1.5 ${
                 isActive('/catalog') ? 'text-white bg-slate-800/80' : 'hover:text-white hover:bg-slate-800/50'
@@ -253,6 +273,20 @@ export const Navbar = () => {
               className="p-2.5 rounded-lg hover:bg-slate-800 text-slate-200"
             >
               Home
+            </Link>
+            <Link
+              to="/courses"
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-2.5 rounded-lg hover:bg-slate-800 text-slate-200 flex items-center gap-2"
+            >
+              <GraduationCap className="w-4 h-4 text-sky-400" /> Free Courses
+            </Link>
+            <Link
+              to="/certificates/verify"
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-2.5 rounded-lg hover:bg-slate-800 text-slate-200 flex items-center gap-2"
+            >
+              <ShieldCheck className="w-4 h-4 text-sky-400" /> Verify Certificate
             </Link>
             <Link
               to="/catalog"

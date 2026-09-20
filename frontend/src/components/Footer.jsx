@@ -94,18 +94,18 @@ export const Footer = () => {
           <h4 className="text-white font-semibold text-xs uppercase tracking-wider mb-3">About & Help</h4>
           <ul className="space-y-2 text-xs">
             <li>
-              <Link to="/catalog" className="hover:text-sky-400 transition-colors flex items-center gap-1.5">
-                <Info className="w-3.5 h-3.5 text-sky-400" /> About CodeOrbit
+              <Link to="/courses" className="hover:text-sky-400 transition-colors flex items-center gap-1.5">
+                <BookOpen className="w-3.5 h-3.5 text-sky-400" /> Free CSE Courses
+              </Link>
+            </li>
+            <li>
+              <Link to="/certificates/verify" className="hover:text-sky-400 transition-colors flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-sky-400" /> Verify Certificate
               </Link>
             </li>
             <li>
               <Link to="/contact" className="hover:text-sky-400 transition-colors flex items-center gap-1.5">
                 <Mail className="w-3.5 h-3.5 text-sky-400" /> Contact Us
-              </Link>
-            </li>
-            <li>
-              <Link to="/contact" className="hover:text-sky-400 transition-colors flex items-center gap-1.5">
-                <HelpCircle className="w-3.5 h-3.5 text-sky-400" /> Help Desk & Support
               </Link>
             </li>
             <li>
