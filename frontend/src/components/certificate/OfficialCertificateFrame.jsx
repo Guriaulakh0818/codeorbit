@@ -143,11 +143,8 @@ export const OfficialCertificateFrame = forwardRef(({ cert }, ref) => {
               
               {/* Academy Seal Crest */}
               <div className="flex items-center gap-3.5">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 text-amber-400 p-0.5 shadow-md flex items-center justify-center border border-amber-400/60 flex-shrink-0">
-                  <div className="w-full h-full rounded-[14px] border border-amber-400/40 flex flex-col items-center justify-center bg-slate-950/95">
-                    <Sparkles className="w-5 h-5 text-amber-400 mb-0.5" />
-                    <span className="font-cinzel text-[9px] font-black tracking-widest text-amber-300">CODEORBIT</span>
-                  </div>
+                <div className="h-12 w-auto flex items-center justify-center p-1 bg-white rounded-xl border border-amber-300 shadow-xs flex-shrink-0">
+                  <img src="/logo.png" alt="CodeOrbit Academy" className="h-10 w-auto object-contain" />
                 </div>
                 <div className="space-y-0.5">
                   <div className="font-cinzel text-lg sm:text-xl font-black tracking-wider text-slate-950 leading-tight">

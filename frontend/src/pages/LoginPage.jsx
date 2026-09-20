@@ -57,10 +57,10 @@ export const LoginPage = () => {
       <div className="w-full max-w-md space-y-6 animate-in fade-in duration-300">
         
         {/* Header */}
-        <div className="text-center space-y-2">
-          <div className="w-12 h-12 mx-auto rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shadow-2xs">
-            <GraduationCap className="w-6 h-6" />
-          </div>
+        <div className="text-center space-y-2 flex flex-col items-center">
+          <Link to="/" className="inline-block hover:opacity-95 transition-opacity mb-1">
+            <img src="/logo.png" alt="CodeOrbit Logo" className="h-10 w-auto object-contain" />
+          </Link>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Student Sign In</h1>
           <p className="text-xs text-slate-500">Access your learning history, quiz results, and verified certificates</p>
         </div>

@@ -10,13 +10,12 @@ export const Footer = () => {
           
           {/* Col 1: Brand & Mission */}
           <div className="lg:col-span-2 space-y-4">
-            <Link to="/" className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-md shadow-emerald-500/20">
-                <Terminal className="w-4 h-4 text-white" />
-              </div>
-              <span className="font-extrabold text-base text-white tracking-tight">
-                Code<span className="text-emerald-400">Orbit</span>
-              </span>
+            <Link to="/" className="inline-block p-1.5 px-3 rounded-xl bg-white shadow-xs hover:opacity-95 transition-opacity">
+              <img 
+                src="/logo.png" 
+                alt="CodeOrbit — Free CS Learning For Everyone" 
+                className="h-7 w-auto object-contain" 
+              />
             </Link>
             <p className="text-slate-300 text-xs leading-relaxed max-w-sm">
               100% Free Computer Science learning platform and placement handbook. High-quality tutorials, bilingual notes (English & Hinglish), interactive practice quizzes, and verifiable certifications.

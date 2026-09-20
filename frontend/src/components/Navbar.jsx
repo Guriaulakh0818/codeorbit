@@ -54,23 +54,12 @@ export const Navbar = () => {
         <div className="flex items-center justify-between h-16 gap-3">
           
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 group flex-shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-all duration-300">
-              <Terminal className="w-5 h-5 text-white" />
-            </div>
-            <div className="flex flex-col">
-              <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-lg text-slate-900 tracking-tight group-hover:text-emerald-600 transition-colors">
-                  Code<span className="text-emerald-600">Orbit</span>
-                </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold uppercase tracking-wider">
-                  FREE CS
-                </span>
-              </div>
-              <span className="text-[10px] text-slate-500 font-medium hidden sm:inline">
-                Open Computer Science Library
-              </span>
-            </div>
+          <Link to="/" className="flex items-center gap-2 group flex-shrink-0">
+            <img 
+              src="/logo.png" 
+              alt="CodeOrbit — Free CS Learning For Everyone" 
+              className="h-9 sm:h-10 w-auto object-contain hover:opacity-95 transition-opacity" 
+            />
           </Link>
 
           {/* Search Bar (Desktop) */}
