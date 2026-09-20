@@ -26,6 +26,9 @@ export const StudentDashboardPage = () => {
   const navigate = useNavigate();
   const { completedLessonIds, bookmarkedLessonIds, courseProgressMap } = useLearningProgress();
 
+  const [courses, setCourses] = useState([]);
+  const [certificates, setCertificates] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('courses'); // 'courses' | 'certificates' | 'profile'
   const [copiedCode, setCopiedCode] = useState(null);
 
