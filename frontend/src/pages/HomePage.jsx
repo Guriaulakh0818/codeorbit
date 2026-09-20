@@ -141,9 +141,9 @@ export const HomePage = () => {
 
           {/* Hero Heading */}
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight">
-            Learn CS Fundamentals & Crack Placements{' '}
-            <span className="text-emerald-600 underline decoration-emerald-300 decoration-wavy decoration-2">
-              Without Paying A Rupee.
+            Learn CS Fundamentals &{' '}
+            <span className="text-emerald-600">
+              Crack Placements
             </span>
           </h1>
 
