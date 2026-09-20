@@ -15,6 +15,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { CodeOrbitLogo } from '../components/brand/CodeOrbitLogo';
 
 export const AdminLoginPage = () => {
   const { user, login, logout, isAdmin } = useAuth();
@@ -84,7 +85,7 @@ export const AdminLoginPage = () => {
         {/* Portal Header Badge */}
         <div className="text-center space-y-3 flex flex-col items-center">
           <Link to="/" className="inline-block hover:opacity-95 transition-opacity mb-1">
-            <img src="/logo.png" alt="CodeOrbit Logo" className="h-10 w-auto object-contain" />
+            <CodeOrbitLogo variant="light" height={48} />
           </Link>
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs font-semibold shadow-2xs">
             <ShieldCheck className="w-4 h-4 text-emerald-600" />

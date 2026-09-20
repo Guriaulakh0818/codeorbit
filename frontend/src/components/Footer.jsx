@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Terminal, Github, Twitter, Linkedin, Heart, ShieldCheck, Sparkles, BookOpen } from 'lucide-react';
+import { Github, Twitter, Linkedin, Heart, ShieldCheck, Sparkles, BookOpen } from 'lucide-react';
+import { CodeOrbitLogo } from './brand/CodeOrbitLogo';
 
 export const Footer = () => {
   return (
@@ -10,12 +11,8 @@ export const Footer = () => {
           
           {/* Col 1: Brand & Mission */}
           <div className="lg:col-span-2 space-y-4">
-            <Link to="/" className="inline-block p-1.5 px-3 rounded-xl bg-white shadow-xs hover:opacity-95 transition-opacity">
-              <img 
-                src="/logo.png" 
-                alt="CodeOrbit — Free CS Learning For Everyone" 
-                className="h-7 w-auto object-contain" 
-              />
+            <Link to="/" className="inline-block hover:opacity-95 transition-opacity">
+              <CodeOrbitLogo variant="dark" height={52} />
             </Link>
             <p className="text-slate-300 text-xs leading-relaxed max-w-sm">
               100% Free Computer Science learning platform and placement handbook. High-quality tutorials, bilingual notes (English & Hinglish), interactive practice quizzes, and verifiable certifications.

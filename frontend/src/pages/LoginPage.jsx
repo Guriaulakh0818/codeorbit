@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, Lock, Mail, ArrowRight, Eye, EyeOff, AlertCircle, Loader2, GraduationCap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { CodeOrbitLogo } from '../components/brand/CodeOrbitLogo';
 
 export const LoginPage = () => {
   const { login } = useAuth();
@@ -59,7 +60,7 @@ export const LoginPage = () => {
         {/* Header */}
         <div className="text-center space-y-2 flex flex-col items-center">
           <Link to="/" className="inline-block hover:opacity-95 transition-opacity mb-1">
-            <img src="/logo.png" alt="CodeOrbit Logo" className="h-10 w-auto object-contain" />
+            <CodeOrbitLogo variant="light" height={48} />
           </Link>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Student Sign In</h1>
           <p className="text-xs text-slate-500">Access your learning history, quiz results, and verified certificates</p>

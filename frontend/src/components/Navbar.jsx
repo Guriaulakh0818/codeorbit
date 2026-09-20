@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { LanguageSelector } from './LanguageSelector';
+import { CodeOrbitLogo } from './brand/CodeOrbitLogo';
 
 export const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
@@ -55,11 +56,7 @@ export const Navbar = () => {
           
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group flex-shrink-0">
-            <img 
-              src="/logo.png" 
-              alt="CodeOrbit — Free CS Learning For Everyone" 
-              className="h-9 sm:h-10 w-auto object-contain hover:opacity-95 transition-opacity" 
-            />
+            <CodeOrbitLogo variant="light" height={42} className="hover:opacity-95 transition-opacity" />
           </Link>
 
           {/* Search Bar (Desktop) */}
