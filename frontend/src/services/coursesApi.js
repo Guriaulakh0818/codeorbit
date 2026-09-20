@@ -1,10 +1,11 @@
 import { API_BASE, getAuthHeaders } from './apiConfig';
+import { CURRICULUM_DATA } from '../data/curriculumData';
 
 export const coursesApi = {
   /**
    * Fetch published courses for the public catalog
    * @param {Object} options
-   * @param {string} [options.track] - Optional track filter (e.g. 'DSA', 'SYSTEMS', 'WEB')
+   * @param {string} [options.track] - Optional track filter (e.g. 'DSA', 'OS', 'DBMS')
    * @param {string} [options.search] - Optional search query
    * @param {number} [options.page=0] - Page index (0-based)
    * @param {number} [options.size=12] - Items per page
@@ -24,30 +25,43 @@ export const coursesApi = {
       if (res.ok) {
         const json = await res.json();
         const paged = json.data || {};
-        return {
-          success: true,
-          data: paged.content || [],
-          totalElements: paged.totalElements || 0,
-          totalPages: paged.totalPages || 0,
-          page: paged.page || 0,
-          size: paged.size || size,
-          last: paged.last ?? true
-        };
+        if (Array.isArray(paged.content) && paged.content.length > 0) {
+          return {
+            success: true,
+            data: paged.content,
+            totalElements: paged.totalElements || paged.content.length,
+            totalPages: paged.totalPages || 1,
+            page: paged.page || 0,
+            size: paged.size || size,
+            last: paged.last ?? true
+          };
+        }
       }
-
-      const errJson = await res.json().catch(() => ({}));
-      return {
-        success: false,
-        message: errJson.message || `Failed to fetch courses (HTTP ${res.status})`,
-        data: []
-      };
     } catch (e) {
-      return {
-        success: false,
-        message: 'Server is currently unreachable. Please ensure the backend is running.',
-        data: []
-      };
+      // fallback to static curriculum data below
     }
+
+    // Local Dataset Fallback
+    let filtered = [...CURRICULUM_DATA];
+    if (track && track !== 'ALL') {
+      filtered = filtered.filter((c) => c.track?.toUpperCase() === track.toUpperCase());
+    }
+    if (search && search.trim()) {
+      const q = search.toLowerCase();
+      filtered = filtered.filter((c) =>
+        c.title?.toLowerCase().includes(q) || c.description?.toLowerCase().includes(q)
+      );
+    }
+
+    return {
+      success: true,
+      data: filtered,
+      totalElements: filtered.length,
+      totalPages: Math.ceil(filtered.length / size) || 1,
+      page: 0,
+      size,
+      last: true
+    };
   },
 
   /**
@@ -62,22 +76,25 @@ export const coursesApi = {
 
       if (res.ok) {
         const json = await res.json();
-        return { success: true, data: json.data };
+        if (json.data) {
+          return { success: true, data: json.data };
+        }
       }
-
-      const errJson = await res.json().catch(() => ({}));
-      return {
-        success: false,
-        status: res.status,
-        message: errJson.message || (res.status === 404 ? 'Course not found' : 'Failed to load course detail')
-      };
     } catch (e) {
-      return {
-        success: false,
-        status: 503,
-        message: 'Server is currently unreachable.'
-      };
+      // fallback below
     }
+
+    // Fallback from local dataset
+    const course = CURRICULUM_DATA.find((c) => c.slug === slug);
+    if (course) {
+      return { success: true, data: course };
+    }
+
+    return {
+      success: false,
+      status: 404,
+      message: 'Course track not found.'
+    };
   },
 
   /**
@@ -87,6 +104,8 @@ export const coursesApi = {
    * @param {string} [lang='en'] - 'en' or 'hinglish'
    */
   async getLesson(courseSlug, lessonSlug, lang = 'en') {
+    const isHinglishRequested = lang === 'hinglish';
+
     try {
       const params = new URLSearchParams();
       if (lang) params.set('lang', lang);
@@ -100,31 +119,69 @@ export const coursesApi = {
 
       if (res.ok) {
         const json = await res.json();
-        return { success: true, data: json.data };
+        if (json.data) {
+          const lessonData = json.data;
+          // Ensure both content & contentMarkdown are populated with language
+          const activeContent = lessonData.content || (isHinglishRequested ? lessonData.contentHinglish : lessonData.contentEn) || '';
+          return {
+            success: true,
+            data: {
+              ...lessonData,
+              content: activeContent,
+              contentMarkdown: activeContent
+            }
+          };
+        }
       }
-
-      const errJson = await res.json().catch(() => ({}));
-      return {
-        success: false,
-        status: res.status,
-        message: errJson.message || (res.status === 404 ? 'Lesson not found' : 'Failed to load lesson')
-      };
     } catch (e) {
-      return {
-        success: false,
-        status: 503,
-        message: 'Server is currently unreachable.'
-      };
+      // fallback below
     }
+
+    // Fallback from local dataset
+    const course = CURRICULUM_DATA.find((c) => c.slug === courseSlug);
+    if (course && course.modules) {
+      for (const mod of course.modules) {
+        const foundLesson = (mod.lessons || []).find((l) => l.slug === lessonSlug);
+        if (foundLesson) {
+          const activeContent = isHinglishRequested
+            ? (foundLesson.contentHinglish || foundLesson.contentEn)
+            : (foundLesson.contentEn || foundLesson.contentHinglish);
+
+          return {
+            success: true,
+            data: {
+              ...foundLesson,
+              courseTitle: course.title,
+              courseSlug: course.slug,
+              moduleId: mod.id,
+              moduleTitle: mod.title,
+              content: activeContent,
+              contentMarkdown: activeContent,
+              contentEn: foundLesson.contentEn,
+              contentHinglish: foundLesson.contentHinglish,
+              activeLanguageServed: isHinglishRequested ? 'hinglish' : 'en'
+            }
+          };
+        }
+      }
+    }
+
+    return {
+      success: false,
+      status: 404,
+      message: 'Lesson content not found.'
+    };
   },
 
   /**
-   * Fetch public quiz questions with randomized options (no answer keys exposed)
+   * Fetch public quiz questions with randomized options
    * @param {string} courseSlug
    * @param {string} quizSlug
    * @param {string} [lang='en'] - 'en' or 'hinglish'
    */
   async getQuiz(courseSlug, quizSlug, lang = 'en') {
+    const isHinglishRequested = lang === 'hinglish';
+
     try {
       const params = new URLSearchParams();
       if (lang) params.set('lang', lang);
@@ -138,21 +195,48 @@ export const coursesApi = {
 
       if (res.ok) {
         const json = await res.json();
-        return { success: true, data: json.data };
+        if (json.data) {
+          return { success: true, data: json.data };
+        }
       }
-
-      const errJson = await res.json().catch(() => ({}));
-      return {
-        success: false,
-        status: res.status,
-        message: errJson.message || (res.status === 404 ? 'Quiz not found' : 'Failed to load quiz')
-      };
     } catch (e) {
-      return {
-        success: false,
-        status: 503,
-        message: 'Server is currently unreachable.'
-      };
+      // fallback below
     }
+
+    // Fallback from local dataset
+    const course = CURRICULUM_DATA.find((c) => c.slug === courseSlug);
+    if (course && course.modules) {
+      for (const mod of course.modules) {
+        const foundQuiz = (mod.quizzes || []).find((q) => q.slug === quizSlug);
+        if (foundQuiz) {
+          const localizedQuestions = (foundQuiz.questions || []).map((q) => ({
+            id: q.id,
+            prompt: isHinglishRequested ? (q.promptHinglish || q.promptEn) : (q.promptEn || q.promptHinglish),
+            codeContext: q.codeContext,
+            options: (q.options || []).map((opt) => ({
+              id: opt.id,
+              text: isHinglishRequested ? (opt.text_hinglish || opt.text_en || opt.text) : (opt.text_en || opt.text_hinglish || opt.text)
+            }))
+          }));
+
+          return {
+            success: true,
+            data: {
+              ...foundQuiz,
+              moduleTitle: mod.title,
+              questions: localizedQuestions
+            }
+          };
+        }
+      }
+    }
+
+    return {
+      success: false,
+      status: 404,
+      message: 'Quiz assessment not found.'
+    };
   }
 };
+
+export default coursesApi;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, 
@@ -83,8 +83,17 @@ export const LessonReaderPage = () => {
     loadLesson();
   }, [courseSlug, lessonSlug, language]);
 
+  // Dynamic language resolution: Instantly switches to Hinglish or English markdown
+  const activeContent = useMemo(() => {
+    if (!lesson) return '';
+    if (isHinglish) {
+      return lesson.contentHinglish || lesson.content || lesson.contentMarkdown || lesson.contentEn || '';
+    }
+    return lesson.contentEn || lesson.content || lesson.contentMarkdown || '';
+  }, [lesson, isHinglish]);
+
   // Flatten all lessons in course to find prev/next navigation
-  const allLessons = React.useMemo(() => {
+  const allLessons = useMemo(() => {
     if (!course || !course.modules) return [];
     return course.modules.flatMap((m) => m.lessons || []);
   }, [course]);
@@ -244,7 +253,7 @@ export const LessonReaderPage = () => {
 
               {/* Markdown Content (Eye-friendly typography & high contrast code) */}
               <div className="prose prose-slate max-w-none prose-headings:text-slate-900 prose-headings:font-bold prose-headings:tracking-tight prose-p:text-slate-700 prose-p:leading-relaxed prose-li:text-slate-700 prose-strong:text-slate-900 prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-pre:border prose-pre:border-slate-800 prose-a:text-emerald-700 hover:prose-a:underline">
-                <MarkdownRenderer content={lesson.contentMarkdown || ''} />
+                <MarkdownRenderer content={activeContent} />
               </div>
 
               {/* In-Article Mid-Way Ad Slot */}
@@ -328,7 +337,7 @@ export const LessonReaderPage = () => {
 
         {/* Right Column: Dynamic Table of Contents & Sticky AdSense Banner */}
         <aside className="hidden xl:block w-72 h-[calc(100vh-5rem)] sticky top-20 p-4 space-y-4 overflow-y-auto custom-scrollbar">
-          {lesson && <TableOfContents markdownContent={lesson.contentMarkdown || ''} />}
+          {lesson && <TableOfContents markdownContent={activeContent} />}
 
           {/* Sticky Sidebar Banner Ad */}
           <AdSlot slotType="sidebar" />
