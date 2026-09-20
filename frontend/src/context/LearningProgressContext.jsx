@@ -190,14 +190,6 @@ export const LearningProgressProvider = ({ children }) => {
           ...prev,
           [courseSlug]: res.data
         }));
-
-        if (Array.isArray(res.data.completedLessonIds)) {
-          setCompletedLessonIds((prev) => {
-            const next = new Set([...prev, ...res.data.completedLessonIds]);
-            saveStoredCompleted(Array.from(next), user);
-            return next;
-          });
-        }
         return res.data;
       }
     } catch (e) {}
