@@ -147,7 +147,7 @@ public int[] twoSum(int[] numbers, int target) {
         ],
         quizzes: [
           {
-            id: 2001,
+            id: 1,
             title: 'Module 1 Assessment: Complexity & Two Pointers',
             slug: 'module-1-quiz',
             description: 'Test your understanding of algorithmic complexity and the two-pointer technique.',

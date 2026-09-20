@@ -96,11 +96,6 @@ export const QuizPlayerPage = () => {
   const handleSubmitQuiz = async () => {
     if (!quiz || submitting) return;
 
-    if (!user) {
-      setSubmissionError('Please login to submit your quiz and record your progress.');
-      return;
-    }
-
     setSubmitting(true);
     setSubmissionError(null);
 
@@ -115,11 +110,13 @@ export const QuizPlayerPage = () => {
         answers: answersPayload
       };
 
-      const res = await studentLearningApi.submitQuiz(quiz.id, payload);
+      const res = await studentLearningApi.submitQuiz(quiz.id, payload, courseSlug, quizSlug);
       if (res.success && res.data) {
         setSubmissionResult(res.data);
-        // Refresh course-level progress
-        fetchCourseProgress(courseSlug);
+        // Refresh course-level progress if logged in
+        if (user && courseSlug) {
+          fetchCourseProgress(courseSlug);
+        }
       } else {
         setSubmissionError(res.message || 'Failed to submit quiz attempt.');
       }
