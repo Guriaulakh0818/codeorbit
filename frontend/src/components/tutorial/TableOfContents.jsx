@@ -65,9 +65,9 @@ export const TableOfContents = ({ markdownContent = '' }) => {
   if (headings.length === 0) return null;
 
   return (
-    <div className="p-4 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 space-y-3">
-      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
-        <ListTree className="w-3.5 h-3.5 text-emerald-400" />
+    <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
+      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 font-mono">
+        <ListTree className="w-3.5 h-3.5 text-emerald-600" />
         <span>On This Page</span>
       </div>
 
@@ -82,8 +82,8 @@ export const TableOfContents = ({ markdownContent = '' }) => {
                 h.level === 3 ? 'pl-4' : 'pl-1'
               } ${
                 isActive
-                  ? 'text-emerald-400 font-bold border-l-2 border-emerald-500 pl-2 bg-emerald-500/5 py-0.5 rounded-r'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'text-emerald-700 font-bold border-l-2 border-emerald-600 pl-2 bg-emerald-50/80 py-0.5 rounded-r'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               {h.title}

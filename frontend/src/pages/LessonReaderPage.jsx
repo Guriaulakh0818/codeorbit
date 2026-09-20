@@ -108,7 +108,7 @@ export const LessonReaderPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col selection:bg-emerald-500 selection:text-white">
       {/* SEO Dynamic Head */}
       {lesson && (
         <SeoHead
@@ -129,28 +129,28 @@ export const LessonReaderPage = () => {
       )}
 
       {/* Top Banner / Mobile Sidebar Trigger Bar */}
-      <div className="sticky top-16 z-30 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/80 px-4 py-2.5 flex items-center justify-between">
+      <div className="sticky top-16 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 py-2.5 flex items-center justify-between shadow-2xs">
         <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={() => setIsSidebarOpen(true)}
-            className="lg:hidden p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white"
+            className="lg:hidden p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900"
             aria-label="Open Syllabus"
           >
             <Menu className="w-4 h-4" />
           </button>
 
-          <div className="flex items-center gap-2 text-xs text-slate-400 truncate">
-            <Link to="/courses" className="hover:text-emerald-400 transition-colors">
+          <div className="flex items-center gap-2 text-xs text-slate-500 truncate">
+            <Link to="/courses" className="hover:text-emerald-700 transition-colors">
               Tutorials
             </Link>
             <span>/</span>
-            <Link to={`/courses/${courseSlug}`} className="text-emerald-400 hover:underline truncate max-w-[140px] sm:max-w-[200px] font-medium">
+            <Link to={`/courses/${courseSlug}`} className="text-emerald-700 hover:underline truncate max-w-[140px] sm:max-w-[200px] font-semibold">
               {course?.title || courseSlug}
             </Link>
             {lesson && (
               <>
                 <span className="hidden sm:inline">/</span>
-                <span className="text-slate-200 font-semibold truncate hidden sm:inline max-w-[180px]">
+                <span className="text-slate-900 font-semibold truncate hidden sm:inline max-w-[180px]">
                   {lesson.title}
                 </span>
               </>
@@ -161,13 +161,13 @@ export const LessonReaderPage = () => {
         {/* Action Controls: Hinglish Switch & Share */}
         <div className="flex items-center gap-2">
           {/* English / Hinglish Toggle */}
-          <div className="flex items-center bg-slate-900/90 border border-slate-800 rounded-xl p-0.5 shadow-inner">
+          <div className="flex items-center bg-slate-100 border border-slate-200 rounded-xl p-0.5 shadow-2xs">
             <button
               onClick={() => setLanguage('en')}
               className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                 language === 'en'
-                  ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25 font-bold'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-emerald-600 text-white shadow-xs font-bold'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               English
@@ -176,8 +176,8 @@ export const LessonReaderPage = () => {
               onClick={() => setLanguage('hinglish')}
               className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
                 language === 'hinglish'
-                  ? 'bg-teal-600 text-white shadow-md shadow-teal-500/25 font-bold'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-teal-700 text-white shadow-xs font-bold'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <span>Hinglish</span>
@@ -188,7 +188,7 @@ export const LessonReaderPage = () => {
           <button
             onClick={handleShare}
             title="Share Tutorial"
-            className="p-2 rounded-xl bg-slate-900/90 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 transition-colors"
+            className="p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 transition-colors"
           >
             <Share2 className="w-4 h-4" />
           </button>
@@ -212,22 +212,22 @@ export const LessonReaderPage = () => {
 
           {loading ? (
             <div className="space-y-6 animate-pulse">
-              <div className="h-8 bg-slate-800/60 rounded-xl w-3/4"></div>
-              <div className="h-4 bg-slate-800/40 rounded w-1/2"></div>
+              <div className="h-8 bg-slate-200 rounded-xl w-3/4"></div>
+              <div className="h-4 bg-slate-200 rounded w-1/2"></div>
               <div className="space-y-3 pt-4">
-                <div className="h-4 bg-slate-800/40 rounded w-full"></div>
-                <div className="h-4 bg-slate-800/40 rounded w-5/6"></div>
-                <div className="h-4 bg-slate-800/40 rounded w-4/6"></div>
+                <div className="h-4 bg-slate-200 rounded w-full"></div>
+                <div className="h-4 bg-slate-200 rounded w-5/6"></div>
+                <div className="h-4 bg-slate-200 rounded w-4/6"></div>
               </div>
             </div>
           ) : error ? (
-            <div className="p-8 rounded-2xl bg-rose-950/20 border border-rose-800/40 text-center space-y-4">
-              <AlertCircle className="w-12 h-12 text-rose-400 mx-auto" />
-              <h2 className="text-xl font-bold text-white">Tutorial Not Found</h2>
-              <p className="text-xs text-rose-300 max-w-md mx-auto">{error}</p>
+            <div className="p-8 rounded-2xl bg-rose-50 border border-rose-200 text-center space-y-4">
+              <AlertCircle className="w-12 h-12 text-rose-600 mx-auto" />
+              <h2 className="text-xl font-bold text-slate-900">Tutorial Not Found</h2>
+              <p className="text-xs text-rose-700 max-w-md mx-auto">{error}</p>
               <Link
                 to={`/courses/${courseSlug}`}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white transition-all"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-white transition-all"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Back to Subject Syllabus</span>
@@ -236,33 +236,33 @@ export const LessonReaderPage = () => {
           ) : lesson ? (
             <article className="space-y-6">
               {/* Article Header */}
-              <header className="space-y-3 border-b border-slate-800/80 pb-6">
+              <header className="space-y-3 border-b border-slate-200 pb-6">
                 <div className="flex items-center gap-2 text-xs font-mono">
-                  <span className="px-2.5 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold uppercase tracking-wider">
+                  <span className="px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold uppercase tracking-wider">
                     {course?.track || 'CS Core'}
                   </span>
-                  <span className="text-slate-500">•</span>
-                  <span className="flex items-center gap-1 text-slate-400">
-                    <Clock className="w-3.5 h-3.5 text-slate-500" />
+                  <span className="text-slate-400">•</span>
+                  <span className="flex items-center gap-1 text-slate-500">
+                    <Clock className="w-3.5 h-3.5 text-slate-400" />
                     {lesson.estimatedMinutes || 15} mins read
                   </span>
                   {lesson.hinglishStatus && language === 'hinglish' && (
                     <>
-                      <span className="text-slate-500">•</span>
-                      <span className="text-emerald-400 font-semibold text-[11px] bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                      <span className="text-slate-400">•</span>
+                      <span className="text-emerald-800 font-semibold text-[11px] bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
                         Hinglish Edition 🇮🇳
                       </span>
                     </>
                   )}
                 </div>
 
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
                   {lesson.title}
                 </h1>
               </header>
 
-              {/* Markdown Content (Sanitized & Rich Code Rendering) */}
-              <div className="prose prose-invert max-w-none prose-pre:bg-slate-950 prose-pre:border prose-pre:border-slate-800 prose-headings:text-white prose-headings:font-bold prose-a:text-emerald-400 hover:prose-a:underline">
+              {/* Markdown Content (Eye-friendly typography & high contrast code) */}
+              <div className="prose prose-slate max-w-none prose-headings:text-slate-900 prose-headings:font-bold prose-headings:tracking-tight prose-p:text-slate-700 prose-p:leading-relaxed prose-li:text-slate-700 prose-strong:text-slate-900 prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-pre:border prose-pre:border-slate-800 prose-a:text-emerald-700 hover:prose-a:underline">
                 <MarkdownRenderer content={lesson.contentMarkdown || ''} />
               </div>
 
@@ -270,14 +270,14 @@ export const LessonReaderPage = () => {
               <AdSlot slotType="in_article" />
 
               {/* Lesson Completion & Feedback Bar */}
-              <div className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-3 text-left">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 flex-shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 flex-shrink-0 shadow-2xs">
                     <Sparkles className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-white">Finished reading this topic?</h3>
-                    <p className="text-xs text-slate-400">Mark it completed to track your syllabus progress.</p>
+                    <h3 className="text-sm font-bold text-slate-900">Finished reading this topic?</h3>
+                    <p className="text-xs text-slate-500">Mark it completed to track your syllabus progress.</p>
                   </div>
                 </div>
 
@@ -285,8 +285,8 @@ export const LessonReaderPage = () => {
                   onClick={() => lesson && toggleLessonCompletion(lesson.id)}
                   className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
                     isCompleted
-                      ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
-                      : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300'
                   }`}
                 >
                   <CheckCircle2 className="w-4 h-4" />
@@ -295,16 +295,16 @@ export const LessonReaderPage = () => {
               </div>
 
               {/* Previous / Next Topic Navigation */}
-              <nav className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-slate-800/80">
+              <nav className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-slate-200">
                 {prevLesson ? (
                   <Link
                     to={`/courses/${courseSlug}/lessons/${prevLesson.slug}`}
-                    className="group p-4 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-slate-700 hover:bg-slate-800/40 transition-all flex flex-col items-start gap-1"
+                    className="group p-4 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 hover:shadow-xs transition-all flex flex-col items-start gap-1"
                   >
-                    <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1 group-hover:text-emerald-400">
+                    <span className="text-[11px] font-mono text-slate-500 flex items-center gap-1 group-hover:text-emerald-700">
                       <ChevronLeft className="w-3.5 h-3.5" /> Previous Topic
                     </span>
-                    <span className="text-sm font-bold text-slate-200 group-hover:text-white truncate w-full text-left">
+                    <span className="text-sm font-bold text-slate-800 group-hover:text-slate-900 truncate w-full text-left">
                       {prevLesson.title}
                     </span>
                   </Link>
@@ -315,24 +315,24 @@ export const LessonReaderPage = () => {
                 {nextLesson ? (
                   <Link
                     to={`/courses/${courseSlug}/lessons/${nextLesson.slug}`}
-                    className="group p-4 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-emerald-500/40 hover:bg-slate-800/40 transition-all flex flex-col items-end gap-1 text-right"
+                    className="group p-4 rounded-2xl bg-white border border-slate-200 hover:border-emerald-400 hover:shadow-xs transition-all flex flex-col items-end gap-1 text-right"
                   >
-                    <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1 group-hover:text-emerald-400">
+                    <span className="text-[11px] font-mono text-slate-500 flex items-center gap-1 group-hover:text-emerald-700">
                       Next Topic <ChevronRight className="w-3.5 h-3.5" />
                     </span>
-                    <span className="text-sm font-bold text-slate-200 group-hover:text-white truncate w-full">
+                    <span className="text-sm font-bold text-slate-800 group-hover:text-emerald-700 truncate w-full">
                       {nextLesson.title}
                     </span>
                   </Link>
                 ) : (
                   <Link
                     to={`/courses/${courseSlug}`}
-                    className="group p-4 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-emerald-500/40 hover:bg-slate-800/40 transition-all flex flex-col items-end gap-1 text-right"
+                    className="group p-4 rounded-2xl bg-white border border-slate-200 hover:border-emerald-400 hover:shadow-xs transition-all flex flex-col items-end gap-1 text-right"
                   >
-                    <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1 group-hover:text-emerald-400">
-                      Track Completed <Award className="w-3.5 h-3.5 text-amber-400" />
+                    <span className="text-[11px] font-mono text-slate-500 flex items-center gap-1 group-hover:text-emerald-700">
+                      Track Completed <Award className="w-3.5 h-3.5 text-amber-500" />
                     </span>
-                    <span className="text-sm font-bold text-emerald-400 truncate w-full">
+                    <span className="text-sm font-bold text-emerald-700 truncate w-full">
                       View Certificate & Track Summary →
                     </span>
                   </Link>
