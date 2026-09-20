@@ -331,14 +331,14 @@ export const LessonReaderPage = () => {
                   </Link>
                 ) : (
                   <Link
-                    to={`/courses/${courseSlug}`}
-                    className="group p-4 rounded-2xl bg-white border border-slate-200 hover:border-emerald-400 hover:shadow-xs transition-all flex flex-col items-end gap-1 text-right"
+                    to={`/courses/${courseSlug}/quizzes/module-1-quiz`}
+                    className="group p-4 rounded-2xl bg-emerald-50 border border-emerald-300 hover:border-emerald-500 hover:shadow-xs transition-all flex flex-col items-end gap-1 text-right"
                   >
-                    <span className="text-[11px] font-mono text-slate-500 flex items-center gap-1 group-hover:text-emerald-700">
+                    <span className="text-[11px] font-mono text-emerald-800 flex items-center gap-1 font-bold">
                       Track Completed <Award className="w-3.5 h-3.5 text-amber-500" />
                     </span>
-                    <span className="text-sm font-bold text-emerald-700 truncate w-full">
-                      View Certificate & Track Summary →
+                    <span className="text-sm font-extrabold text-emerald-900 group-hover:text-emerald-950 truncate w-full">
+                      Take Quiz & Unlock Certificate →
                     </span>
                   </Link>
                 )}

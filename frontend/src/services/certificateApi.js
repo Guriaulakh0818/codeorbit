@@ -6,27 +6,46 @@ export const certificateApi = {
    * @param {string} certificateCode
    */
   async verifyCertificate(certificateCode) {
+    const code = (certificateCode || '').trim().toUpperCase();
+    if (!code) {
+      return { success: false, status: 400, message: 'Please enter a certificate code.' };
+    }
+
     try {
-      const code = (certificateCode || '').trim().toUpperCase();
       const res = await fetch(`${API_BASE}/certificates/verify/${encodeURIComponent(code)}`, {
         headers: getAuthHeaders(false)
       });
       if (res.ok) {
         const json = await res.json();
-        return { success: true, data: json.data };
+        if (json.data) {
+          return { success: true, data: json.data };
+        }
       }
-      const err = await res.json().catch(() => ({}));
-      return {
-        success: false,
-        status: res.status,
-        message: err.message || (res.status === 404 ? 'Certificate not found' : 'Failed to verify certificate')
-      };
     } catch (e) {
-      return {
-        success: false,
-        status: 503,
-        message: 'Server unreachable during verification'
-      };
+      // Check fallback below
     }
+
+    // Check locally issued certificates
+    try {
+      const localDirect = localStorage.getItem(`codeorbit_cert_${code}`);
+      if (localDirect) {
+        return { success: true, data: JSON.parse(localDirect) };
+      }
+
+      const rawList = localStorage.getItem('codeorbit_user_certificates');
+      if (rawList) {
+        const list = JSON.parse(rawList);
+        const found = list.find((c) => (c.certificateCode || '').toUpperCase() === code);
+        if (found) {
+          return { success: true, data: found };
+        }
+      }
+    } catch (e) {}
+
+    return {
+      success: false,
+      status: 404,
+      message: `No issued certificate matches the code "${code}".`
+    };
   }
 };

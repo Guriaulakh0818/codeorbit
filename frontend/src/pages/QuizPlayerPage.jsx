@@ -14,7 +14,10 @@ import {
   ChevronRight, 
   RotateCcw, 
   LogIn,
-  GraduationCap
+  GraduationCap,
+  Share2,
+  Sparkles,
+  Check
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { coursesApi } from '../services/coursesApi';
@@ -42,7 +45,11 @@ export const QuizPlayerPage = () => {
   const [userAnswers, setUserAnswers] = useState({}); // { [questionId]: selectedOptionId }
   const [submitting, setSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState(null);
-  const [submissionResult, setSubmissionResult] = useState(null);
+  // Certificate state
+  const [claimedCertificate, setClaimedCertificate] = useState(null);
+  const [claimingCert, setClaimingCert] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [guestName, setGuestName] = useState('');
 
   const loadQuiz = async () => {
     if (!courseSlug || !quizSlug) return;
@@ -50,6 +57,7 @@ export const QuizPlayerPage = () => {
     setError(null);
     setIs404(false);
     setSubmissionResult(null);
+    setClaimedCertificate(null);
     setUserAnswers({});
     setCurrentQuestionIdx(0);
 
@@ -75,16 +83,47 @@ export const QuizPlayerPage = () => {
     loadQuiz();
   }, [courseSlug, quizSlug, language]);
 
-  // Trigger celebratory confetti on passing
+  // Trigger celebratory confetti and auto-claim certificate on passing
   useEffect(() => {
     if (submissionResult && submissionResult.passed) {
       confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 }
+        particleCount: 120,
+        spread: 80,
+        origin: { y: 0.5 }
       });
+
+      const issueCert = async () => {
+        setClaimingCert(true);
+        try {
+          const studentName = user?.fullName || user?.name || guestName || 'CodeOrbit Scholar';
+          const certRes = await studentLearningApi.claimCertificate(courseSlug, studentName);
+          if (certRes.success && certRes.data) {
+            setClaimedCertificate(certRes.data);
+          }
+        } catch (e) {
+          // Non-blocking
+        } finally {
+          setClaimingCert(false);
+        }
+      };
+
+      issueCert();
     }
-  }, [submissionResult]);
+  }, [submissionResult, courseSlug, user]);
+
+  const handleUpdateGuestCertificate = async () => {
+    if (!guestName.trim()) return;
+    setClaimingCert(true);
+    try {
+      const certRes = await studentLearningApi.claimCertificate(courseSlug, guestName.trim());
+      if (certRes.success && certRes.data) {
+        setClaimedCertificate(certRes.data);
+      }
+    } catch (e) {
+    } finally {
+      setClaimingCert(false);
+    }
+  };
 
   const handleSelectOption = (questionId, optionId) => {
     setUserAnswers((prev) => ({
@@ -454,6 +493,98 @@ export const QuizPlayerPage = () => {
                 </Link>
               </div>
             </div>
+
+            {/* Grand Certificate Card if Passed */}
+            {submissionResult.passed && (
+              <div className="rounded-3xl bg-gradient-to-br from-emerald-900 via-emerald-950 to-slate-900 text-white p-8 sm:p-10 border border-emerald-500/30 shadow-xl space-y-6 relative overflow-hidden animate-in fade-in slide-in-from-bottom-3 duration-500">
+                <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+
+                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                  <div className="flex items-start sm:items-center gap-4">
+                    <div className="w-16 h-16 rounded-2xl bg-amber-400/20 border border-amber-400/40 flex items-center justify-center flex-shrink-0 text-amber-300 shadow-inner">
+                      <Award className="w-9 h-9" />
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                          <Sparkles className="w-3 h-3 text-amber-300" /> Certificate of Completion Unlocked
+                        </span>
+                        {claimedCertificate && (
+                          <span className="text-[11px] text-slate-400 font-mono bg-white/5 px-2 py-0.5 rounded border border-white/10">
+                            ID: {claimedCertificate.certificateCode}
+                          </span>
+                        )}
+                      </div>
+                      <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+                        Official Course Credential
+                      </h2>
+                      <p className="text-xs sm:text-sm text-slate-300">
+                        Awarded for scoring <span className="font-bold text-white">{submissionResult.scorePercentage}%</span> and successfully mastering this track.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  {claimedCertificate ? (
+                    <div className="flex flex-wrap items-center gap-3 relative z-10">
+                      <Link
+                        to={`/certificates/verify/${claimedCertificate.certificateCode}`}
+                        className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold rounded-xl shadow-md transition-all active:scale-95 cursor-pointer"
+                      >
+                        <GraduationCap className="w-4 h-4" /> View & Print Certificate
+                      </Link>
+
+                      <button
+                        onClick={() => {
+                          const url = `${window.location.origin}/certificates/verify/${claimedCertificate.certificateCode}`;
+                          navigator.clipboard.writeText(url);
+                          setCopiedLink(true);
+                          setTimeout(() => setCopiedLink(false), 2500);
+                        }}
+                        className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-xl border border-white/15 transition-all cursor-pointer"
+                      >
+                        {copiedLink ? <Check className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4" />}
+                        {copiedLink ? 'Link Copied!' : 'Copy Verification Link'}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <RefreshCw className="w-4 h-4 animate-spin text-emerald-400" />
+                      <span className="text-xs text-emerald-300">Generating Official Certificate...</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Name personalization if guest */}
+                {!user && (
+                  <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-300">
+                    <div className="flex items-center gap-2 flex-1 max-w-md">
+                      <span className="text-slate-400 whitespace-nowrap">Your Full Name:</span>
+                      <input
+                        type="text"
+                        placeholder="Enter your name for the certificate"
+                        value={guestName}
+                        onChange={(e) => setGuestName(e.target.value)}
+                        className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-emerald-400 flex-1"
+                      />
+                      <button
+                        onClick={handleUpdateGuestCertificate}
+                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs cursor-pointer"
+                      >
+                        Update Name
+                      </button>
+                    </div>
+                    <Link
+                      to="/login"
+                      className="text-emerald-400 hover:text-emerald-300 underline font-semibold"
+                    >
+                      Login to permanently save to your dashboard →
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Question by Question Feedback Audit */}
             <div className="space-y-4">

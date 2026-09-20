@@ -18,6 +18,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useLearningProgress } from '../context/LearningProgressContext';
 import { coursesApi } from '../services/coursesApi';
+import { studentLearningApi } from '../services/studentLearningApi';
 import { SeoHead } from '../components/seo/SeoHead';
 
 export const StudentDashboardPage = () => {
@@ -27,22 +28,29 @@ export const StudentDashboardPage = () => {
 
   const [activeTab, setActiveTab] = useState('courses'); // 'courses' | 'certificates' | 'profile'
   const [courses, setCourses] = useState([]);
+  const [certificates, setCertificates] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadCourses() {
+    async function loadData() {
       try {
-        const res = await coursesApi.getCourses({ size: 20 });
-        if (res.success && res.data) {
-          setCourses(res.data);
+        const [coursesRes, certsRes] = await Promise.all([
+          coursesApi.getCourses({ size: 20 }),
+          studentLearningApi.getStudentCertificates()
+        ]);
+        if (coursesRes.success && coursesRes.data) {
+          setCourses(coursesRes.data);
+        }
+        if (certsRes.success && certsRes.data) {
+          setCertificates(certsRes.data);
         }
       } catch (e) {
-        console.error('Failed to load courses', e);
+        console.error('Failed to load dashboard data', e);
       } finally {
         setLoading(false);
       }
     }
-    loadCourses();
+    loadData();
   }, []);
 
   const handleLogout = () => {
@@ -273,7 +281,7 @@ export const StudentDashboardPage = () => {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-bold text-slate-900">Your Verified Certificates</h2>
+                <h2 className="text-lg font-bold text-slate-900">Your Verified Certificates ({certificates.length})</h2>
                 <p className="text-xs text-slate-500">Official completion credentials registered in the public verification database</p>
               </div>
               <Link to="/certificates/verify" className="text-xs font-semibold text-emerald-700 hover:underline">
@@ -281,14 +289,70 @@ export const StudentDashboardPage = () => {
               </Link>
             </div>
 
-            <div className="p-8 rounded-2xl bg-white border border-slate-200 space-y-4 shadow-xs">
+            {certificates.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {certificates.map((cert) => (
+                  <div
+                    key={cert.certificateCode}
+                    className="p-6 rounded-3xl bg-white border border-emerald-200 shadow-xs space-y-4 hover:shadow-md transition-shadow relative overflow-hidden"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 flex-shrink-0">
+                          <Award className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                            Verified Credential
+                          </span>
+                          <h3 className="text-base font-bold text-slate-900 mt-1">
+                            {cert.courseTitle}
+                          </h3>
+                        </div>
+                      </div>
+
+                      <span className="text-[11px] font-mono font-bold text-slate-500 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
+                        {cert.certificateCode}
+                      </span>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-100 text-xs text-slate-600 flex items-center justify-between">
+                      <span>Awarded To: <strong>{cert.studentFullName}</strong></span>
+                      <span>{cert.issuedAt ? new Date(cert.issuedAt).toLocaleDateString() : 'Verified'}</span>
+                    </div>
+
+                    <div className="flex items-center gap-3 pt-2">
+                      <Link
+                        to={`/certificates/verify/${cert.certificateCode}`}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-colors shadow-2xs cursor-pointer flex-1 justify-center"
+                      >
+                        <GraduationCap className="w-3.5 h-3.5" /> View & Print
+                      </Link>
+
+                      <button
+                        onClick={() => {
+                          const url = `${window.location.origin}/certificates/verify/${cert.certificateCode}`;
+                          navigator.clipboard.writeText(url);
+                          alert('Verification link copied to clipboard!');
+                        }}
+                        className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition-colors cursor-pointer"
+                      >
+                        Copy Link
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+
+            <div className="p-8 rounded-3xl bg-white border border-slate-200 space-y-4 shadow-xs">
               <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center mx-auto">
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <div className="text-center max-w-md mx-auto space-y-2">
-                <h3 className="text-base font-bold text-slate-900">How to Earn Certificates</h3>
+                <h3 className="text-base font-bold text-slate-900">How to Earn More Certificates</h3>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Complete 100% of the lessons and score at least 80% on all module quizzes in any Computer Science track to claim your verifiable credential with unique verification ID.
+                  Complete all lessons in any course track and pass the module assessment with at least 80% to instantly unlock your verifiable certificate of completion.
                 </p>
               </div>
               <div className="text-center pt-2">
