@@ -1,157 +1,80 @@
 import React from 'react';
-import { RefreshCw, CheckCircle2, AlertCircle, Clock, ShieldCheck, Mail, ArrowRight } from 'lucide-react';
+import { RefreshCw, CheckCircle2, ShieldCheck, Mail, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { SeoHead } from '../components/seo/SeoHead';
 
 export const RefundPolicyPage = () => {
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10 text-slate-300">
-      {/* Page Header */}
-      <div className="text-center space-y-3">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-semibold text-emerald-400">
-          <RefreshCw className="w-3.5 h-3.5" />
-          <span>Fair & Transparent Policy</span>
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-          Refunds & Cancellations Policy
-        </h1>
-        <p className="text-xs text-slate-400">
-          Last Updated: September 19, 2026 • CodeOrbit Technologies Private Limited
-        </p>
-      </div>
+    <div className="min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8 flex flex-col selection:bg-emerald-500 selection:text-white">
+      <SeoHead
+        title="100% Free Learning Policy — CodeOrbit"
+        description="CodeOrbit is a 100% free computer science learning portal. No payment or refund required."
+        canonicalUrl="https://www.codeorbit.online/refund"
+      />
 
-      {/* Main Content Card */}
-      <div className="p-8 sm:p-10 rounded-3xl bg-slate-900/70 border border-slate-800 space-y-8 text-xs sm:text-sm leading-relaxed">
-        
-        {/* Overview Box */}
-        <div className="p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-200 space-y-1.5">
-          <h3 className="font-bold text-emerald-300 text-sm flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4" /> 100% Student-Friendly Guarantee
-          </h3>
-          <p className="text-xs text-emerald-300/90 leading-relaxed">
-            At CodeOrbit, customer satisfaction is our highest priority. If you encounter technical download issues, duplicate deductions, or corrupted files, we guarantee immediate replacement or a hassle-free refund to your original payment method.
-          </p>
-        </div>
-
-        {/* Section 1 */}
-        <section className="space-y-3">
-          <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-            1. Nature of Digital Goods & Instant Fulfillment
-          </h2>
-          <p>
-            Because CodeOrbit provides <strong>instant digital access</strong> to downloadable PDF handbooks and online reading materials, orders cannot be cancelled once digital files have been fully downloaded and decrypted.
-          </p>
-          <p>
-            However, we provide comprehensive refund protections under the specific circumstances outlined below.
-          </p>
-        </section>
-
-        {/* Section 2 */}
-        <section className="space-y-3">
-          <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-            2. Eligible Scenarios for Full Refund
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-            <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-2">
-              <div className="flex items-center gap-2 text-white font-semibold text-xs">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Duplicate / Accidental Multiple Charges</span>
-              </div>
-              <p className="text-xs text-slate-400">
-                If your bank account or UPI was charged more than once for the same single e-book or order due to a network glitch, 100% of the duplicate amount will be refunded immediately.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-2">
-              <div className="flex items-center gap-2 text-white font-semibold text-xs">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Defective / Inaccessible Digital File</span>
-              </div>
-              <p className="text-xs text-slate-400">
-                If an e-book file is corrupted, missing pages, or cannot be accessed on your dashboard, and our tech support cannot rectify the issue within 24 hours of report.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-2">
-              <div className="flex items-center gap-2 text-white font-semibold text-xs">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Payment Deducted but Order Failed</span>
-              </div>
-              <p className="text-xs text-slate-400">
-                If money was debited from your account but the order shows as Failed or Pending due to bank gateway timeout, Razorpay automatically initiates auto-reversal.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-2">
-              <div className="flex items-center gap-2 text-white font-semibold text-xs">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Wrong E-Book Purchased by Mistake</span>
-              </div>
-              <p className="text-xs text-slate-400">
-                If reported within <strong>48 hours</strong> of purchase and the file has not been downloaded more than 1 time, we can issue store credit or swap for the intended e-book.
-              </p>
-            </div>
+      <div className="max-w-4xl mx-auto w-full space-y-10 flex-1">
+        {/* Page Header */}
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800">
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Fair Learning Guarantee</span>
           </div>
-        </section>
-
-        {/* Section 3 */}
-        <section className="space-y-3">
-          <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-            3. Refund Process & Timelines
-          </h2>
-          <p>
-            Once a refund request is approved by our billing desk:
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+            100% Free Learning Policy
+          </h1>
+          <p className="text-xs text-slate-500">
+            Last Updated: September 20, 2026 • CodeOrbit Open Computer Science Platform
           </p>
-          <div className="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/60 space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-sky-500/10 text-sky-400 flex items-center justify-center shrink-0">
-                <Clock className="w-4 h-4" />
-              </div>
+        </div>
+
+        {/* Main Content Card */}
+        <div className="p-8 sm:p-10 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-8 text-xs sm:text-sm leading-relaxed text-slate-700">
+          
+          {/* Overview Box */}
+          <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1.5">
+            <h3 className="font-bold text-emerald-800 text-sm flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" /> 100% Free Forever Guarantee
+            </h3>
+            <p className="text-xs text-emerald-700 leading-relaxed">
+              CodeOrbit is an open-access platform. Every tutorial, code explanation, interview roadmap, and verified certificate of completion is completely free for students. There are no credit card charges, paywalls, or fee deductions.
+            </p>
+          </div>
+
+          <section className="space-y-3">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+              1. No Financial Transactions
+            </h2>
+            <p>
+              Because CodeOrbit does not charge students for accessing course materials, reading lessons, or taking quizzes, payment refunds are generally not applicable.
+            </p>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+              2. Student Help Desk
+            </h2>
+            <p>
+              If you experience any technical issues with course syllabus display, quiz scoring, or certificate code generation, our technical team will assist you immediately.
+            </p>
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 mt-2">
               <div>
-                <p className="text-white font-semibold text-xs">Processing Time (Razorpay Gateway):</p>
-                <p className="text-xs text-slate-400">Refunds are processed within <strong>5 to 7 working business days</strong> directly to the original payment source (UPI ID, Debit/Credit Card, or Bank Account).</p>
+                <p className="font-bold text-slate-900 text-xs">Email: support@codeorbit.online</p>
+                <p className="text-xs text-slate-500">Subject: Technical Support Request</p>
               </div>
+              <Link
+                to="/contact"
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center gap-1.5 shrink-0"
+              >
+                <span>Contact Help Desk</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* Section 4 */}
-        <section className="space-y-3">
-          <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-            4. Cancellation Policy
-          </h2>
-          <p>
-            Since digital e-books are fulfilled instantly upon payment completion:
-          </p>
-          <ul className="list-disc list-inside space-y-1 pl-2 text-slate-400">
-            <li><strong>Pending Orders:</strong> If an order is still marked as Pending and unfulfilled, students can cancel the order anytime from their dashboard or by contacting support.</li>
-            <li><strong>Completed Orders:</strong> Post-delivery cancellations follow the refund qualification guidelines mentioned in Section 2.</li>
-          </ul>
-        </section>
-
-        {/* Section 5 */}
-        <section className="space-y-3">
-          <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-            5. How to Raise a Refund Request
-          </h2>
-          <p>
-            To initiate a refund or cancellation inquiry, please email us with your Order ID and registered email address:
-          </p>
-          <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="space-y-1">
-              <p className="font-mono text-sky-400 font-semibold text-xs">Email: support@codeorbit.dev / refunds@codeorbit.dev</p>
-              <p className="text-xs text-slate-400">Subject: "Refund Request - [Your Order Number]"</p>
-            </div>
-            <Link
-              to="/contact"
-              className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold rounded-xl shadow-md transition-colors flex items-center gap-1.5 shrink-0"
-            >
-              <span>Submit via Contact Form</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </section>
-
+        </div>
       </div>
     </div>
   );
 };
+
+export default RefundPolicyPage;

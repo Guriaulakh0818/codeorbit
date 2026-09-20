@@ -1,126 +1,102 @@
 import React from 'react';
-import { FileText, Shield, Scale, AlertCircle, CheckCircle, HelpCircle } from 'lucide-react';
+import { Scale, FileText, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { SeoHead } from '../components/seo/SeoHead';
 
 export const TermsConditionsPage = () => {
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10 text-slate-300">
-      {/* Page Header */}
-      <div className="text-center space-y-3">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-xs font-semibold text-sky-400">
-          <Scale className="w-3.5 h-3.5" />
-          <span>Legal Agreement</span>
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-          Terms & Conditions
-        </h1>
-        <p className="text-xs text-slate-400">
-          Last Updated: September 19, 2026 • CodeOrbit Technologies Private Limited
-        </p>
-      </div>
+    <div className="min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8 flex flex-col selection:bg-emerald-500 selection:text-white">
+      <SeoHead
+        title="Terms & Conditions — CodeOrbit"
+        description="Review terms of service, acceptable usage guidelines, and intellectual property terms for CodeOrbit."
+        canonicalUrl="https://www.codeorbit.online/terms"
+      />
 
-      {/* Main Content Card */}
-      <div className="p-8 sm:p-10 rounded-3xl bg-slate-900/70 border border-slate-800 space-y-8 text-xs sm:text-sm leading-relaxed">
-        
-        {/* Section 1 */}
-        <section className="space-y-3">
-          <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-            1. Introduction & Acceptance of Terms
-          </h2>
-          <p>
-            Welcome to <strong>CodeOrbit</strong> (accessible via our website and web applications). By accessing, browsing, registering an account, or purchasing digital goods (such as technical e-books, cheat sheets, interview guides, or code repositories) through CodeOrbit, you agree to be legally bound by these Terms & Conditions.
-          </p>
-          <p>
-            If you do not agree to these Terms, you must immediately discontinue using the platform.
-          </p>
-        </section>
-
-        {/* Section 2 */}
-        <section className="space-y-3">
-          <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-            2. Nature of Products & Digital Delivery
-          </h2>
-          <p>
-            CodeOrbit offers <strong>100% digital products</strong> (including DRM-watermarked PDF e-books, source code bundles, and interactive in-browser readers) specifically designed for engineering students and developers.
-          </p>
-          <ul className="list-disc list-inside space-y-1 pl-2 text-slate-400">
-            <li><strong>Instant Delivery:</strong> Upon successful payment authorization via our authorized gateway (Razorpay), purchased materials are automatically added to your personal "Student Dashboard" and available for instant viewing and download.</li>
-            <li><strong>No Physical Shipment:</strong> We do not ship physical paperback books or optical media. All fulfillment is digital.</li>
-          </ul>
-        </section>
-
-        {/* Section 3 */}
-        <section className="space-y-3">
-          <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-            3. Pricing, Payments & Currency
-          </h2>
-          <p>
-            All product prices listed on CodeOrbit are prominently displayed in <strong>Indian Rupees (INR - ₹)</strong> and include all applicable digital goods taxes unless otherwise stated.
-          </p>
-          <p>
-            Payments are securely processed through RBI-authorized payment aggregators, specifically <strong>Razorpay Software Pvt. Ltd.</strong> We support UPI (Google Pay, PhonePe, Paytm, BHIM), Credit/Debit Cards (Visa, Mastercard, RuPay), and NetBanking from major Indian banks.
-          </p>
-        </section>
-
-        {/* Section 4 */}
-        <section className="space-y-3">
-          <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-            4. User License & Intellectual Property Rights
-          </h2>
-          <p>
-            When you purchase an e-book from CodeOrbit, you are granted a non-exclusive, non-transferable, revocable single-user personal license to read, study, and reference the material for personal educational and career development purposes.
-          </p>
-          <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 space-y-1">
-            <p className="font-semibold text-rose-200">Strict Prohibitions:</p>
-            <p>You may NOT redistribute, resell, re-host, upload to public file-sharing networks (e.g. Telegram channels, torrent sites, Google Drive links), modify, or create unauthorized derivative commercial works from any CodeOrbit publications.</p>
+      <div className="max-w-4xl mx-auto w-full space-y-10 flex-1">
+        {/* Page Header */}
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800">
+            <Scale className="w-3.5 h-3.5" />
+            <span>Platform Terms & Guidelines</span>
           </div>
-        </section>
-
-        {/* Section 5 */}
-        <section className="space-y-3">
-          <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-            5. User Account Responsibilities
-          </h2>
-          <p>
-            You are solely responsible for maintaining the confidentiality of your account credentials (email and password). Any activities, purchases, or interactions performed under your registered account will be deemed authorized by you.
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+            Terms & Conditions
+          </h1>
+          <p className="text-xs text-slate-500">
+            Last Updated: September 20, 2026 • CodeOrbit Open Computer Science Platform
           </p>
-        </section>
-
-        {/* Section 6 */}
-        <section className="space-y-3">
-          <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-            6. Limitation of Liability
-          </h2>
-          <p>
-            CodeOrbit publications and guides are provided for educational purposes. While our authors and editors make every effort to ensure factual correctness and optimal coding patterns, CodeOrbit shall not be liable for any indirect, incidental, or consequential damages resulting from technical implementations or examinations.
-          </p>
-        </section>
-
-        {/* Section 7 */}
-        <section className="space-y-3">
-          <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-            7. Governing Law & Jurisdiction
-          </h2>
-          <p>
-            These Terms shall be governed by and interpreted in accordance with the laws of <strong>India</strong>. Any disputes arising out of or in connection with these Terms shall be subject to the exclusive jurisdiction of the competent courts in <strong>Noida / New Delhi, India</strong>.
-          </p>
-        </section>
-
-        {/* Contact Banner */}
-        <div className="p-6 rounded-2xl bg-slate-800/40 border border-slate-700/60 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="space-y-0.5">
-            <p className="font-semibold text-white">Questions regarding our terms?</p>
-            <p className="text-xs text-slate-400">Our legal and customer support team is available to assist you.</p>
-          </div>
-          <Link
-            to="/contact"
-            className="px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-semibold text-xs transition-colors shrink-0"
-          >
-            Contact Legal Desk
-          </Link>
         </div>
 
+        {/* Main Content Card */}
+        <div className="p-8 sm:p-10 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-8 text-xs sm:text-sm leading-relaxed text-slate-700">
+          
+          <section className="space-y-3">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+              1. Acceptance of Terms
+            </h2>
+            <p>
+              By accessing, browsing, reading tutorials, or taking quizzes on <strong>CodeOrbit</strong> (https://www.codeorbit.online), you agree to be legally bound by these Terms & Conditions. If you disagree with any part of these terms, please do not use our services.
+            </p>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+              2. 100% Free Open Educational Access
+            </h2>
+            <p>
+              All computer science courses, tutorials, practice quizzes, and verifiable certificates on CodeOrbit are provided free of charge to students worldwide. There are no paid paywalls or hidden fees.
+            </p>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+              3. Intellectual Property & Code Snippets
+            </h2>
+            <p>
+              Educational articles, diagrams, and explanations published on CodeOrbit are protected by intellectual property laws. Code examples and algorithmic solutions provided in tutorials are open for personal study and non-commercial educational reference.
+            </p>
+            <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 space-y-1">
+              <p className="font-semibold">Acceptable Usage:</p>
+              <p className="text-xs">You may not scrape, mirror, or republish bulk tutorials from CodeOrbit for commercial resale without prior written permission.</p>
+            </div>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+              4. Disclaimer of Warranties
+            </h2>
+            <p>
+              While our editorial board strives for absolute accuracy in all technical topics (DSA, Operating Systems, DBMS, Networks, System Design), content is provided on an "as-is" basis for educational and interview preparation purposes.
+            </p>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+              5. Governing Law
+            </h2>
+            <p>
+              These Terms shall be governed by and interpreted in accordance with the laws of India.
+            </p>
+          </section>
+
+          {/* Contact Banner */}
+          <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="space-y-0.5">
+              <p className="font-semibold text-slate-900">Questions regarding our terms?</p>
+              <p className="text-xs text-slate-500">Our support team is available to assist you.</p>
+            </div>
+            <Link
+              to="/contact"
+              className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors shrink-0 shadow-xs"
+            >
+              Contact Support Desk
+            </Link>
+          </div>
+
+        </div>
       </div>
     </div>
   );
 };
+
+export default TermsConditionsPage;
