@@ -35,7 +35,7 @@ export const LessonReaderPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { language, setLanguage, isHinglish } = useLanguage();
-  const { isLessonCompleted, isCourseBookmarked, toggleLessonCompletion, toggleCourseBookmark } = useLearningProgress();
+  const { isLessonCompleted, markLessonCompleted, toggleLessonCompletion } = useLearningProgress();
 
   const [course, setCourse] = useState(null);
   const [lesson, setLesson] = useState(null);
@@ -119,7 +119,6 @@ export const LessonReaderPage = () => {
   const nextLesson = currentIndex >= 0 && currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1] : null;
 
   const isCompleted = lesson ? isLessonCompleted(lesson.id) : false;
-  const isBookmarked = course ? isCourseBookmarked(course.id) : false;
 
   const handleShare = () => {
     if (navigator.share) {

@@ -29,8 +29,8 @@ class ErrorBoundary extends React.Component {
       return (
         <div style={{
           minHeight: '100vh',
-          backgroundColor: '#080d1e',
-          color: '#f8fafc',
+          backgroundColor: '#f8fafc',
+          color: '#1e293b',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -39,48 +39,48 @@ class ErrorBoundary extends React.Component {
           fontFamily: 'system-ui, sans-serif'
         }}>
           <div style={{
-            maxWidth: '600px',
+            maxWidth: '540px',
             width: '100%',
-            backgroundColor: '#0f172a',
-            border: '1px solid #334155',
-            borderRadius: '1rem',
+            backgroundColor: '#ffffff',
+            border: '1px solid #e2e8f0',
+            borderRadius: '1.5rem',
             padding: '2rem',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)'
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
           }}>
-            <h2 style={{ color: '#38bdf8', fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem' }}>
+            <h2 style={{ color: '#0f172a', fontSize: '1.25rem', fontWeight: '800', marginBottom: '0.75rem' }}>
               CodeOrbit Application Notice
             </h2>
-            <p style={{ color: '#94a3b8', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
-              An unexpected error occurred while rendering the page. You can reset local state to restore the default store catalog:
+            <p style={{ color: '#64748b', fontSize: '0.875rem', marginBottom: '1.25rem', lineHeight: '1.5' }}>
+              An unexpected rendering exception occurred. You can reset local cached state to reload:
             </p>
             <div style={{
-              backgroundColor: '#020617',
-              border: '1px solid #1e293b',
-              borderRadius: '0.5rem',
-              padding: '1rem',
+              backgroundColor: '#fff1f2',
+              border: '1px solid #fecdd3',
+              borderRadius: '0.75rem',
+              padding: '0.875rem',
               fontFamily: 'monospace',
               fontSize: '0.75rem',
-              color: '#f43f5e',
+              color: '#be123c',
               overflowX: 'auto',
-              marginBottom: '1.5rem',
-              maxHeight: '150px'
+              marginBottom: '1.25rem',
+              maxHeight: '120px'
             }}>
               {this.state.error?.toString()}
             </div>
             <button
               onClick={this.handleReset}
               style={{
-                backgroundColor: '#0284c7',
+                backgroundColor: '#059669',
                 color: '#ffffff',
                 border: 'none',
-                borderRadius: '0.5rem',
+                borderRadius: '0.75rem',
                 padding: '0.75rem 1.5rem',
-                fontWeight: '600',
+                fontWeight: '700',
                 fontSize: '0.875rem',
                 cursor: 'pointer'
               }}
             >
-              Clear Storage & Reload Store
+              Reset Cache & Reload Portal
             </button>
           </div>
         </div>
@@ -97,4 +97,3 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </ErrorBoundary>
   </React.StrictMode>,
 )
-

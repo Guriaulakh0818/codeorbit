@@ -22,7 +22,7 @@ export const TutorialSidebar = ({
   onClose = () => {}
 }) => {
   const { courseSlug } = useParams();
-  const { progress } = useLearningProgress();
+  const { isLessonCompleted } = useLearningProgress();
   const [searchTerm, setSearchTerm] = useState('');
   const [openModules, setOpenModules] = useState({});
 
@@ -145,7 +145,7 @@ export const TutorialSidebar = ({
                   <div className="px-2 pb-2 pt-1 space-y-1 border-t border-slate-100">
                     {lessons.map((lesson) => {
                       const isActive = lesson.slug === activeLessonSlug;
-                      const isCompleted = progress.completedLessonIds.includes(lesson.id);
+                      const isCompleted = isLessonCompleted ? isLessonCompleted(lesson.id) : false;
 
                       return (
                         <Link
@@ -182,8 +182,6 @@ export const TutorialSidebar = ({
 
                     {/* Quiz Links */}
                     {quizzes.map((quiz) => {
-                      const isPassed = progress.passedQuizIds.includes(quiz.id);
-
                       return (
                         <Link
                           key={quiz.id}
@@ -195,9 +193,6 @@ export const TutorialSidebar = ({
                             <HelpCircle className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
                             <span className="truncate">{quiz.title}</span>
                           </div>
-                          {isPassed && (
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                          )}
                         </Link>
                       );
                     })}

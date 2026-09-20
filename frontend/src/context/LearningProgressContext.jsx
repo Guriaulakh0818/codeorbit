@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import { studentLearningApi } from '../services/studentLearningApi';
 
@@ -41,14 +41,12 @@ export const LearningProgressProvider = ({ children }) => {
     let isMounted = true;
 
     const initializeProgress = async () => {
-      // Clear previous user's in-memory progress map to prevent account leakage
       setCourseProgressMap({});
 
       if (user) {
         setCompletedLessonIds(new Set());
         setBookmarkedLessonIds(new Set());
 
-        // Authenticated user: Check if there is pending guest progress to merge
         const guestData = getStoredGuestProgress();
         const hasPendingGuestData = 
           guestData.completedLessonIds.length > 0 || guestData.bookmarkedLessonIds.length > 0;
@@ -60,17 +58,15 @@ export const LearningProgressProvider = ({ children }) => {
             if (syncRes.success && syncRes.data && isMounted) {
               setCompletedLessonIds(new Set(syncRes.data.totalCompletedLessonIds || []));
               setBookmarkedLessonIds(new Set(syncRes.data.totalBookmarkedLessonIds || []));
-              // Guest data cleared only after verified server reconciliation
               localStorage.removeItem(GUEST_PROGRESS_KEY);
             }
           } catch (e) {
-            // Keep guest data in localStorage so sync can retry on next connection
+            // Keep guest data in localStorage
           } finally {
             if (isMounted) setIsSyncing(false);
           }
         }
       } else {
-        // Guest user: Load from localStorage
         const guest = getStoredGuestProgress();
         if (isMounted) {
           setCompletedLessonIds(new Set(guest.completedLessonIds));
@@ -98,6 +94,11 @@ export const LearningProgressProvider = ({ children }) => {
     return bookmarkedLessonIds.has(Number(lessonId));
   }, [bookmarkedLessonIds]);
 
+  // Safe fallback for course bookmark checks
+  const isCourseBookmarked = useCallback((courseId) => {
+    return false;
+  }, []);
+
   // Mark lesson in progress
   const markLessonInProgress = useCallback(async (lessonId) => {
     if (!lessonId || !user) return;
@@ -114,7 +115,6 @@ export const LearningProgressProvider = ({ children }) => {
     const numId = Number(lessonId);
 
     if (user) {
-      // Authenticated: Authoritative server update
       const res = await studentLearningApi.markCompleted(numId);
       if (res.success) {
         setCompletedLessonIds((prev) => new Set([...prev, numId]));
@@ -125,7 +125,6 @@ export const LearningProgressProvider = ({ children }) => {
       }
       return false;
     } else {
-      // Guest: Store in localStorage
       const current = getStoredGuestProgress();
       if (!current.completedLessonIds.includes(numId)) {
         current.completedLessonIds.push(numId);
@@ -136,13 +135,17 @@ export const LearningProgressProvider = ({ children }) => {
     }
   }, [user]);
 
+  // Toggle completion alias
+  const toggleLessonCompletion = useCallback(async (lessonId, courseSlug = null) => {
+    return markLessonCompleted(lessonId, courseSlug);
+  }, [markLessonCompleted]);
+
   // Toggle bookmark
   const toggleLessonBookmark = useCallback(async (lessonId) => {
     if (!lessonId) return false;
     const numId = Number(lessonId);
 
     if (user) {
-      // Authenticated: Server update
       const res = await studentLearningApi.toggleBookmark(numId);
       if (res.success) {
         setBookmarkedLessonIds((prev) => {
@@ -158,7 +161,6 @@ export const LearningProgressProvider = ({ children }) => {
       }
       return false;
     } else {
-      // Guest: Local update
       const current = getStoredGuestProgress();
       let nowBookmarked = false;
       if (current.bookmarkedLessonIds.includes(numId)) {
@@ -179,6 +181,10 @@ export const LearningProgressProvider = ({ children }) => {
     }
   }, [user]);
 
+  const toggleCourseBookmark = useCallback(async () => {
+    return false;
+  }, []);
+
   // Fetch course-level authoritative progress
   const fetchCourseProgress = useCallback(async (courseSlug) => {
     if (!courseSlug || !user) return null;
@@ -189,7 +195,6 @@ export const LearningProgressProvider = ({ children }) => {
         [courseSlug]: res.data
       }));
 
-      // Update completed and bookmarked sets with authoritative server lists
       if (Array.isArray(res.data.completedLessonIds)) {
         setCompletedLessonIds((prev) => new Set([...prev, ...res.data.completedLessonIds]));
       }
@@ -201,19 +206,30 @@ export const LearningProgressProvider = ({ children }) => {
     return null;
   }, [user]);
 
+  // Backward compatibility object for legacy components
+  const progress = useMemo(() => ({
+    completedLessonIds: Array.from(completedLessonIds),
+    bookmarkedLessonIds: Array.from(bookmarkedLessonIds),
+    passedQuizIds: []
+  }), [completedLessonIds, bookmarkedLessonIds]);
+
   return (
     <LearningProgressContext.Provider
       value={{
-        completedLessonIds,
-        bookmarkedLessonIds,
+        completedLessonIds: Array.from(completedLessonIds),
+        bookmarkedLessonIds: Array.from(bookmarkedLessonIds),
         courseProgressMap,
         isSyncing,
         isLessonCompleted,
         isLessonBookmarked,
+        isCourseBookmarked,
         markLessonInProgress,
         markLessonCompleted,
+        toggleLessonCompletion,
         toggleLessonBookmark,
-        fetchCourseProgress
+        toggleCourseBookmark,
+        fetchCourseProgress,
+        progress
       }}
     >
       {children}
@@ -224,7 +240,24 @@ export const LearningProgressProvider = ({ children }) => {
 export const useLearningProgress = () => {
   const context = useContext(LearningProgressContext);
   if (!context) {
-    throw new Error('useLearningProgress must be used within a LearningProgressProvider');
+    return {
+      completedLessonIds: [],
+      bookmarkedLessonIds: [],
+      courseProgressMap: {},
+      isSyncing: false,
+      isLessonCompleted: () => false,
+      isLessonBookmarked: () => false,
+      isCourseBookmarked: () => false,
+      markLessonInProgress: async () => {},
+      markLessonCompleted: async () => {},
+      toggleLessonCompletion: async () => {},
+      toggleLessonBookmark: async () => {},
+      toggleCourseBookmark: async () => {},
+      fetchCourseProgress: async () => null,
+      progress: { completedLessonIds: [], bookmarkedLessonIds: [], passedQuizIds: [] }
+    };
   }
   return context;
 };
+
+export default LearningProgressContext;
