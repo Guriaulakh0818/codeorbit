@@ -123,6 +123,16 @@ export const CourseDetailPage = () => {
     }));
   };
 
+  // Calculate totals
+  const totalLessons = (course?.modules || []).reduce(
+    (acc, m) => acc + (m.lessons?.length || 0), 
+    0
+  );
+  const totalQuizzes = (course?.modules || []).reduce(
+    (acc, m) => acc + (m.quizzes?.length || 0), 
+    0
+  );
+
   // Calculate dynamic local completed lessons in this course
   const locallyCompletedCount = useMemo(() => {
     if (!course || !course.modules) return 0;
