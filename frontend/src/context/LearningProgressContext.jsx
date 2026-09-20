@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import { studentLearningApi } from '../services/studentLearningApi';
+import { CURRICULUM_DATA } from '../data/curriculumData';
 
 const MASTER_COMPLETED_KEY = 'codeorbit_completed_lessons';
 const MASTER_BOOKMARKS_KEY = 'codeorbit_bookmarked_lessons';
@@ -295,6 +296,56 @@ export const LearningProgressProvider = ({ children }) => {
     return isNowBookmarked;
   }, [user]);
 
+  // Real-time track progress calculator combining local completion state & server sync
+  const getTrackProgress = useCallback((courseOrSlug) => {
+    if (!courseOrSlug) {
+      return { completedLessons: 0, totalLessons: 0, completionPercentage: 0, isCompleted: false };
+    }
+
+    let slug = '';
+    let courseObj = null;
+
+    if (typeof courseOrSlug === 'string') {
+      slug = courseOrSlug;
+      courseObj = CURRICULUM_DATA.find((c) => c.slug === slug);
+    } else if (typeof courseOrSlug === 'object') {
+      slug = courseOrSlug.slug || '';
+      courseObj = (courseOrSlug.modules && courseOrSlug.modules.length > 0)
+        ? courseOrSlug
+        : (CURRICULUM_DATA.find((c) => c.slug === slug) || courseOrSlug);
+    }
+
+    // Extract all lessons from courseObj or CURRICULUM_DATA
+    const allLessons = (courseObj?.modules || []).flatMap((m) => m.lessons || []);
+    
+    // Count how many lessons are completed locally
+    const localCompleted = allLessons.filter((l) => 
+      isLessonCompleted(l.id) || isLessonCompleted(l.slug)
+    ).length;
+
+    // Server-side recorded progress (if available)
+    const serverProgress = (slug && courseProgressMap[slug]) ? courseProgressMap[slug] : {};
+    const serverCompleted = serverProgress.completedLessons || 0;
+    const serverTotal = serverProgress.totalLessons || 0;
+
+    const completedLessons = Math.max(serverCompleted, localCompleted);
+    const totalLessons = allLessons.length > 0 
+      ? allLessons.length 
+      : (serverTotal || courseObj?.totalLessons || 1);
+
+    const completionPercentage = totalLessons > 0
+      ? Math.min(100, Math.round((completedLessons / totalLessons) * 100))
+      : 0;
+
+    return {
+      completedLessons,
+      totalLessons,
+      completionPercentage,
+      isCompleted: completionPercentage === 100,
+      certificateCode: serverProgress.certificateCode || null
+    };
+  }, [isLessonCompleted, courseProgressMap]);
+
   // Format progress for dashboard consumers
   const progress = useMemo(() => ({
     completedLessonIds: Array.from(completedLessonIds),
@@ -317,6 +368,7 @@ export const LearningProgressProvider = ({ children }) => {
         markLessonCompleted,
         toggleLessonBookmark,
         fetchCourseProgress,
+        getTrackProgress,
         progress
       }}
     >
@@ -341,6 +393,7 @@ export const useLearningProgress = () => {
       markLessonCompleted: async () => false,
       toggleLessonBookmark: async () => false,
       fetchCourseProgress: async () => null,
+      getTrackProgress: () => ({ completedLessons: 0, totalLessons: 0, completionPercentage: 0, isCompleted: false }),
       progress: { completedLessonIds: [], bookmarkedLessonIds: [], passedQuizIds: [] }
     };
   }

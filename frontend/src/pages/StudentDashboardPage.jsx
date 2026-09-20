@@ -24,7 +24,13 @@ import { SeoHead } from '../components/seo/SeoHead';
 export const StudentDashboardPage = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const { completedLessonIds, bookmarkedLessonIds, courseProgressMap } = useLearningProgress();
+  const { 
+    completedLessonIds, 
+    bookmarkedLessonIds, 
+    courseProgressMap, 
+    getTrackProgress,
+    fetchCourseProgress 
+  } = useLearningProgress();
 
   const [courses, setCourses] = useState([]);
   const [certificates, setCertificates] = useState([]);
@@ -51,6 +57,10 @@ export const StudentDashboardPage = () => {
         ]);
         if (coursesRes.success && coursesRes.data) {
           setCourses(coursesRes.data);
+          // Fetch authoritative progress for all tracks in parallel
+          coursesRes.data.forEach((c) => {
+            if (c.slug) fetchCourseProgress(c.slug);
+          });
         }
         if (certsRes.success && certsRes.data) {
           setCertificates(certsRes.data);
@@ -62,7 +72,7 @@ export const StudentDashboardPage = () => {
       }
     }
     loadData();
-  }, []);
+  }, [fetchCourseProgress]);
 
   const handleLogout = () => {
     logout();
@@ -232,9 +242,10 @@ export const StudentDashboardPage = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {courses.map((course) => {
-                  const progress = courseProgressMap[course.slug] || {};
-                  const pct = progress.completionPercentage || 0;
-                  const completedLessons = progress.completedLessons || 0;
+                  const trackProgress = getTrackProgress(course);
+                  const pct = trackProgress.completionPercentage;
+                  const completedLessons = trackProgress.completedLessons;
+                  const totalLessons = trackProgress.totalLessons;
 
                   return (
                     <div
@@ -246,7 +257,7 @@ export const StudentDashboardPage = () => {
                           <span className="px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold uppercase">
                             {course.track || 'CS CORE'}
                           </span>
-                          <span className="text-slate-500 font-semibold">{pct}% Complete</span>
+                          <span className="text-emerald-700 font-bold font-mono">{pct}% Complete</span>
                         </div>
 
                         <div>
@@ -268,7 +279,7 @@ export const StudentDashboardPage = () => {
 
                         <div className="flex items-center justify-between text-xs">
                           <span className="text-slate-500 font-mono text-[11px]">
-                            {completedLessons} Lessons Completed
+                            {completedLessons} / {totalLessons} Lessons Completed
                           </span>
                           <Link
                             to={`/courses/${course.slug}`}
