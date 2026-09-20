@@ -23,6 +23,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useLearningProgress } from '../context/LearningProgressContext';
 import { LanguageSelector } from '../components/LanguageSelector';
+import { translateToHinglish } from '../utils/hinglishTranslator';
 
 export const QuizPlayerPage = () => {
   const { courseSlug, quizSlug } = useParams();
@@ -281,7 +282,7 @@ export const QuizPlayerPage = () => {
                     )}
                   </div>
                   <h2 className="text-lg sm:text-xl font-bold text-slate-900 leading-snug">
-                    {currentQuestion.prompt}
+                    {isHinglish ? (currentQuestion.promptHinglish || translateToHinglish(currentQuestion.prompt)) : currentQuestion.prompt}
                   </h2>
 
                   {/* Code Context if present */}
@@ -299,6 +300,9 @@ export const QuizPlayerPage = () => {
                   {(currentQuestion.options || []).map((opt, optIdx) => {
                     const isSelected = userAnswers[currentQuestion.id] === opt.id;
                     const letter = String.fromCharCode(65 + optIdx); // A, B, C, D
+                    const optText = isHinglish
+                      ? (opt.text_hinglish || translateToHinglish(opt.text || opt.text_en || ''))
+                      : (opt.text || opt.text_en || '');
 
                     return (
                       <button
@@ -318,7 +322,7 @@ export const QuizPlayerPage = () => {
                           {letter}
                         </span>
                         <span className="text-sm font-medium leading-relaxed">
-                          {opt.text}
+                          {optText}
                         </span>
                       </button>
                     );

@@ -28,6 +28,7 @@ import { AdSlot } from '../components/ads/AdSlot';
 import { TutorialSidebar } from '../components/tutorial/TutorialSidebar';
 import { TableOfContents } from '../components/tutorial/TableOfContents';
 import { LanguageSelector } from '../components/LanguageSelector';
+import { translateToHinglish } from '../utils/hinglishTranslator';
 
 export const LessonReaderPage = () => {
   const { courseSlug, lessonSlug } = useParams();
@@ -86,10 +87,25 @@ export const LessonReaderPage = () => {
   // Dynamic language resolution: Instantly switches to Hinglish or English markdown
   const activeContent = useMemo(() => {
     if (!lesson) return '';
+    const rawEnglish = lesson.contentEn || lesson.contentMarkdown || lesson.content || '';
     if (isHinglish) {
-      return lesson.contentHinglish || lesson.content || lesson.contentMarkdown || lesson.contentEn || '';
+      if (lesson.contentHinglish && lesson.contentHinglish.trim() && lesson.contentHinglish.trim() !== rawEnglish.trim()) {
+        return lesson.contentHinglish;
+      }
+      return translateToHinglish(rawEnglish);
     }
-    return lesson.contentEn || lesson.content || lesson.contentMarkdown || '';
+    return rawEnglish;
+  }, [lesson, isHinglish]);
+
+  const activeTitle = useMemo(() => {
+    if (!lesson) return '';
+    if (isHinglish) {
+      if (lesson.titleHinglish && lesson.titleHinglish.trim()) {
+        return lesson.titleHinglish;
+      }
+      return translateToHinglish(lesson.title);
+    }
+    return lesson.title;
   }, [lesson, isHinglish]);
 
   // Flatten all lessons in course to find prev/next navigation
@@ -247,7 +263,7 @@ export const LessonReaderPage = () => {
                 </div>
 
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
-                  {lesson.title}
+                  {activeTitle}
                 </h1>
               </header>
 

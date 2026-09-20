@@ -74,20 +74,20 @@ export const MarkdownRenderer = ({ content }) => {
   return (
     <div
       ref={containerRef}
-      className="prose prose-invert max-w-none 
-        prose-headings:text-white prose-headings:font-bold prose-headings:tracking-tight
-        prose-h1:text-2xl prose-h1:sm:text-3xl prose-h1:border-b prose-h1:border-slate-800 prose-h1:pb-3 prose-h1:mb-6
-        prose-h2:text-xl prose-h2:sm:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-h2:text-sky-300
-        prose-h3:text-lg prose-h3:mt-6 prose-h3:mb-3 prose-h3:text-slate-100
-        prose-p:text-slate-300 prose-p:leading-relaxed prose-p:text-sm prose-p:sm:text-base
-        prose-ul:text-slate-300 prose-ul:my-4 prose-ul:list-disc prose-ul:pl-6 prose-li:my-1 prose-li:text-sm prose-li:sm:text-base
-        prose-ol:text-slate-300 prose-ol:my-4 prose-ol:list-decimal prose-ol:pl-6 prose-li:my-1
-        prose-strong:text-white prose-strong:font-bold
-        prose-code:text-sky-300 prose-code:bg-slate-900 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:font-mono
-        prose-blockquote:border-l-4 prose-blockquote:border-sky-500 prose-blockquote:bg-sky-500/5 prose-blockquote:p-4 prose-blockquote:rounded-r-xl prose-blockquote:text-slate-200 prose-blockquote:not-italic
+      className="prose prose-slate max-w-none 
+        prose-headings:text-slate-900 prose-headings:font-bold prose-headings:tracking-tight
+        prose-h1:text-2xl prose-h1:sm:text-3xl prose-h1:border-b prose-h1:border-slate-200 prose-h1:pb-3 prose-h1:mb-6 prose-h1:text-slate-900
+        prose-h2:text-xl prose-h2:sm:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-h2:text-emerald-800
+        prose-h3:text-lg prose-h3:mt-6 prose-h3:mb-3 prose-h3:text-slate-900
+        prose-p:text-slate-700 prose-p:leading-relaxed prose-p:text-sm prose-p:sm:text-base
+        prose-ul:text-slate-700 prose-ul:my-4 prose-ul:list-disc prose-ul:pl-6 prose-li:my-1 prose-li:text-sm prose-li:sm:text-base
+        prose-ol:text-slate-700 prose-ol:my-4 prose-ol:list-decimal prose-ol:pl-6 prose-li:my-1
+        prose-strong:text-slate-900 prose-strong:font-bold
+        prose-code:text-emerald-700 prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:font-mono
+        prose-blockquote:border-l-4 prose-blockquote:border-emerald-600 prose-blockquote:bg-emerald-50/60 prose-blockquote:p-4 prose-blockquote:rounded-r-xl prose-blockquote:text-slate-800 prose-blockquote:not-italic
         prose-table:w-full prose-table:border-collapse prose-table:my-4
-        prose-th:border prose-th:border-slate-700 prose-th:bg-slate-900 prose-th:p-2.5 prose-th:text-xs prose-th:text-white
-        prose-td:border prose-td:border-slate-800 prose-td:p-2.5 prose-td:text-xs prose-td:text-slate-300"
+        prose-th:border prose-th:border-slate-200 prose-th:bg-slate-100 prose-th:p-2.5 prose-th:text-xs prose-th:text-slate-900 prose-th:font-bold
+        prose-td:border prose-td:border-slate-200 prose-td:p-2.5 prose-td:text-xs prose-td:text-slate-700"
       dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
     />
   );
