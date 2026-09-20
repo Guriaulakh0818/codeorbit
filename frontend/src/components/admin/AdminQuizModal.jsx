@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, AlertCircle, RefreshCw, HelpCircle, Plus, Trash2, CheckCircle2, Languages } from 'lucide-react';
+import { X, Save, AlertCircle, RefreshCw, HelpCircle, Plus, Trash2, CheckCircle2, Languages, Edit3 } from 'lucide-react';
 import { adminCurriculumApi } from '../../services/adminCurriculumApi';
 
 export const AdminQuizModal = ({ isOpen, onClose, moduleId, quizId, onSaved }) => {
@@ -91,7 +91,23 @@ export const AdminQuizModal = ({ isOpen, onClose, moduleId, quizId, onSaved }) =
     }));
   };
 
-  // Add / Edit Question helpers
+  const resetQuestionForm = () => {
+    setCurrentQuestion({
+      promptEn: '',
+      promptHinglish: '',
+      codeContext: '',
+      options: [
+        { id: 'opt_a', text: '' },
+        { id: 'opt_b', text: '' },
+        { id: 'opt_c', text: '' },
+        { id: 'opt_d', text: '' }
+      ],
+      correctOptionId: 'opt_a',
+      explanationEn: '',
+      explanationHinglish: ''
+    });
+  };
+
   const handleSaveQuestion = async () => {
     if (!currentQuestion.promptEn.trim() || !currentQuestion.explanationEn.trim()) {
       setError('Question prompt and English explanation are required.');
@@ -109,7 +125,6 @@ export const AdminQuizModal = ({ isOpen, onClose, moduleId, quizId, onSaved }) =
       return;
     }
 
-    // If quiz is already persisted, save question to backend immediately
     if (quizId) {
       setSaving(true);
       try {
@@ -139,7 +154,6 @@ export const AdminQuizModal = ({ isOpen, onClose, moduleId, quizId, onSaved }) =
         setSaving(false);
       }
     } else {
-      // Local addition before quiz creation
       const updated = [...questions];
       if (editingQuestionIdx !== null) {
         updated[editingQuestionIdx] = { ...currentQuestion, options: filledOptions };
@@ -150,44 +164,26 @@ export const AdminQuizModal = ({ isOpen, onClose, moduleId, quizId, onSaved }) =
       setEditingQuestionIdx(null);
       resetQuestionForm();
     }
+    setError(null);
   };
 
-  const resetQuestionForm = () => {
-    setCurrentQuestion({
-      promptEn: '',
-      promptHinglish: '',
-      codeContext: '',
-      options: [
-        { id: 'opt_a', text: '' },
-        { id: 'opt_b', text: '' },
-        { id: 'opt_c', text: '' },
-        { id: 'opt_d', text: '' }
-      ],
-      correctOptionId: 'opt_a',
-      explanationEn: '',
-      explanationHinglish: ''
-    });
-  };
-
-  const handleDeleteQuestion = async (idx) => {
-    const q = questions[idx];
-    if (q?.id) {
-      if (!window.confirm('Are you sure you want to delete this question?')) return;
+  const handleDeleteQuestion = async (idx, questionId) => {
+    if (!window.confirm('Delete this question?')) return;
+    if (quizId && questionId) {
       try {
-        const res = await adminCurriculumApi.deleteQuestion(q.id);
+        const res = await adminCurriculumApi.deleteQuestion(questionId);
         if (res.success) {
           loadQuizDetails(quizId);
         }
       } catch (e) {
-        setError('Failed to delete question.');
+        // ignore
       }
     } else {
-      const updated = questions.filter((_, i) => i !== idx);
-      setQuestions(updated);
+      setQuestions((prev) => prev.filter((_, i) => i !== idx));
     }
   };
 
-  const handleSubmitQuiz = async (e) => {
+  const handleSaveQuiz = async (e) => {
     e.preventDefault();
     if (!formData.title.trim() || !formData.slug.trim()) {
       setError('Quiz title and slug are required.');
@@ -202,13 +198,10 @@ export const AdminQuizModal = ({ isOpen, onClose, moduleId, quizId, onSaved }) =
       if (quizId) {
         res = await adminCurriculumApi.updateQuiz(quizId, formData);
       } else {
-        res = await adminCurriculumApi.createQuiz(moduleId, formData);
-        // If there were draft questions, add them now
-        if (res.success && res.data?.id && questions.length > 0) {
-          for (const q of questions) {
-            await adminCurriculumApi.addQuestion(res.data.id, q);
-          }
-        }
+        res = await adminCurriculumApi.createQuiz(moduleId, {
+          ...formData,
+          questions: questions
+        });
       }
 
       if (res.success) {
@@ -227,148 +220,151 @@ export const AdminQuizModal = ({ isOpen, onClose, moduleId, quizId, onSaved }) =
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200">
-      <div className="relative w-full max-w-4xl bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 my-6 max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/60 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-200">
+      <div className="relative w-full max-w-4xl bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 my-6 max-h-[92vh] flex flex-col">
         
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800 flex-shrink-0">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-100 flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <HelpCircle className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">
-                {quizId ? 'Edit Quiz Assessment' : 'Create Module Quiz'}
+              <h2 className="text-lg font-bold text-slate-900">
+                {quizId ? 'Edit Chapter Quiz' : 'Create Module Practice Quiz'}
               </h2>
-              <p className="text-xs text-slate-400">Configure passing threshold (80%), attempts, and questions</p>
+              <p className="text-xs text-slate-500">Configure quiz questions, pass percentage, and bilingual answer explanations</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {error && (
-          <div className="bg-rose-950/40 border border-rose-800/60 p-3.5 rounded-2xl text-xs text-rose-200 flex items-center gap-2.5 flex-shrink-0">
-            <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+          <div className="bg-rose-50 border border-rose-200 p-3.5 rounded-xl text-xs text-rose-800 flex items-center gap-2.5 flex-shrink-0">
+            <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
-        {/* Scrollable Form Body */}
+        {/* Scrollable Body */}
         <div className="space-y-6 flex-1 overflow-y-auto pr-1 text-xs">
           
-          {/* Quiz Metadata */}
-          <form onSubmit={handleSubmitQuiz} className="space-y-4 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+          {/* Metadata */}
+          <div className="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200 space-y-4">
+            <h3 className="font-bold text-slate-900 text-xs">1. Quiz General Information</h3>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Quiz Title *</label>
+                <label className="block text-slate-700 font-semibold mb-1">Quiz Title *</label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={handleTitleChange}
-                  placeholder="e.g. Module 1 Assessment: Complexity"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400"
-                  required
+                  placeholder="e.g. Algorithmic Complexity Checkpoint Quiz"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Slug (Identifier) *</label>
+                <label className="block text-slate-700 font-semibold mb-1">Slug *</label>
                 <input
                   type="text"
                   value={formData.slug}
                   onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                  placeholder="e.g. module-1-quiz"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white font-mono placeholder-slate-500 focus:outline-none focus:border-purple-400"
-                  required
+                  placeholder="e.g. complexity-checkpoint-quiz"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-mono placeholder-slate-400 focus:outline-none focus:border-emerald-500"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Pass Score % *</label>
+                <label className="block text-slate-700 font-semibold mb-1">Pass Score (%)</label>
                 <input
                   type="number"
-                  min="50"
+                  min="10"
                   max="100"
                   value={formData.minPassScorePercentage}
                   onChange={(e) => setFormData({ ...formData, minPassScorePercentage: parseInt(e.target.value, 10) || 80 })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-purple-400"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:border-emerald-500"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Max Attempts (Blank=Unlimited)</label>
+                <label className="block text-slate-700 font-semibold mb-1">Max Attempts</label>
                 <input
                   type="number"
-                  min="1"
+                  placeholder="Unlimited (Leave blank)"
                   value={formData.maxAttempts || ''}
                   onChange={(e) => setFormData({ ...formData, maxAttempts: e.target.value ? parseInt(e.target.value, 10) : null })}
-                  placeholder="Unlimited"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-purple-400"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:border-emerald-500"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Publish Status</label>
+                <label className="block text-slate-700 font-semibold mb-1">Status</label>
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-purple-400 font-semibold"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:border-emerald-500 font-semibold"
                 >
                   <option value="DRAFT">DRAFT</option>
                   <option value="PUBLISHED">PUBLISHED</option>
                 </select>
               </div>
             </div>
+          </div>
 
-            <div className="flex justify-end pt-2">
-              <button
-                type="submit"
-                disabled={saving}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold transition-all shadow-md shadow-purple-500/20"
-              >
-                <Save className="w-3.5 h-3.5" /> Save Quiz Settings
-              </button>
-            </div>
-          </form>
-
-          {/* Question List & Builder */}
-          <div className="space-y-4">
+          {/* Question List Preview */}
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <span>Quiz Questions</span>
-                <span className="bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full text-[10px]">
-                  {questions.length} Questions
+              <h3 className="font-bold text-slate-900 text-xs flex items-center gap-2">
+                <span>2. Questions in this Quiz</span>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                  {questions.length} Total
                 </span>
               </h3>
+
+              {editingQuestionIdx !== null && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingQuestionIdx(null);
+                    resetQuestionForm();
+                  }}
+                  className="text-slate-500 hover:text-slate-800 underline font-semibold text-[11px] cursor-pointer"
+                >
+                  + Add New Question
+                </button>
+              )}
             </div>
 
-            {/* List of existing questions */}
-            {questions.length > 0 && (
+            {questions.length === 0 ? (
+              <p className="text-slate-400 italic text-center py-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                No questions added yet. Use the question editor below to create practice questions.
+              </p>
+            ) : (
               <div className="space-y-2">
                 {questions.map((q, idx) => (
                   <div
                     key={q.id || idx}
-                    className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex items-start justify-between gap-3"
+                    className={`p-3 rounded-xl border flex items-center justify-between gap-3 ${
+                      editingQuestionIdx === idx ? 'bg-emerald-50 border-emerald-300' : 'bg-white border-slate-200'
+                    }`}
                   >
-                    <div className="space-y-1">
-                      <div className="font-semibold text-slate-200">
-                        <span className="text-purple-400 font-bold mr-2">Q{idx + 1}.</span>
-                        {q.promptEn}
-                      </div>
-                      <div className="text-[11px] text-slate-400 flex items-center gap-3">
-                        <span>{q.options?.length || 0} Options</span>
-                        <span className="text-emerald-400 font-mono">Correct: {q.correctOptionId}</span>
-                      </div>
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-[10px] flex-shrink-0">
+                        {idx + 1}
+                      </span>
+                      <p className="font-medium text-slate-800 truncate">{q.promptEn}</p>
                     </div>
 
-                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <div className="flex items-center gap-1 flex-shrink-0">
                       <button
                         type="button"
                         onClick={() => {
@@ -377,20 +373,28 @@ export const AdminQuizModal = ({ isOpen, onClose, moduleId, quizId, onSaved }) =
                             promptEn: q.promptEn || '',
                             promptHinglish: q.promptHinglish || '',
                             codeContext: q.codeContext || '',
-                            options: q.options || [],
+                            options: q.options?.length ? q.options : [
+                              { id: 'opt_a', text: '' },
+                              { id: 'opt_b', text: '' },
+                              { id: 'opt_c', text: '' },
+                              { id: 'opt_d', text: '' }
+                            ],
                             correctOptionId: q.correctOptionId || 'opt_a',
                             explanationEn: q.explanationEn || '',
                             explanationHinglish: q.explanationHinglish || ''
                           });
                         }}
-                        className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs"
+                        className="p-1 text-slate-500 hover:text-slate-800 cursor-pointer"
+                        title="Edit question"
                       >
-                        Edit
+                        <Edit3 className="w-3.5 h-3.5" />
                       </button>
+
                       <button
                         type="button"
-                        onClick={() => handleDeleteQuestion(idx)}
-                        className="p-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg text-xs"
+                        onClick={() => handleDeleteQuestion(idx, q.id)}
+                        className="p-1 text-rose-600 hover:text-rose-800 cursor-pointer"
+                        title="Delete question"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -399,124 +403,145 @@ export const AdminQuizModal = ({ isOpen, onClose, moduleId, quizId, onSaved }) =
                 ))}
               </div>
             )}
+          </div>
 
-            {/* Question Builder Box */}
-            <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
-              <h4 className="font-bold text-white text-xs flex items-center gap-2">
-                <Plus className="w-4 h-4 text-purple-400" />
-                {editingQuestionIdx !== null ? `Edit Question #${editingQuestionIdx + 1}` : 'Add New Question'}
-              </h4>
+          {/* Question Editor Section */}
+          <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
+            <h4 className="font-bold text-slate-900 text-xs">
+              {editingQuestionIdx !== null ? `Edit Question #${editingQuestionIdx + 1}` : 'Add New Question'}
+            </h4>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-400 font-medium mb-1">English Prompt *</label>
-                  <textarea
-                    rows="2"
-                    value={currentQuestion.promptEn}
-                    onChange={(e) => setCurrentQuestion({ ...currentQuestion, promptEn: e.target.value })}
-                    placeholder="Question prompt in English..."
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-purple-400"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-slate-400 font-medium mb-1">Hinglish Prompt</label>
-                  <textarea
-                    rows="2"
-                    value={currentQuestion.promptHinglish}
-                    onChange={(e) => setCurrentQuestion({ ...currentQuestion, promptHinglish: e.target.value })}
-                    placeholder="Hinglish me question prompt..."
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-purple-400"
-                  />
-                </div>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Question Prompt (English) *</label>
+                <input
+                  type="text"
+                  value={currentQuestion.promptEn}
+                  onChange={(e) => setCurrentQuestion({ ...currentQuestion, promptEn: e.target.value })}
+                  placeholder="e.g. What is the worst-case time complexity of QuickSort?"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 focus:outline-none focus:border-emerald-500"
+                />
               </div>
 
-              {/* Options & Correct Answer Radio */}
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1 flex items-center gap-1.5">
+                  <Languages className="w-3.5 h-3.5 text-emerald-600" /> Question Prompt (Hinglish)
+                </label>
+                <input
+                  type="text"
+                  value={currentQuestion.promptHinglish}
+                  onChange={(e) => setCurrentQuestion({ ...currentQuestion, promptHinglish: e.target.value })}
+                  placeholder="e.g. QuickSort ki worst-case time complexity kya hoti hai?"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Optional Code Block / Context</label>
+                <textarea
+                  rows="3"
+                  value={currentQuestion.codeContext}
+                  onChange={(e) => setCurrentQuestion({ ...currentQuestion, codeContext: e.target.value })}
+                  placeholder="int x = 5; while(x > 0) { ... }"
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 font-mono text-emerald-300 text-xs focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              {/* Multiple Choice Options */}
               <div className="space-y-2">
-                <label className="block text-slate-400 font-medium">Multiple Choice Options (Select radio for correct answer)</label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {currentQuestion.options.map((opt, oIdx) => (
-                    <div key={opt.id} className="flex items-center gap-2 bg-slate-900 border border-slate-700 rounded-xl p-2">
-                      <input
-                        type="radio"
-                        name="correctOption"
-                        checked={currentQuestion.correctOptionId === opt.id}
-                        onChange={() => setCurrentQuestion({ ...currentQuestion, correctOptionId: opt.id })}
-                        className="text-emerald-500 focus:ring-0 ml-1 cursor-pointer"
-                      />
-                      <span className="font-mono text-slate-400 text-[11px] font-bold uppercase">{opt.id}:</span>
-                      <input
-                        type="text"
-                        value={opt.text}
-                        onChange={(e) => {
-                          const updated = [...currentQuestion.options];
-                          updated[oIdx] = { ...opt, text: e.target.value };
-                          setCurrentQuestion({ ...currentQuestion, options: updated });
-                        }}
-                        placeholder={`Option ${opt.id.slice(-1).toUpperCase()} text...`}
-                        className="w-full bg-transparent text-white text-xs focus:outline-none"
-                      />
-                    </div>
-                  ))}
-                </div>
+                <label className="block text-slate-700 font-semibold">Options & Correct Answer Selection *</label>
+                
+                {currentQuestion.options.map((opt, i) => (
+                  <div key={opt.id || i} className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="correctOption"
+                      checked={currentQuestion.correctOptionId === opt.id}
+                      onChange={() => setCurrentQuestion({ ...currentQuestion, correctOptionId: opt.id })}
+                      className="text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                      title="Select as correct answer"
+                    />
+                    <input
+                      type="text"
+                      value={opt.text}
+                      onChange={(e) => {
+                        const newOpts = [...currentQuestion.options];
+                        newOpts[i] = { ...newOpts[i], text: e.target.value };
+                        setCurrentQuestion({ ...currentQuestion, options: newOpts });
+                      }}
+                      placeholder={`Option ${String.fromCharCode(65 + i)}`}
+                      className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-slate-900 focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                ))}
               </div>
 
-              {/* Explanations */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 <div>
-                  <label className="block text-slate-400 font-medium mb-1">English Explanation *</label>
+                  <label className="block text-slate-700 font-semibold mb-1">Explanation (English) *</label>
                   <textarea
                     rows="2"
                     value={currentQuestion.explanationEn}
                     onChange={(e) => setCurrentQuestion({ ...currentQuestion, explanationEn: e.target.value })}
-                    placeholder="Why this answer is correct..."
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-purple-400"
+                    placeholder="When the array is already sorted and the pivot is the first/last element..."
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-emerald-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-400 font-medium mb-1">Hinglish Explanation</label>
+                  <label className="block text-slate-700 font-semibold mb-1">Explanation (Hinglish)</label>
                   <textarea
                     rows="2"
                     value={currentQuestion.explanationHinglish}
                     onChange={(e) => setCurrentQuestion({ ...currentQuestion, explanationHinglish: e.target.value })}
-                    placeholder="Hinglish explanation..."
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-purple-400"
+                    placeholder="Jab array pehle se sorted ho to pivot selection se O(N^2) ban jata hai..."
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-emerald-500"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2">
-                {editingQuestionIdx !== null && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditingQuestionIdx(null);
-                      resetQuestionForm();
-                    }}
-                    className="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold"
-                  >
-                    Cancel Edit
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={handleSaveQuestion}
-                  disabled={saving}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-purple-500/20"
-                >
-                  <Save className="w-3.5 h-3.5" />
-                  {editingQuestionIdx !== null ? 'Update Question' : 'Add Question to Quiz'}
-                </button>
-              </div>
-
+              <button
+                type="button"
+                onClick={handleSaveQuestion}
+                className="w-full py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold transition-colors cursor-pointer"
+              >
+                {editingQuestionIdx !== null ? 'Update Question' : '+ Add Question to Quiz'}
+              </button>
             </div>
-
           </div>
 
+        </div>
+
+        {/* Footer Actions */}
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 flex-shrink-0">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition-colors cursor-pointer"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleSaveQuiz}
+            disabled={saving}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all shadow-xs disabled:opacity-50 cursor-pointer"
+          >
+            {saving ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin" /> Saving Quiz...
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" /> Save Entire Quiz
+              </>
+            )}
+          </button>
         </div>
 
       </div>
     </div>
   );
 };
+
+export default AdminQuizModal;

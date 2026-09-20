@@ -13,6 +13,7 @@ import { QuizPlayerPage } from './pages/QuizPlayerPage';
 import { CertificateVerifyPage } from './pages/CertificateVerifyPage';
 import { StudentDashboardPage } from './pages/StudentDashboardPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { AdminLoginPage } from './pages/AdminLoginPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { ContactUsPage } from './pages/ContactUsPage';
@@ -20,14 +21,14 @@ import { TermsConditionsPage } from './pages/TermsConditionsPage';
 import { RefundPolicyPage } from './pages/RefundPolicyPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 
-// Protected Route Guard
+// Protected Route Guard for Students/Admins
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user, loading } = useAuth();
   
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -39,9 +40,28 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   return children;
 };
 
+// Dedicated Admin Route Gateway: If admin authenticated, load AdminDashboard; otherwise load distinct AdminLoginPage
+const AdminGateway = () => {
+  const { user, loading, isAdmin } = useAuth();
+  
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (isAdmin) {
+    return <AdminDashboardPage />;
+  }
+
+  return <AdminLoginPage />;
+};
+
 function MainLayout() {
   return (
-    <div className="flex flex-col min-h-screen bg-[#080d1e] text-slate-100 selection:bg-brand-500 selection:text-white">
+    <div className="flex flex-col min-h-screen bg-slate-50 text-slate-800 selection:bg-emerald-500 selection:text-white">
       <Navbar />
 
       <main className="flex-1">
@@ -77,7 +97,9 @@ function MainLayout() {
             }
           />
 
-          {/* Admin Curriculum Management Console */}
+          {/* Dedicated Admin Portal Routes */}
+          <Route path="/admin" element={<AdminGateway />} />
+          <Route path="/admin/login" element={<AdminLoginPage />} />
           <Route
             path="/admin/dashboard"
             element={
@@ -86,12 +108,8 @@ function MainLayout() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/admin"
-            element={<Navigate to="/admin/dashboard" replace />}
-          />
 
-          {/* Authentication */}
+          {/* Student Authentication */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 

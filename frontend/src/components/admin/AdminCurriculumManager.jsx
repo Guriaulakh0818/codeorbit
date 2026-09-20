@@ -17,7 +17,8 @@ import {
   Clock, 
   Sparkles,
   Eye,
-  ExternalLink
+  ExternalLink,
+  Languages
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { adminCurriculumApi } from '../../services/adminCurriculumApi';
@@ -173,9 +174,9 @@ export const AdminCurriculumManager = () => {
     }
   };
 
-  // Delete handlers
+  // Deletion handlers
   const handleDeleteCourse = async (courseId) => {
-    if (!window.confirm('Delete this course and all its modules, lessons, and quizzes? This action cannot be undone.')) return;
+    if (!window.confirm('Delete this course track and all its modules/lessons?')) return;
     try {
       const res = await adminCurriculumApi.deleteCourse(courseId);
       if (res.success) {
@@ -226,14 +227,14 @@ export const AdminCurriculumManager = () => {
     <div className="space-y-6">
       
       {/* Top Header & Action Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/60 p-6 rounded-3xl border border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
         <div>
-          <h2 className="text-xl font-black text-white flex items-center gap-2.5">
-            <GraduationCap className="w-6 h-6 text-sky-400" />
-            Curriculum & Course Tracks
+          <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2.5">
+            <GraduationCap className="w-6 h-6 text-emerald-600" />
+            Curriculum & Subject Tracks
           </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Author and publish courses, modules, bilingual lessons, and interactive quizzes.
+          <p className="text-xs text-slate-500 mt-1">
+            Author and publish CS courses, modules, bilingual lessons (English & Hinglish), and interactive quizzes.
           </p>
         </div>
 
@@ -242,7 +243,7 @@ export const AdminCurriculumManager = () => {
             setEditingCourse(null);
             setCourseModalOpen(true);
           }}
-          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-brand-600 to-sky-600 hover:from-brand-500 hover:to-sky-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-brand-500/20 active:scale-95"
+          className="inline-flex items-center justify-center gap-2 px-4.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95"
         >
           <Plus className="w-4 h-4" /> Add New Course Track
         </button>
@@ -257,7 +258,7 @@ export const AdminCurriculumManager = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search courses by title or slug..."
-            className="w-full bg-slate-900 border border-slate-700/80 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-sky-400"
+            className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 shadow-2xs"
           />
         </form>
 
@@ -265,7 +266,7 @@ export const AdminCurriculumManager = () => {
           <select
             value={trackFilter}
             onChange={(e) => setTrackFilter(e.target.value)}
-            className="bg-slate-900 border border-slate-700/80 rounded-2xl px-3.5 py-2.5 text-xs text-slate-300 focus:outline-none focus:border-sky-400"
+            className="bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-700 focus:outline-none focus:border-emerald-500 shadow-2xs font-medium"
           >
             <option value="ALL">All Tracks</option>
             <option value="DSA">DSA</option>
@@ -279,7 +280,7 @@ export const AdminCurriculumManager = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-slate-900 border border-slate-700/80 rounded-2xl px-3.5 py-2.5 text-xs text-slate-300 focus:outline-none focus:border-sky-400"
+            className="bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-700 focus:outline-none focus:border-emerald-500 shadow-2xs font-medium"
           >
             <option value="ALL">All Status</option>
             <option value="PUBLISHED">Published</option>
@@ -288,7 +289,7 @@ export const AdminCurriculumManager = () => {
 
           <button
             onClick={fetchCourses}
-            className="p-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-700/80 rounded-2xl text-slate-400 hover:text-white transition-colors"
+            className="p-2.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-slate-500 hover:text-slate-800 transition-colors shadow-2xs cursor-pointer"
             title="Refresh Courses"
           >
             <RefreshCw className="w-4 h-4" />
@@ -298,8 +299,8 @@ export const AdminCurriculumManager = () => {
 
       {/* Error State */}
       {error && (
-        <div className="bg-rose-950/40 border border-rose-800/60 p-4 rounded-2xl text-xs text-rose-200 flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 text-rose-400 flex-shrink-0" />
+        <div className="bg-rose-50 border border-rose-200 p-4 rounded-xl text-xs text-rose-800 flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0" />
           <span>{error}</span>
         </div>
       )}
@@ -308,20 +309,20 @@ export const AdminCurriculumManager = () => {
       {loading && (
         <div className="space-y-4 animate-pulse">
           {[1, 2, 3].map((n) => (
-            <div key={n} className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 h-28" />
+            <div key={n} className="bg-white border border-slate-200 rounded-2xl p-6 h-28" />
           ))}
         </div>
       )}
 
       {/* Empty State */}
       {!loading && courses.length === 0 && (
-        <div className="bg-slate-900/30 border border-slate-800 rounded-3xl p-12 text-center space-y-4">
-          <div className="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center mx-auto text-slate-400">
+        <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center space-y-4 shadow-xs">
+          <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto text-slate-400">
             <BookOpen className="w-6 h-6" />
           </div>
-          <h3 className="text-sm font-bold text-white">No Courses Found</h3>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto">
-            Get started by creating your first course track for computer science engineering students.
+          <h3 className="text-sm font-bold text-slate-900">No Courses Found</h3>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            Get started by authoring your first Computer Science track for students.
           </p>
         </div>
       )}
@@ -330,25 +331,25 @@ export const AdminCurriculumManager = () => {
       {!loading && courses.length > 0 && (
         <div className="space-y-4">
           {courses.map((course) => {
-            const isExpanded = !!expandedCourses[course.id];
+            const isExpanded = !expandedCourses[course.id];
             const details = expandedCourses[course.id];
-            const isDetailLoading = !!loadingDetails[course.id];
+            const isDetailLoading = !loadingDetails[course.id];
 
             return (
               <div
                 key={course.id}
-                className="bg-slate-900/70 border border-slate-800 hover:border-slate-700/80 rounded-3xl overflow-hidden transition-all shadow-xl"
+                className="bg-white border border-slate-200 hover:border-slate-300 rounded-2xl overflow-hidden transition-all shadow-xs"
               >
                 {/* Course Header Bar */}
                 <div className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-start gap-3.5 flex-1 cursor-pointer" onClick={() => toggleCourseExpand(course.id)}>
-                    <button className="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 mt-0.5">
+                    <button className="p-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 mt-0.5 cursor-pointer">
                       {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                     </button>
 
                     <div className="space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-sm sm:text-base font-black text-white">{course.title}</span>
+                        <span className="text-sm sm:text-base font-bold text-slate-900">{course.title}</span>
                         
                         {/* Status Badge */}
                         <button
@@ -356,21 +357,21 @@ export const AdminCurriculumManager = () => {
                             e.stopPropagation();
                             handleToggleCourseStatus(course.id, course.status);
                           }}
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-colors ${
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-colors cursor-pointer ${
                             course.status === 'PUBLISHED'
-                              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
-                              : 'bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30'
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
+                              : 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
                           }`}
                         >
                           {course.status}
                         </button>
 
-                        <span className="bg-sky-500/10 text-sky-400 border border-sky-500/20 px-2 py-0.5 rounded-full text-[10px] font-semibold">
+                        <span className="bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full text-[10px] font-semibold">
                           {course.track}
                         </span>
                       </div>
 
-                      <p className="text-xs text-slate-400 line-clamp-1">{course.shortDescription || course.description}</p>
+                      <p className="text-xs text-slate-500 line-clamp-1">{course.shortDescription || course.description}</p>
                     </div>
                   </div>
 
@@ -379,7 +380,7 @@ export const AdminCurriculumManager = () => {
                     <Link
                       to={`/courses/${course.slug}`}
                       target="_blank"
-                      className="p-2 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-xl transition-colors"
+                      className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors"
                       title="Preview Public Course Page"
                     >
                       <ExternalLink className="w-4 h-4" />
@@ -391,7 +392,7 @@ export const AdminCurriculumManager = () => {
                         setEditingModule(null);
                         setModuleModalOpen(true);
                       }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-semibold transition-colors"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5" /> Module
                     </button>
@@ -401,7 +402,7 @@ export const AdminCurriculumManager = () => {
                         setEditingCourse(course);
                         setCourseModalOpen(true);
                       }}
-                      className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors"
+                      className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors cursor-pointer"
                       title="Edit Course Metadata"
                     >
                       <Edit3 className="w-4 h-4" />
@@ -409,7 +410,7 @@ export const AdminCurriculumManager = () => {
 
                     <button
                       onClick={() => handleDeleteCourse(course.id)}
-                      className="p-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-xl transition-colors"
+                      className="p-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl transition-colors cursor-pointer"
                       title="Delete Course"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -419,15 +420,15 @@ export const AdminCurriculumManager = () => {
 
                 {/* Expanded Modules & Content Tree */}
                 {isExpanded && (
-                  <div className="border-t border-slate-800/80 bg-slate-950/70 p-5 sm:p-6 space-y-4">
+                  <div className="border-t border-slate-100 bg-slate-50/70 p-5 sm:p-6 space-y-4">
                     {isDetailLoading && (
-                      <div className="py-6 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-                        <RefreshCw className="w-4 h-4 animate-spin text-sky-400" /> Loading modules and lessons...
+                      <div className="py-6 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
+                        <RefreshCw className="w-4 h-4 animate-spin text-emerald-600" /> Loading modules and lessons...
                       </div>
                     )}
 
                     {!isDetailLoading && details?.modules?.length === 0 && (
-                      <div className="py-6 text-center text-xs text-slate-400 space-y-2">
+                      <div className="py-6 text-center text-xs text-slate-500 space-y-2">
                         <p>No modules created in this course track yet.</p>
                         <button
                           onClick={() => {
@@ -435,7 +436,7 @@ export const AdminCurriculumManager = () => {
                             setEditingModule(null);
                             setModuleModalOpen(true);
                           }}
-                          className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold"
+                          className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-2xs cursor-pointer"
                         >
                           Add First Module
                         </button>
@@ -445,20 +446,20 @@ export const AdminCurriculumManager = () => {
                     {!isDetailLoading && details?.modules?.map((mod) => (
                       <div
                         key={mod.id}
-                        className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-4 shadow-md"
+                        className="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 space-y-4 shadow-2xs"
                       >
                         {/* Module Header */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-800/80">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
                           <div className="flex items-center gap-2">
-                            <Layers className="w-4 h-4 text-purple-400" />
-                            <span className="text-xs font-bold text-white">{mod.title}</span>
+                            <Layers className="w-4 h-4 text-emerald-600" />
+                            <span className="text-xs font-bold text-slate-900">{mod.title}</span>
                             
                             <button
                               onClick={() => handleToggleModuleStatus(course.id, mod.id, mod.status)}
-                              className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${
+                              className={`px-2 py-0.5 rounded-full text-[9px] font-bold border cursor-pointer ${
                                 mod.status === 'PUBLISHED'
-                                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                                  : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                  : 'bg-amber-50 text-amber-800 border-amber-200'
                               }`}
                             >
                               {mod.status}
@@ -472,7 +473,7 @@ export const AdminCurriculumManager = () => {
                                 setEditingLesson(null);
                                 setLessonModalOpen(true);
                               }}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-sky-500/20 text-sky-300 hover:bg-sky-500/30 rounded-lg text-[11px] font-semibold border border-sky-500/30"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 rounded-lg text-[11px] font-semibold border border-emerald-200 cursor-pointer"
                             >
                               <Plus className="w-3 h-3" /> Lesson
                             </button>
@@ -483,7 +484,7 @@ export const AdminCurriculumManager = () => {
                                 setEditingQuizId(null);
                                 setQuizModalOpen(true);
                               }}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 rounded-lg text-[11px] font-semibold border border-purple-500/30"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-sky-50 text-sky-800 hover:bg-sky-100 rounded-lg text-[11px] font-semibold border border-sky-200 cursor-pointer"
                             >
                               <Plus className="w-3 h-3" /> Quiz
                             </button>
@@ -494,14 +495,14 @@ export const AdminCurriculumManager = () => {
                                 setEditingModule(mod);
                                 setModuleModalOpen(true);
                               }}
-                              className="p-1 text-slate-400 hover:text-white"
+                              className="p-1 text-slate-500 hover:text-slate-800 cursor-pointer"
                             >
                               <Edit3 className="w-3.5 h-3.5" />
                             </button>
 
                             <button
                               onClick={() => handleDeleteModule(course.id, mod.id)}
-                              className="p-1 text-rose-400 hover:text-rose-300"
+                              className="p-1 text-rose-600 hover:text-rose-800 cursor-pointer"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -513,8 +514,8 @@ export const AdminCurriculumManager = () => {
                           
                           {/* Lessons Column */}
                           <div className="space-y-2">
-                            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                              <BookOpen className="w-3.5 h-3.5 text-sky-400" />
+                            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                              <BookOpen className="w-3.5 h-3.5 text-emerald-600" />
                               Lessons ({mod.lessons?.length || 0})
                             </div>
 
@@ -524,21 +525,21 @@ export const AdminCurriculumManager = () => {
                               mod.lessons?.map((l) => (
                                 <div
                                   key={l.id}
-                                  className="p-2.5 rounded-xl bg-slate-950 border border-slate-800/80 flex items-center justify-between gap-2 text-xs"
+                                  className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-2 text-xs"
                                 >
                                   <div className="flex items-center gap-2 truncate">
-                                    <span className="font-semibold text-slate-200 truncate">{l.title}</span>
-                                    <span className="text-[10px] text-slate-400">{l.estimatedMinutes}m</span>
+                                    <span className="font-semibold text-slate-800 truncate">{l.title}</span>
+                                    <span className="text-[10px] text-slate-500 font-mono">{l.estimatedMinutes}m</span>
                                     {l.hasHinglish && (
-                                      <span className="bg-purple-500/20 text-purple-300 text-[9px] px-1.5 py-0.2 rounded">Hinglish</span>
+                                      <span className="bg-emerald-100 text-emerald-800 text-[9px] font-bold px-1.5 py-0.5 rounded">HI</span>
                                     )}
                                   </div>
 
                                   <div className="flex items-center gap-1 flex-shrink-0">
                                     <button
                                       onClick={() => handleToggleLessonStatus(course.id, l.id, l.status)}
-                                      className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
-                                        l.status === 'PUBLISHED' ? 'text-emerald-400 bg-emerald-950/60' : 'text-amber-400 bg-amber-950/60'
+                                      className={`text-[9px] font-bold px-1.5 py-0.5 rounded cursor-pointer ${
+                                        l.status === 'PUBLISHED' ? 'text-emerald-800 bg-emerald-100' : 'text-amber-800 bg-amber-100'
                                       }`}
                                     >
                                       {l.status}
@@ -553,14 +554,14 @@ export const AdminCurriculumManager = () => {
                                           setLessonModalOpen(true);
                                         }
                                       }}
-                                      className="p-1 text-slate-400 hover:text-white"
+                                      className="p-1 text-slate-500 hover:text-slate-800 cursor-pointer"
                                     >
                                       <Edit3 className="w-3 h-3" />
                                     </button>
 
                                     <button
                                       onClick={() => handleDeleteLesson(course.id, l.id)}
-                                      className="p-1 text-rose-400 hover:text-rose-300"
+                                      className="p-1 text-rose-600 hover:text-rose-800 cursor-pointer"
                                     >
                                       <Trash2 className="w-3 h-3" />
                                     </button>
@@ -572,8 +573,8 @@ export const AdminCurriculumManager = () => {
 
                           {/* Quizzes Column */}
                           <div className="space-y-2">
-                            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                              <HelpCircle className="w-3.5 h-3.5 text-purple-400" />
+                            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                              <HelpCircle className="w-3.5 h-3.5 text-sky-600" />
                               Quizzes ({mod.quizzes?.length || 0})
                             </div>
 
@@ -583,19 +584,19 @@ export const AdminCurriculumManager = () => {
                               mod.quizzes?.map((q) => (
                                 <div
                                   key={q.id}
-                                  className="p-2.5 rounded-xl bg-slate-950 border border-slate-800/80 flex items-center justify-between gap-2 text-xs"
+                                  className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-2 text-xs"
                                 >
                                   <div className="flex items-center gap-2 truncate">
-                                    <span className="font-semibold text-purple-200 truncate">{q.title}</span>
-                                    <span className="text-[10px] text-slate-400">{q.questionCount} Qs</span>
-                                    <span className="text-[10px] text-emerald-400">{q.minPassScorePercentage}% Pass</span>
+                                    <span className="font-semibold text-slate-800 truncate">{q.title}</span>
+                                    <span className="text-[10px] text-slate-500">{q.questionCount} Qs</span>
+                                    <span className="text-[10px] text-emerald-700 font-medium">{q.minPassScorePercentage}% Pass</span>
                                   </div>
 
                                   <div className="flex items-center gap-1 flex-shrink-0">
                                     <button
                                       onClick={() => handleToggleQuizStatus(course.id, q.id, q.status)}
-                                      className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
-                                        q.status === 'PUBLISHED' ? 'text-emerald-400 bg-emerald-950/60' : 'text-amber-400 bg-amber-950/60'
+                                      className={`text-[9px] font-bold px-1.5 py-0.5 rounded cursor-pointer ${
+                                        q.status === 'PUBLISHED' ? 'text-emerald-800 bg-emerald-100' : 'text-amber-800 bg-amber-100'
                                       }`}
                                     >
                                       {q.status}
@@ -607,14 +608,14 @@ export const AdminCurriculumManager = () => {
                                         setTargetQuizModuleId(mod.id);
                                         setQuizModalOpen(true);
                                       }}
-                                      className="p-1 text-slate-400 hover:text-white"
+                                      className="p-1 text-slate-500 hover:text-slate-800 cursor-pointer"
                                     >
                                       <Edit3 className="w-3 h-3" />
                                     </button>
 
                                     <button
                                       onClick={() => handleDeleteQuiz(course.id, q.id)}
-                                      className="p-1 text-rose-400 hover:text-rose-300"
+                                      className="p-1 text-rose-600 hover:text-rose-800 cursor-pointer"
                                     >
                                       <Trash2 className="w-3 h-3" />
                                     </button>
@@ -659,7 +660,6 @@ export const AdminCurriculumManager = () => {
         moduleId={targetModuleId}
         lesson={editingLesson}
         onSaved={() => {
-          // find courseId
           const cId = Object.keys(expandedCourses).find((cId) =>
             expandedCourses[cId]?.modules?.some((m) => m.id === targetModuleId)
           );
@@ -683,3 +683,5 @@ export const AdminCurriculumManager = () => {
     </div>
   );
 };
+
+export default AdminCurriculumManager;

@@ -102,33 +102,33 @@ export const AdminCourseModal = ({ isOpen, onClose, course, onSaved }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-200">
+      <div className="relative w-full max-w-2xl bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 my-8">
         
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-brand-500/20 text-sky-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <BookOpen className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">
-                {course ? 'Edit Course' : 'Create New Course'}
+              <h2 className="text-lg font-bold text-slate-900">
+                {course ? 'Edit Course Track' : 'Create New Course Track'}
               </h2>
-              <p className="text-xs text-slate-400">Manage course metadata and publication status</p>
+              <p className="text-xs text-slate-500">Manage course metadata, difficulty, and publication status</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {error && (
-          <div className="bg-rose-950/40 border border-rose-800/60 p-3.5 rounded-2xl text-xs text-rose-200 flex items-center gap-2.5">
-            <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+          <div className="bg-rose-50 border border-rose-200 p-3.5 rounded-xl text-xs text-rose-800 flex items-center gap-2.5">
+            <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
             <span>{error}</span>
           </div>
         )}
@@ -137,25 +137,25 @@ export const AdminCourseModal = ({ isOpen, onClose, course, onSaved }) => {
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Course Title *</label>
+              <label className="block text-slate-700 font-semibold mb-1">Course Title *</label>
               <input
                 type="text"
                 value={formData.title}
                 onChange={handleTitleChange}
                 placeholder="e.g. Master Data Structures & Algorithms"
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-sky-400"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-emerald-500"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Slug (URL identifier) *</label>
+              <label className="block text-slate-700 font-semibold mb-1">Slug (URL Path) *</label>
               <input
                 type="text"
                 value={formData.slug}
                 onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                placeholder="e.g. dsa-master-track"
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white font-mono placeholder-slate-500 focus:outline-none focus:border-sky-400"
+                placeholder="e.g. master-dsa-in-java"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-mono placeholder-slate-400 focus:bg-white focus:outline-none focus:border-emerald-500"
                 required
               />
             </div>
@@ -163,110 +163,108 @@ export const AdminCourseModal = ({ isOpen, onClose, course, onSaved }) => {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Track</label>
+              <label className="block text-slate-700 font-semibold mb-1">Track Category</label>
               <select
                 value={formData.track}
                 onChange={(e) => setFormData({ ...formData, track: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-sky-400"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500 font-medium"
               >
                 <option value="DSA">DSA</option>
                 <option value="SYSTEM_DESIGN">System Design</option>
                 <option value="JAVA">Java</option>
                 <option value="PYTHON">Python</option>
                 <option value="WEB_DEV">Web Development</option>
-                <option value="DBMS">DBMS / SQL</option>
-                <option value="CORE_CS">Core CSE (OS, CN, DBMS)</option>
+                <option value="DBMS">DBMS</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Difficulty Level</label>
+              <label className="block text-slate-700 font-semibold mb-1">Difficulty</label>
               <select
                 value={formData.difficultyLevel}
                 onChange={(e) => setFormData({ ...formData, difficultyLevel: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-sky-400"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500 font-medium"
               >
-                <option value="BEGINNER">Beginner</option>
-                <option value="INTERMEDIATE">Intermediate</option>
-                <option value="ADVANCED">Advanced</option>
-                <option value="BEGINNER_TO_ADVANCED">Beginner to Advanced</option>
+                <option value="BEGINNER">BEGINNER</option>
+                <option value="INTERMEDIATE">INTERMEDIATE</option>
+                <option value="ADVANCED">ADVANCED</option>
+                <option value="ALL_LEVELS">ALL LEVELS</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Estimated Hours</label>
-              <input
-                type="number"
-                min="1"
-                value={formData.estimatedHours}
-                onChange={(e) => setFormData({ ...formData, estimatedHours: parseInt(e.target.value, 10) || 1 })}
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-sky-400"
-              />
+              <label className="block text-slate-700 font-semibold mb-1">Status</label>
+              <select
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500 font-bold"
+              >
+                <option value="DRAFT">DRAFT</option>
+                <option value="PUBLISHED">PUBLISHED</option>
+              </select>
             </div>
           </div>
 
           <div>
-            <label className="block text-slate-300 font-semibold mb-1">Short Tagline Description</label>
+            <label className="block text-slate-700 font-semibold mb-1">Short Tagline Description</label>
             <input
               type="text"
               value={formData.shortDescription}
               onChange={(e) => setFormData({ ...formData, shortDescription: e.target.value })}
-              placeholder="e.g. Zero-to-hero DSA curriculum for placement preparation."
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-sky-400"
+              placeholder="Brief 1-line summary shown in cards..."
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-emerald-500"
             />
           </div>
 
           <div>
-            <label className="block text-slate-300 font-semibold mb-1">Comprehensive Description *</label>
+            <label className="block text-slate-700 font-semibold mb-1">Full Curriculum Description *</label>
             <textarea
               rows="3"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Detailed syllabus overview and learning outcomes..."
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-sky-400"
+              placeholder="Comprehensive syllabus overview, target audience, and placement interview prep details..."
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-emerald-500"
               required
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Cover Image URL</label>
+              <label className="block text-slate-700 font-semibold mb-1">Estimated Hours</label>
+              <input
+                type="number"
+                min="1"
+                value={formData.estimatedHours}
+                onChange={(e) => setFormData({ ...formData, estimatedHours: parseInt(e.target.value, 10) || 10 })}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-slate-700 font-semibold mb-1">Cover Image URL</label>
               <input
                 type="url"
                 value={formData.coverImageUrl}
                 onChange={(e) => setFormData({ ...formData, coverImageUrl: e.target.value })}
                 placeholder="https://images.unsplash.com/..."
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-sky-400"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-emerald-500"
               />
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Initial Publish Status</label>
-              <select
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-sky-400 font-semibold"
-              >
-                <option value="DRAFT">DRAFT (Hidden from Students)</option>
-                <option value="PUBLISHED">PUBLISHED (Live on /courses)</option>
-                <option value="ARCHIVED">ARCHIVED</option>
-              </select>
             </div>
           </div>
 
           {/* Footer Actions */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-semibold transition-colors"
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-brand-600 to-sky-600 hover:from-brand-500 hover:to-sky-500 text-white rounded-xl font-bold transition-all shadow-md shadow-brand-500/20 disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all shadow-xs disabled:opacity-50 cursor-pointer"
             >
               {saving ? (
                 <>
@@ -274,7 +272,7 @@ export const AdminCourseModal = ({ isOpen, onClose, course, onSaved }) => {
                 </>
               ) : (
                 <>
-                  <Save className="w-4 h-4" /> Save Course
+                  <Save className="w-4 h-4" /> Save Course Track
                 </>
               )}
             </button>
@@ -285,3 +283,5 @@ export const AdminCourseModal = ({ isOpen, onClose, course, onSaved }) => {
     </div>
   );
 };
+
+export default AdminCourseModal;
