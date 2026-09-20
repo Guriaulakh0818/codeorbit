@@ -4,22 +4,22 @@ import { Terminal, Github, Twitter, Linkedin, Heart, ShieldCheck, Sparkles, Book
 
 export const Footer = () => {
   return (
-    <footer className="bg-[#050814] border-t border-slate-800/80 text-slate-400 text-xs mt-16">
+    <footer className="bg-[#050810] border-t border-slate-800/80 text-slate-400 text-xs mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           
           {/* Col 1: Brand & Mission */}
           <div className="lg:col-span-2 space-y-4">
             <Link to="/" className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-600 to-sky-400 flex items-center justify-center shadow-lg shadow-brand-500/25">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-700 flex items-center justify-center shadow-lg shadow-emerald-500/20">
                 <Terminal className="w-4 h-4 text-white" />
               </div>
               <span className="font-extrabold text-base text-white tracking-tight">
-                Code<span className="text-brand-400">Orbit</span>
+                Code<span className="text-emerald-400">Orbit</span>
               </span>
             </Link>
             <p className="text-slate-400 text-xs leading-relaxed max-w-sm">
-              Free, modern Computer Science learning platform and placement handbook portal. High-quality tutorials, bilingual notes (English & Hinglish), interactive practice quizzes, and verifiable certifications.
+              100% Free Computer Science learning platform and placement handbook. High-quality tutorials, bilingual notes (English & Hinglish), interactive practice quizzes, and verifiable certifications.
             </p>
             <div className="flex items-center gap-3 pt-2">
               <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-mono font-bold">
@@ -35,27 +35,27 @@ export const Footer = () => {
             </h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/courses/dsa" className="hover:text-brand-400 transition-colors">
+                <Link to="/courses/dsa" className="hover:text-emerald-400 transition-colors">
                   Data Structures & Algorithms
                 </Link>
               </li>
               <li>
-                <Link to="/courses" className="hover:text-brand-400 transition-colors">
+                <Link to="/courses" className="hover:text-emerald-400 transition-colors">
                   Operating Systems
                 </Link>
               </li>
               <li>
-                <Link to="/courses" className="hover:text-brand-400 transition-colors">
+                <Link to="/courses" className="hover:text-emerald-400 transition-colors">
                   Database Management (DBMS)
                 </Link>
               </li>
               <li>
-                <Link to="/courses" className="hover:text-brand-400 transition-colors">
+                <Link to="/courses" className="hover:text-emerald-400 transition-colors">
                   Computer Networks
                 </Link>
               </li>
               <li>
-                <Link to="/courses/system-design-track-2026" className="hover:text-brand-400 transition-colors">
+                <Link to="/courses/system-design-track-2026" className="hover:text-emerald-400 transition-colors">
                   System Design & Scalability
                 </Link>
               </li>
@@ -69,22 +69,22 @@ export const Footer = () => {
             </h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/courses" className="hover:text-brand-400 transition-colors">
+                <Link to="/courses" className="hover:text-emerald-400 transition-colors">
                   Java for Placements
                 </Link>
               </li>
               <li>
-                <Link to="/courses" className="hover:text-brand-400 transition-colors">
+                <Link to="/courses" className="hover:text-emerald-400 transition-colors">
                   Python Programming
                 </Link>
               </li>
               <li>
-                <Link to="/courses" className="hover:text-brand-400 transition-colors">
+                <Link to="/courses" className="hover:text-emerald-400 transition-colors">
                   C++ STL & Complexity
                 </Link>
               </li>
               <li>
-                <Link to="/certificates/verify" className="hover:text-brand-400 transition-colors">
+                <Link to="/certificates/verify" className="hover:text-emerald-400 transition-colors">
                   Certificate Verification
                 </Link>
               </li>
@@ -98,22 +98,22 @@ export const Footer = () => {
             </h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/privacy" className="hover:text-brand-400 transition-colors">
+                <Link to="/privacy" className="hover:text-emerald-400 transition-colors">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link to="/terms" className="hover:text-brand-400 transition-colors">
+                <Link to="/terms" className="hover:text-emerald-400 transition-colors">
                   Terms & Conditions
                 </Link>
               </li>
               <li>
-                <Link to="/refund" className="hover:text-brand-400 transition-colors">
+                <Link to="/refund" className="hover:text-emerald-400 transition-colors">
                   Free Platform Policy
                 </Link>
               </li>
               <li>
-                <Link to="/contact" className="hover:text-brand-400 transition-colors">
+                <Link to="/contact" className="hover:text-emerald-400 transition-colors">
                   Contact Us & Editorial
                 </Link>
               </li>

@@ -75,7 +75,7 @@ export const CoursesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#080d1e] text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-white">
       <SeoHead
         title="Computer Science Tutorials & Subject Tracks — CodeOrbit"
         description="Browse all free CS courses, notes, and roadmaps. Master DSA, OS, DBMS, Networks, and System Design with step-by-step syllabus and interactive quizzes."
@@ -83,19 +83,19 @@ export const CoursesPage = () => {
       />
 
       {/* Header Banner */}
-      <section className="pt-10 pb-8 px-4 sm:px-6 lg:px-8 border-b border-slate-800/80 bg-slate-950/40">
-        <div className="max-w-7xl mx-auto space-y-4 text-center sm:text-left">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center justify-center sm:justify-start gap-2 text-xs font-mono text-brand-400 font-bold uppercase tracking-wider mb-1">
+      <section className="pt-12 pb-10 px-4 sm:px-6 lg:px-8 border-b border-slate-800/80 bg-grid-pattern relative">
+        <div className="max-w-7xl mx-auto space-y-4 text-center sm:text-left relative z-10">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="space-y-2">
+              <div className="flex items-center justify-center sm:justify-start gap-2 text-xs font-mono text-emerald-400 font-bold uppercase tracking-wider">
                 <Terminal className="w-3.5 h-3.5" />
-                <span>FREE CS CURRICULUM</span>
+                <span>FREE CS CURRICULUM & ROADMAPS</span>
               </div>
               <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-                Computer Science Tutorials & Tracks
+                Computer Science Tutorials & Subject Tracks
               </h1>
-              <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mt-1">
-                Self-paced, verified tutorials designed for university curriculum and technical interviews.
+              <p className="text-xs sm:text-sm text-slate-400 max-w-2xl">
+                Self-paced, verified tutorials designed for university curriculum, GATE prep, and tech placement interviews.
               </p>
             </div>
 
@@ -104,7 +104,7 @@ export const CoursesPage = () => {
               <span className="px-3.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono font-bold">
                 100% Free
               </span>
-              <span className="px-3.5 py-1.5 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-mono font-bold">
+              <span className="px-3.5 py-1.5 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-400 text-xs font-mono font-bold">
                 English + Hinglish
               </span>
             </div>
@@ -121,17 +121,17 @@ export const CoursesPage = () => {
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8 flex-1">
         
         {/* Search & Subject Track Filters */}
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-slate-900/50 p-4 rounded-3xl border border-slate-800/80">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-slate-900/60 backdrop-blur-xl p-4 rounded-2xl border border-slate-800/80">
           
           {/* Search Form */}
-          <form onSubmit={handleSearchSubmit} className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
+          <form onSubmit={handleSearchSubmit} className="relative flex-1 max-w-md group">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none group-focus-within:text-emerald-400 transition-colors" />
             <input
               type="text"
               placeholder="Search tutorials by title, keyword..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-brand-500"
+              className="w-full bg-slate-950/80 border border-slate-800 hover:border-slate-700 focus:border-emerald-500 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
             />
           </form>
 
@@ -146,8 +146,8 @@ export const CoursesPage = () => {
                 }}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                   selectedTrack === t.value
-                    ? 'bg-brand-500 text-white shadow-md shadow-brand-500/25'
-                    : 'bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800'
+                    ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25 font-bold'
+                    : 'bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 hover:border-slate-700'
                 }`}
               >
                 {t.label}
@@ -160,7 +160,7 @@ export const CoursesPage = () => {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="p-6 rounded-3xl bg-slate-900/40 border border-slate-800 animate-pulse space-y-4 h-64">
+              <div key={i} className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800 animate-pulse space-y-4 h-64">
                 <div className="h-6 bg-slate-800 rounded w-1/3"></div>
                 <div className="h-8 bg-slate-800 rounded w-3/4"></div>
                 <div className="h-16 bg-slate-800 rounded w-full"></div>
@@ -168,7 +168,7 @@ export const CoursesPage = () => {
             ))}
           </div>
         ) : courses.length === 0 ? (
-          <div className="p-12 text-center rounded-3xl bg-slate-900/30 border border-slate-800 space-y-4 max-w-md mx-auto">
+          <div className="p-12 text-center rounded-2xl bg-slate-900/30 border border-slate-800 space-y-4 max-w-md mx-auto">
             <BookOpen className="w-12 h-12 text-slate-500 mx-auto" />
             <h3 className="text-lg font-bold text-white">No Tutorials Found</h3>
             <p className="text-xs text-slate-400">
@@ -180,7 +180,7 @@ export const CoursesPage = () => {
                 setSelectedTrack('ALL');
                 setPage(0);
               }}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white"
+              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white transition-colors"
             >
               Reset Filters
             </button>
@@ -191,22 +191,22 @@ export const CoursesPage = () => {
               <Link
                 key={course.id}
                 to={`/courses/${course.slug}`}
-                className="group p-6 rounded-3xl bg-slate-900/50 border border-slate-800 hover:border-brand-500/60 hover:bg-slate-900/80 transition-all hover:-translate-y-1 shadow-xl flex flex-col justify-between space-y-6"
+                className="group p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 hover:border-emerald-500/50 hover:bg-slate-900/90 transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-2xl flex flex-col justify-between space-y-6"
               >
                 <div className="space-y-4">
                   {/* Track Badge & Hours */}
                   <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="px-2.5 py-0.5 rounded-md bg-brand-500/10 text-brand-400 border border-brand-500/20 font-bold uppercase tracking-wider">
+                    <span className="px-2.5 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold uppercase tracking-wider">
                       {course.track || 'CS CORE'}
                     </span>
                     <span className="flex items-center gap-1 text-slate-400">
-                      <Clock className="w-3.5 h-3.5" />
+                      <Clock className="w-3.5 h-3.5 text-slate-500" />
                       {course.estimatedHours || 30} hrs
                     </span>
                   </div>
 
                   <div className="space-y-2">
-                    <h3 className="text-lg font-bold text-white group-hover:text-brand-400 transition-colors leading-snug">
+                    <h3 className="text-lg font-bold text-white group-hover:text-emerald-400 transition-colors leading-snug">
                       {course.title}
                     </h3>
                     <p className="text-xs text-slate-300 leading-relaxed line-clamp-3">
@@ -226,7 +226,7 @@ export const CoursesPage = () => {
                     <span>{course.lessonCount || 2} Lessons</span>
                   </div>
 
-                  <span className="font-bold text-brand-400 group-hover:text-brand-300 flex items-center gap-1">
+                  <span className="font-bold text-emerald-400 group-hover:text-emerald-300 flex items-center gap-1">
                     <span>Syllabus</span>
                     <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                   </span>

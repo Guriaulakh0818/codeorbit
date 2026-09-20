@@ -63,22 +63,22 @@ export const TutorialSidebar = ({
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed lg:sticky top-16 lg:top-20 inset-y-0 left-0 z-50 lg:z-10 w-72 sm:w-80 h-[calc(100vh-4rem)] lg:h-[calc(100vh-5rem)] bg-[#080d1e] lg:bg-slate-950/40 border-r border-slate-800/80 flex flex-col transition-transform duration-300 ease-in-out ${
+        className={`fixed lg:sticky top-16 lg:top-20 inset-y-0 left-0 z-50 lg:z-10 w-72 sm:w-80 h-[calc(100vh-4rem)] lg:h-[calc(100vh-5rem)] bg-[#090d16] lg:bg-slate-950/60 backdrop-blur-xl border-r border-slate-800/80 flex flex-col transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
         {/* Sidebar Header */}
-        <div className="p-4 border-b border-slate-800/80 space-y-3 bg-slate-900/30">
+        <div className="p-4 border-b border-slate-800/80 space-y-3 bg-slate-900/40">
           <div className="flex items-center justify-between">
             <Link
               to={`/courses/${course.slug}`}
               className="group flex items-center gap-2.5 min-w-0"
             >
-              <div className="w-8 h-8 rounded-xl bg-brand-500/10 border border-brand-500/30 flex items-center justify-center flex-shrink-0 text-brand-400 group-hover:scale-105 transition-transform">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center flex-shrink-0 text-emerald-400 group-hover:scale-105 transition-transform">
                 <Layers className="w-4 h-4" />
               </div>
               <div className="truncate">
-                <h3 className="text-xs font-bold text-white group-hover:text-brand-400 transition-colors truncate">
+                <h3 className="text-xs font-bold text-white group-hover:text-emerald-400 transition-colors truncate">
                   {course.title}
                 </h3>
                 <span className="text-[10px] text-slate-400 font-mono">
@@ -96,14 +96,14 @@ export const TutorialSidebar = ({
           </div>
 
           {/* In-Track Lesson Search */}
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
+          <div className="relative group">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5 pointer-events-none group-focus-within:text-emerald-400 transition-colors" />
             <input
               type="text"
               placeholder="Search topics in this track..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-900/90 border border-slate-800 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+              className="w-full bg-slate-900/90 border border-slate-800 focus:border-emerald-500 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
             />
           </div>
         </div>
@@ -118,7 +118,7 @@ export const TutorialSidebar = ({
             return (
               <div
                 key={module.id}
-                className="rounded-2xl bg-slate-900/40 border border-slate-800/60 overflow-hidden"
+                className="rounded-2xl bg-slate-900/40 border border-slate-800/70 overflow-hidden"
               >
                 {/* Module Header Button */}
                 <button
@@ -126,7 +126,7 @@ export const TutorialSidebar = ({
                   className="w-full p-3 flex items-center justify-between text-left hover:bg-slate-800/40 transition-colors"
                 >
                   <div className="flex items-center gap-2 min-w-0 pr-2">
-                    <span className="text-[11px] font-mono text-brand-400 font-bold">
+                    <span className="text-[11px] font-mono text-emerald-400 font-bold">
                       {mIdx + 1}.
                     </span>
                     <span className="text-xs font-bold text-slate-200 truncate">
@@ -142,7 +142,7 @@ export const TutorialSidebar = ({
 
                 {/* Lessons & Quizzes List */}
                 {isModuleOpen && (
-                  <div className="px-2 pb-2 pt-1 space-y-1 border-t border-slate-800/40">
+                  <div className="px-2 pb-2 pt-1 space-y-1 border-t border-slate-800/50">
                     {lessons.map((lesson) => {
                       const isActive = lesson.slug === activeLessonSlug;
                       const isCompleted = progress.completedLessonIds.includes(lesson.id);
@@ -154,7 +154,7 @@ export const TutorialSidebar = ({
                           onClick={onClose}
                           className={`group flex items-center justify-between p-2 rounded-xl text-xs transition-all ${
                             isActive
-                              ? 'bg-brand-500 text-white font-semibold shadow-md shadow-brand-500/25'
+                              ? 'bg-emerald-500 text-white font-bold shadow-md shadow-emerald-500/25'
                               : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
                           }`}
                         >

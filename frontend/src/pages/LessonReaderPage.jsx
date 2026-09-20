@@ -108,7 +108,7 @@ export const LessonReaderPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#080d1e] text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-white">
       {/* SEO Dynamic Head */}
       {lesson && (
         <SeoHead
@@ -129,7 +129,7 @@ export const LessonReaderPage = () => {
       )}
 
       {/* Top Banner / Mobile Sidebar Trigger Bar */}
-      <div className="sticky top-16 z-30 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80 px-4 py-2.5 flex items-center justify-between">
+      <div className="sticky top-16 z-30 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/80 px-4 py-2.5 flex items-center justify-between">
         <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={() => setIsSidebarOpen(true)}
@@ -140,11 +140,11 @@ export const LessonReaderPage = () => {
           </button>
 
           <div className="flex items-center gap-2 text-xs text-slate-400 truncate">
-            <Link to="/courses" className="hover:text-white transition-colors">
+            <Link to="/courses" className="hover:text-emerald-400 transition-colors">
               Tutorials
             </Link>
             <span>/</span>
-            <Link to={`/courses/${courseSlug}`} className="text-brand-400 hover:underline truncate max-w-[140px] sm:max-w-[200px]">
+            <Link to={`/courses/${courseSlug}`} className="text-emerald-400 hover:underline truncate max-w-[140px] sm:max-w-[200px] font-medium">
               {course?.title || courseSlug}
             </Link>
             {lesson && (
@@ -164,9 +164,9 @@ export const LessonReaderPage = () => {
           <div className="flex items-center bg-slate-900/90 border border-slate-800 rounded-xl p-0.5 shadow-inner">
             <button
               onClick={() => setLanguage('en')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                 language === 'en'
-                  ? 'bg-brand-500 text-white shadow-md shadow-brand-500/30'
+                  ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25 font-bold'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -174,9 +174,9 @@ export const LessonReaderPage = () => {
             </button>
             <button
               onClick={() => setLanguage('hinglish')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
+              className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
                 language === 'hinglish'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/30'
+                  ? 'bg-teal-600 text-white shadow-md shadow-teal-500/25 font-bold'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -221,7 +221,7 @@ export const LessonReaderPage = () => {
               </div>
             </div>
           ) : error ? (
-            <div className="p-8 rounded-3xl bg-rose-950/20 border border-rose-800/40 text-center space-y-4">
+            <div className="p-8 rounded-2xl bg-rose-950/20 border border-rose-800/40 text-center space-y-4">
               <AlertCircle className="w-12 h-12 text-rose-400 mx-auto" />
               <h2 className="text-xl font-bold text-white">Tutorial Not Found</h2>
               <p className="text-xs text-rose-300 max-w-md mx-auto">{error}</p>
@@ -238,19 +238,19 @@ export const LessonReaderPage = () => {
               {/* Article Header */}
               <header className="space-y-3 border-b border-slate-800/80 pb-6">
                 <div className="flex items-center gap-2 text-xs font-mono">
-                  <span className="px-2.5 py-0.5 rounded-md bg-brand-500/10 text-brand-400 border border-brand-500/20 font-bold uppercase tracking-wider">
+                  <span className="px-2.5 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold uppercase tracking-wider">
                     {course?.track || 'CS Core'}
                   </span>
                   <span className="text-slate-500">•</span>
                   <span className="flex items-center gap-1 text-slate-400">
-                    <Clock className="w-3.5 h-3.5" />
+                    <Clock className="w-3.5 h-3.5 text-slate-500" />
                     {lesson.estimatedMinutes || 15} mins read
                   </span>
                   {lesson.hinglishStatus && language === 'hinglish' && (
                     <>
                       <span className="text-slate-500">•</span>
-                      <span className="text-emerald-400 font-semibold text-[11px]">
-                        Hinglish Edition Available
+                      <span className="text-emerald-400 font-semibold text-[11px] bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                        Hinglish Edition 🇮🇳
                       </span>
                     </>
                   )}
@@ -262,7 +262,7 @@ export const LessonReaderPage = () => {
               </header>
 
               {/* Markdown Content (Sanitized & Rich Code Rendering) */}
-              <div className="prose prose-invert max-w-none prose-pre:bg-slate-950 prose-pre:border prose-pre:border-slate-800 prose-headings:text-white prose-headings:font-bold prose-a:text-brand-400">
+              <div className="prose prose-invert max-w-none prose-pre:bg-slate-950 prose-pre:border prose-pre:border-slate-800 prose-headings:text-white prose-headings:font-bold prose-a:text-emerald-400 hover:prose-a:underline">
                 <MarkdownRenderer content={lesson.contentMarkdown || ''} />
               </div>
 
@@ -270,9 +270,9 @@ export const LessonReaderPage = () => {
               <AdSlot slotType="in_article" />
 
               {/* Lesson Completion & Feedback Bar */}
-              <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-3 text-left">
-                  <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 flex-shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 flex-shrink-0">
                     <Sparkles className="w-5 h-5" />
                   </div>
                   <div>
@@ -285,7 +285,7 @@ export const LessonReaderPage = () => {
                   onClick={() => lesson && toggleLessonCompletion(lesson.id)}
                   className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
                     isCompleted
-                      ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
+                      ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
                       : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
                   }`}
                 >
@@ -301,7 +301,7 @@ export const LessonReaderPage = () => {
                     to={`/courses/${courseSlug}/lessons/${prevLesson.slug}`}
                     className="group p-4 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-slate-700 hover:bg-slate-800/40 transition-all flex flex-col items-start gap-1"
                   >
-                    <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1 group-hover:text-brand-400">
+                    <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1 group-hover:text-emerald-400">
                       <ChevronLeft className="w-3.5 h-3.5" /> Previous Topic
                     </span>
                     <span className="text-sm font-bold text-slate-200 group-hover:text-white truncate w-full text-left">
@@ -315,9 +315,9 @@ export const LessonReaderPage = () => {
                 {nextLesson ? (
                   <Link
                     to={`/courses/${courseSlug}/lessons/${nextLesson.slug}`}
-                    className="group p-4 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-brand-500/40 hover:bg-slate-800/40 transition-all flex flex-col items-end gap-1 text-right"
+                    className="group p-4 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-emerald-500/40 hover:bg-slate-800/40 transition-all flex flex-col items-end gap-1 text-right"
                   >
-                    <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1 group-hover:text-brand-400">
+                    <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1 group-hover:text-emerald-400">
                       Next Topic <ChevronRight className="w-3.5 h-3.5" />
                     </span>
                     <span className="text-sm font-bold text-slate-200 group-hover:text-white truncate w-full">
@@ -327,9 +327,9 @@ export const LessonReaderPage = () => {
                 ) : (
                   <Link
                     to={`/courses/${courseSlug}`}
-                    className="group p-4 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-brand-500/40 hover:bg-slate-800/40 transition-all flex flex-col items-end gap-1 text-right"
+                    className="group p-4 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-emerald-500/40 hover:bg-slate-800/40 transition-all flex flex-col items-end gap-1 text-right"
                   >
-                    <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1 group-hover:text-brand-400">
+                    <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1 group-hover:text-emerald-400">
                       Track Completed <Award className="w-3.5 h-3.5 text-amber-400" />
                     </span>
                     <span className="text-sm font-bold text-emerald-400 truncate w-full">

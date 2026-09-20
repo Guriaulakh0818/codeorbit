@@ -65,9 +65,9 @@ export const TableOfContents = ({ markdownContent = '' }) => {
   if (headings.length === 0) return null;
 
   return (
-    <div className="p-4 rounded-2xl bg-slate-900/40 border border-slate-800/80 space-y-3">
+    <div className="p-4 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 space-y-3">
       <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
-        <ListTree className="w-3.5 h-3.5 text-brand-400" />
+        <ListTree className="w-3.5 h-3.5 text-emerald-400" />
         <span>On This Page</span>
       </div>
 
@@ -78,11 +78,11 @@ export const TableOfContents = ({ markdownContent = '' }) => {
             <button
               key={`${h.id}-${idx}`}
               onClick={() => scrollToHeading(h.id)}
-              className={`block w-full text-left text-xs transition-colors truncate ${
+              className={`block w-full text-left text-xs transition-all truncate ${
                 h.level === 3 ? 'pl-4' : 'pl-1'
               } ${
                 isActive
-                  ? 'text-brand-400 font-semibold border-l-2 border-brand-500 pl-2'
+                  ? 'text-emerald-400 font-bold border-l-2 border-emerald-500 pl-2 bg-emerald-500/5 py-0.5 rounded-r'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
