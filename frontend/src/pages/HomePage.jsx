@@ -1,235 +1,303 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
-  Sparkles, 
+  Terminal, 
   Search, 
+  Cpu, 
+  Database, 
+  Network, 
+  Server, 
+  Code2, 
+  Award, 
+  CheckCircle2, 
+  Sparkles, 
   ArrowRight, 
   BookOpen, 
-  CheckCircle2, 
-  Star, 
-  Download, 
-  Code2, 
   Layers, 
+  Zap, 
+  Globe2, 
   GraduationCap,
-  Loader2,
-  ShieldCheck
+  ChevronRight
 } from 'lucide-react';
-import { EbookCard } from '../components/EbookCard';
-import { FeaturedCategories } from '../components/FeaturedCategories';
-import { PdfPreviewModal } from '../components/PdfPreviewModal';
-import { catalogApi } from '../services/catalogApi';
+import { coursesApi } from '../services/coursesApi';
+import { SeoHead } from '../components/seo/SeoHead';
+import { AdSlot } from '../components/ads/AdSlot';
 
 export const HomePage = () => {
-  const [featuredEbooks, setFeaturedEbooks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [previewEbook, setPreviewEbook] = useState(null);
-  const [heroSearch, setHeroSearch] = useState('');
   const navigate = useNavigate();
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    let isMounted = true;
-    async function loadFeatured() {
-      setLoading(true);
-      const res = await catalogApi.getEbooks({ size: 6 });
-      if (!isMounted) return;
-      if (res.success && Array.isArray(res.data)) {
-        const published = res.data.filter(b => b.active !== false && b.status !== 'UNPUBLISHED');
-        setFeaturedEbooks(published);
+    async function loadFeaturedCourses() {
+      try {
+        const res = await coursesApi.getCourses({ page: 0, size: 8 });
+        if (res.success && res.data) {
+          setCourses(res.data);
+        }
+      } catch (err) {
+        console.error('Failed to load courses on homepage', err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
-    loadFeatured();
-
-    return () => {
-      isMounted = false;
-    };
+    loadFeaturedCourses();
   }, []);
 
-  const handleHeroSearch = (e) => {
+  const handleSearchSubmit = (e) => {
     e.preventDefault();
-    if (heroSearch.trim()) {
-      navigate(`/catalog?q=${encodeURIComponent(heroSearch.trim())}`);
+    if (searchQuery.trim()) {
+      navigate(`/courses?search=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 
+  const subjectCards = [
+    {
+      title: 'Data Structures & Algorithms',
+      description: 'Arrays, Linked Lists, Trees, Graphs, Dynamic Programming & LeetCode patterns.',
+      slug: 'dsa',
+      icon: Terminal,
+      color: 'from-sky-500/20 to-brand-600/20',
+      border: 'border-sky-500/30',
+      iconColor: 'text-sky-400',
+      topics: '120+ Topics'
+    },
+    {
+      title: 'Operating Systems',
+      description: 'Processes, Threads, CPU Scheduling, Concurrency, Virtual Memory & Deadlocks.',
+      slug: 'operating-systems',
+      icon: Cpu,
+      color: 'from-amber-500/20 to-orange-600/20',
+      border: 'border-amber-500/30',
+      iconColor: 'text-amber-400',
+      topics: '45+ Topics'
+    },
+    {
+      title: 'Database Management (DBMS)',
+      description: 'SQL queries, Normalization, ACID properties, Indexing & B-Trees, Transactions.',
+      slug: 'dbms',
+      icon: Database,
+      color: 'from-emerald-500/20 to-teal-600/20',
+      border: 'border-emerald-500/30',
+      iconColor: 'text-emerald-400',
+      topics: '50+ Topics'
+    },
+    {
+      title: 'Computer Networks',
+      description: 'OSI 7-Layer Model, TCP/IP, Subnetting, Routing Protocols, DNS, HTTP/3, WebSockets.',
+      slug: 'computer-networks',
+      icon: Network,
+      color: 'from-indigo-500/20 to-blue-600/20',
+      border: 'border-indigo-500/30',
+      iconColor: 'text-indigo-400',
+      topics: '40+ Topics'
+    },
+    {
+      title: 'System Design & Scalability',
+      description: 'Distributed architectures, Load Balancers, Caching, Sharding, Message Queues & CAP theorem.',
+      slug: 'system-design-track-2026',
+      icon: Server,
+      color: 'from-purple-500/20 to-violet-600/20',
+      border: 'border-purple-500/30',
+      iconColor: 'text-purple-400',
+      topics: '35+ Topics'
+    },
+    {
+      title: 'Core Java for Interviews',
+      description: 'OOPs concepts, JVM Internals, Garbage Collection, Collections Framework, Multithreading.',
+      slug: 'dsa',
+      icon: Code2,
+      color: 'from-rose-500/20 to-pink-600/20',
+      border: 'border-rose-500/30',
+      iconColor: 'text-rose-400',
+      topics: '60+ Topics'
+    }
+  ];
+
   return (
-    <div className="space-y-20 pb-20">
+    <div className="min-h-screen bg-[#080d1e] text-slate-100 flex flex-col">
+      <SeoHead
+        title="CodeOrbit — Free Computer Science Tutorials, Notes & Interview Prep"
+        description="100% Free Computer Science learning platform for CSE & IT students. GeeksforGeeks-style tutorials for DSA, Operating Systems, DBMS, Networks, and System Design in English & Hinglish."
+        canonicalUrl="https://www.codeorbit.online/"
+      />
+
       {/* Hero Section */}
-      <section className="relative pt-12 pb-16 overflow-hidden">
-        {/* Ambient background glows */}
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[350px] bg-brand-500/15 rounded-full blur-[130px] pointer-events-none animate-pulse-slow"></div>
-        <div className="absolute top-10 left-10 w-72 h-72 bg-sky-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+      <section className="relative pt-12 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden bg-gradient-to-b from-[#0e1630] to-[#080d1e] border-b border-slate-800/80">
+        <div className="max-w-5xl mx-auto text-center space-y-8 relative z-10">
+          
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-300 text-xs font-mono font-bold shadow-lg shadow-brand-500/10">
+            <Sparkles className="w-3.5 h-3.5 text-brand-400" />
+            <span>100% FREE COMPUTER SCIENCE ENGINEERING PORTAL</span>
+          </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center max-w-3xl mx-auto space-y-6">
-            {/* Top Subtitle Pill */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900/90 border border-brand-500/30 text-xs font-semibold text-sky-300 shadow-lg shadow-brand-500/10">
-              <Sparkles className="w-3.5 h-3.5 text-sky-400" />
-              <span>Official Engineering E-Book Store for CSE & IT Students</span>
-            </div>
+          {/* Heading */}
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight">
+            Master CS Subjects & Placements{' '}
+            <span className="bg-gradient-to-r from-brand-400 via-sky-300 to-indigo-300 bg-clip-text text-transparent">
+              Without Paying A Rupee.
+            </span>
+          </h1>
 
-            {/* Exact Headline as Requested */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.15]">
-              Learn. Build. <span className="text-gradient">Get Career-Ready.</span>
-            </h1>
+          <p className="text-slate-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+            Curated, bite-sized tutorials, bilingual explanations (English & Hinglish), executable code snippets, practice quizzes, and verified certifications for engineering students.
+          </p>
 
-            {/* Sub-copy */}
-            <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
-              Explore downloadable educational PDF e-books, visual DSA interview sheets, SQL performance handbooks, and system design guides.
-            </p>
-
-            {/* Search Input Box */}
-            <form onSubmit={handleHeroSearch} className="max-w-xl mx-auto relative flex items-center pt-2">
+          {/* Global Search Input */}
+          <form onSubmit={handleSearchSubmit} className="max-w-2xl mx-auto relative shadow-2xl">
+            <div className="relative flex items-center">
               <Search className="w-5 h-5 text-slate-400 absolute left-4 pointer-events-none" />
               <input
                 type="text"
-                placeholder="Search engineering e-books (e.g. Java, Python, DSA, DBMS)..."
-                value={heroSearch}
-                onChange={(e) => setHeroSearch(e.target.value)}
-                className="w-full bg-slate-900/95 border border-slate-700/80 rounded-2xl pl-12 pr-32 py-3.5 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 shadow-2xl"
+                placeholder="Search any CS topic (e.g. Binary Search, Deadlocks, SQL Joins, TCP 3-Way Handshake)..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-slate-900/95 border-2 border-slate-700/80 hover:border-slate-600 focus:border-brand-500 rounded-2xl pl-12 pr-32 py-4 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-brand-500/20 transition-all"
               />
               <button
                 type="submit"
-                className="absolute right-2 top-2.5 bottom-2.5 px-5 bg-gradient-to-r from-brand-600 to-sky-500 hover:from-brand-500 hover:to-sky-400 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5"
+                className="absolute right-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-sky-500 hover:from-brand-500 hover:to-sky-400 text-white font-bold text-xs shadow-md shadow-brand-500/20 transition-all"
               >
-                <span>Search</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                Search
               </button>
-            </form>
-
-            {/* Quick Filter Term Pills */}
-            <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-slate-400 pt-1">
-              <span className="font-semibold text-slate-300">Quick links:</span>
-              {['Java 21', 'DSA Sheets', 'Web Dev', 'SQL Tuning', 'Interview Prep'].map((term) => (
-                <button
-                  key={term}
-                  onClick={() => navigate(`/catalog?q=${encodeURIComponent(term)}`)}
-                  className="bg-slate-900/60 hover:bg-slate-800 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-300 hover:text-sky-300 transition-colors"
-                >
-                  {term}
-                </button>
-              ))}
             </div>
+          </form>
 
-            {/* Store Highlights Grid */}
-            <div className="pt-8 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-              <div className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800/80 backdrop-blur-sm">
-                <p className="text-2xl sm:text-3xl font-extrabold text-white">100%</p>
-                <p className="text-xs text-slate-400 mt-0.5">Verified PDF Notes</p>
-              </div>
-              <div className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800/80 backdrop-blur-sm">
-                <p className="text-2xl sm:text-3xl font-extrabold text-sky-400">Direct</p>
-                <p className="text-xs text-slate-400 mt-0.5">Secure PDF Download</p>
-              </div>
-              <div className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800/80 backdrop-blur-sm">
-                <p className="text-2xl sm:text-3xl font-extrabold text-emerald-400">Lifetime</p>
-                <p className="text-xs text-slate-400 mt-0.5">Student Library Access</p>
-              </div>
-              <div className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800/80 backdrop-blur-sm">
-                <p className="text-2xl sm:text-3xl font-extrabold text-purple-400">Razorpay</p>
-                <p className="text-xs text-slate-400 mt-0.5">Instant Checkout</p>
-              </div>
-            </div>
+          {/* Quick Subject Tags */}
+          <div className="flex flex-wrap items-center justify-center gap-2 pt-2 text-xs">
+            <span className="text-slate-400 font-mono text-[11px]">Popular:</span>
+            {['DSA', 'Operating Systems', 'DBMS', 'Computer Networks', 'System Design', 'Java', 'Python'].map((tag, idx) => (
+              <Link
+                key={idx}
+                to={`/courses?search=${encodeURIComponent(tag)}`}
+                className="px-3 py-1 rounded-lg bg-slate-900/80 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white transition-colors"
+              >
+                {tag}
+              </Link>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Category Cards Section (Java, Python, DSA, Web Dev, DBMS, Interview Prep) */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <FeaturedCategories />
+      {/* Top Leaderboard Ad */}
+      <div className="max-w-7xl mx-auto w-full px-4 pt-6">
+        <AdSlot slotType="leaderboard" />
       </div>
 
-      {/* Featured E-books Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-sky-400">Top Handbooks</span>
-              <span className="text-[10px] bg-slate-800 text-slate-400 border border-slate-700 px-2 py-0.5 rounded-full font-mono">
-                Official Publications
-              </span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white mt-1">
-              Featured Engineering E-Books
+      {/* Core CS Subject Cards Grid (GeeksforGeeks Style) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 border-b border-slate-800 pb-4">
+          <div className="space-y-1">
+            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              Explore Computer Science Subjects
             </h2>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              Comprehensive guides with code snippets, chapter breakdowns, and sample previews.
+            <p className="text-xs sm:text-sm text-slate-400">
+              Structured step-by-step tracks curated for university semesters and campus placements.
             </p>
           </div>
-
           <Link
-            to="/catalog"
-            className="text-xs font-semibold text-sky-400 hover:text-sky-300 flex items-center gap-1 group"
+            to="/courses"
+            className="text-xs font-bold text-brand-400 hover:text-brand-300 flex items-center gap-1 group"
           >
-            <span>View all e-books</span>
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            <span>Browse All Subjects & Roadmaps</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
 
-        {/* Featured Grid */}
-        {loading ? (
-          <div className="p-16 text-center space-y-3 bg-slate-900/30 border border-slate-800 rounded-3xl">
-            <Loader2 className="w-8 h-8 text-brand-400 animate-spin mx-auto" />
-            <p className="text-xs text-slate-400">Loading featured engineering handbooks...</p>
-          </div>
-        ) : featuredEbooks.length === 0 ? (
-          <div className="p-12 text-center rounded-2xl bg-slate-900/40 border border-slate-800">
-            <p className="text-sm text-slate-400">No featured e-books available currently.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredEbooks.map((ebook) => (
-              <EbookCard
-                key={ebook.id}
-                ebook={ebook}
-                onQuickPreview={(b) => setPreviewEbook(b)}
-              />
-            ))}
-          </div>
-        )}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {subjectCards.map((sub, idx) => {
+            const IconComponent = sub.icon;
+            return (
+              <Link
+                key={idx}
+                to={`/courses/${sub.slug}`}
+                className={`group p-6 rounded-3xl bg-gradient-to-b ${sub.color} bg-slate-900/40 border ${sub.border} hover:border-brand-500/60 transition-all hover:-translate-y-1 shadow-xl flex flex-col justify-between space-y-6`}
+              >
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className={`p-3 rounded-2xl bg-slate-900/90 border border-slate-800 ${sub.iconColor}`}>
+                      <IconComponent className="w-6 h-6" />
+                    </div>
+                    <span className="text-[11px] font-mono font-bold text-slate-400 bg-slate-900/80 px-2.5 py-1 rounded-lg border border-slate-800">
+                      {sub.topics}
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-bold text-white group-hover:text-brand-400 transition-colors">
+                      {sub.title}
+                    </h3>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      {sub.description}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-slate-800/80 text-xs font-semibold text-brand-400 group-hover:text-brand-300">
+                  <span>Start Learning Free</span>
+                  <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
+            );
+          })}
+        </div>
       </section>
 
-      {/* Value Proposition Callout */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Mid-Page In-Feed AdSlot */}
+      <div className="max-w-7xl mx-auto w-full px-4">
+        <AdSlot slotType="in_article" />
+      </div>
+
+      {/* Features & Why CodeOrbit Grid */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+        <div className="text-center space-y-2 max-w-2xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            Built Specifically For Engineering Students
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-400">
+            Everything you need to crack your semester exams and technical placement interviews.
+          </p>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-brand-500/10 border border-brand-500/30 flex items-center justify-center text-sky-400">
-              <Download className="w-5 h-5" />
+          <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800 space-y-3">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+              <Globe2 className="w-5 h-5" />
             </div>
-            <h3 className="text-base font-bold text-white">Instant Offline Reading</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Direct digital access to study guides and cheat sheets on your computer, tablet, or mobile device.
+            <h3 className="text-base font-bold text-white">English + Hinglish 🇮🇳</h3>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Stuck on difficult concepts? Toggle to Hinglish for crystal clear, intuitive real-world explanations in simple conversational Hindi-English.
             </p>
           </div>
 
-          <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-              <Code2 className="w-5 h-5" />
+          <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800 space-y-3">
+            <div className="w-10 h-10 rounded-2xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400">
+              <Zap className="w-5 h-5" />
             </div>
-            <h3 className="text-base font-bold text-white">Clean Code & Architectures</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Every handbook is packed with verified code examples, algorithmic dry runs, and system diagrams.
+            <h3 className="text-base font-bold text-white">Interactive Practice Quizzes</h3>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Reinforce your knowledge with instant scoring, attempt history, and comprehensive answer explanations after each chapter.
             </p>
           </div>
 
-          <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
-              <GraduationCap className="w-5 h-5" />
+          <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800 space-y-3">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+              <Award className="w-5 h-5" />
             </div>
-            <h3 className="text-base font-bold text-white">Placement & Exam Oriented</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Tailored for computer science university syllabi, semester revisions, and campus recruitment tests.
+            <h3 className="text-base font-bold text-white">Verifiable Certifications</h3>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Complete full subject tracks with 80%+ quiz scores to earn cryptographic, publicly verifiable course completion certificates.
             </p>
           </div>
         </div>
       </section>
 
-      {/* PDF Sample Preview Modal */}
-      <PdfPreviewModal
-        ebook={previewEbook}
-        isOpen={Boolean(previewEbook)}
-        onClose={() => setPreviewEbook(null)}
-      />
+      {/* Footer Banner Ad */}
+      <div className="max-w-7xl mx-auto w-full px-4 pb-6">
+        <AdSlot slotType="footer_banner" />
+      </div>
     </div>
   );
 };

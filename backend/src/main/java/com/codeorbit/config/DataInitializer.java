@@ -233,6 +233,131 @@ public class DataInitializer implements CommandLineRunner {
         );
         quizQuestionRepository.save(qq2);
 
-        logger.info("Successfully seeded launch DSA track with {} modules and {} questions.", 1, 2);
+        logger.info("Successfully seeded launch DSA track.");
+
+        // -------------------------------------------------------------
+        // 2. Seed Operating Systems (OS) Track
+        // -------------------------------------------------------------
+        Course osCourse = new Course(
+                "Operating Systems (OS) Core Curriculum",
+                "operating-systems",
+                "Master fundamental OS concepts: Process Management, Threads, CPU Scheduling, Mutex & Semaphores, Virtual Memory Paging, Page Replacement, and Deadlock Prevention.",
+                "Complete OS syllabus for semester exams and technical interviews.",
+                "OS",
+                "INTERMEDIATE",
+                25,
+                2,
+                PublishStatus.PUBLISHED
+        );
+        osCourse.setCoverImageUrl("https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80");
+        osCourse = courseRepository.save(osCourse);
+
+        CourseModule osMod1 = new CourseModule(
+                osCourse,
+                "Module 1: Process Management & CPU Scheduling",
+                "process-and-cpu-scheduling",
+                "Process states, PCB, context switching, FCFS, SJF, Round Robin, and Priority Scheduling.",
+                1,
+                PublishStatus.PUBLISHED
+        );
+        osMod1 = courseModuleRepository.save(osMod1);
+
+        Lesson osL1 = new Lesson(
+                osMod1,
+                "1.1 Process Lifecycle & Context Switching",
+                "process-lifecycle-and-context-switching",
+                15,
+                1,
+                PublishStatus.PUBLISHED,
+                "# Process Lifecycle & Context Switching\n\nA **Process** is a program in execution. The operating system manages processes using the **Process Control Block (PCB)**.\n\n### 5-State Process Model\n1. **New**: The process is being created.\n2. **Ready**: Loaded into main memory and waiting for CPU assignment.\n3. **Running**: Instructions are being executed on the CPU.\n4. **Waiting/Blocked**: Waiting for an I/O event or signal.\n5. **Terminated**: Finished execution.\n\n### Context Switching\nSaving the state of the currently running process and loading the saved state of the next ready process. This involves saving CPU registers, program counter, and stack pointer into the PCB.",
+                "# Process Lifecycle Aur Context Switching\n\n**Process** ka matlab hota hai 'program in execution'. Operating system har process ko **Process Control Block (PCB)** ke through track karta hai.\n\n### 5-State Process Model\n1. **New**: Naya process create ho raha hai.\n2. **Ready**: RAM me load ho chuka hai aur CPU ka wait kar raha hai.\n3. **Running**: CPU instructions execute kar raha hai.\n4. **Waiting/Blocked**: Kisi I/O ya signal ka wait kar raha hai.\n5. **Terminated**: Execution complete ho gaya.\n\n### Context Switching Kya Hai?\nCurrent process ke state (registers, program counter) ko PCB me save karke agle ready process ke state ko CPU me load karna.",
+                HinglishStatus.PUBLISHED
+        );
+        osL1.setCodeSnippetCpp("// Process structure representation in C++\nstruct PCB {\n    int pid;\n    int programCounter;\n    int registers[8];\n    int priority;\n    enum State { NEW, READY, RUNNING, WAITING, TERMINATED } state;\n};");
+        osL1.setCodeSnippetJava("public enum ProcessState {\n    NEW, READY, RUNNING, WAITING, TERMINATED;\n}\n\npublic class ProcessControlBlock {\n    private int pid;\n    private ProcessState state;\n    private int programCounter;\n}");
+        lessonRepository.save(osL1);
+
+        // -------------------------------------------------------------
+        // 3. Seed Database Management Systems (DBMS) Track
+        // -------------------------------------------------------------
+        Course dbmsCourse = new Course(
+                "Database Management Systems (DBMS) & SQL",
+                "dbms",
+                "Comprehensive DBMS guide covering Relational Model, SQL Mastery, Normalization (1NF, 2NF, 3NF, BCNF), Indexing with B+ Trees, ACID Properties, and Concurrency Control.",
+                "Zero-to-Hero DBMS notes for CSE students and backend developers.",
+                "DBMS",
+                "BEGINNER_TO_ADVANCED",
+                30,
+                3,
+                PublishStatus.PUBLISHED
+        );
+        dbmsCourse.setCoverImageUrl("https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=600&auto=format&fit=crop&q=80");
+        dbmsCourse = courseRepository.save(dbmsCourse);
+
+        CourseModule dbmsMod1 = new CourseModule(
+                dbmsCourse,
+                "Module 1: Relational Model & ACID Transactions",
+                "relational-model-and-acid",
+                "Tables, Primary/Foreign Keys, ACID properties, and Transaction Isolation Levels.",
+                1,
+                PublishStatus.PUBLISHED
+        );
+        dbmsMod1 = courseModuleRepository.save(dbmsMod1);
+
+        Lesson dbmsL1 = new Lesson(
+                dbmsMod1,
+                "1.1 ACID Properties in Database Transactions",
+                "acid-properties-in-database-transactions",
+                20,
+                1,
+                PublishStatus.PUBLISHED,
+                "# ACID Properties in Database Transactions\n\nA **Transaction** is a logical unit of work. To maintain database integrity, all transactions must satisfy **ACID** properties:\n\n### 1. Atomicity\n'All or nothing' — either all operations in the transaction succeed, or the entire transaction is rolled back.\n\n### 2. Consistency\nThe database must transition from one valid state to another valid state, satisfying all schema constraints.\n\n### 3. Isolation\nConcurrent transactions execute independently without interfering with each other.\n\n### 4. Durability\nOnce a transaction commits, its updates are permanently recorded in non-volatile storage even in the event of a system crash.",
+                "# DBMS Me ACID Properties\n\nDatabase me **Transaction** ka matlab hota hai kaam ka ek complete set. Data integrity ensure karne ke liye har transaction ko **ACID** rules follow karne padte hain:\n\n### 1. Atomicity (All or Nothing)\nYa to transaction ke saare steps complete honge, ya fir ek bhi nahi hoga (Rollback).\n\n### 2. Consistency\nTransaction se pehle aur baad me database hamesha valid state aur rules me hona chahiye.\n\n### 3. Isolation\nEk sath chalne wale multiple transactions ek doosre ke kaam me interfere nahi karte.\n\n### 4. Durability\nEk baar transaction commit ho gaya, to system crash hone par bhi data safe aur permanent rehta hai.",
+                HinglishStatus.PUBLISHED
+        );
+        dbmsL1.setCodeSnippetJava("// Spring Boot @Transactional ensures ACID properties\n@Transactional(isolation = Isolation.READ_COMMITTED)\npublic void transferFunds(Long fromId, Long toId, BigDecimal amount) {\n    accountRepository.debit(fromId, amount);\n    accountRepository.credit(toId, amount);\n}");
+        lessonRepository.save(dbmsL1);
+
+        // -------------------------------------------------------------
+        // 4. Seed Computer Networks Track
+        // -------------------------------------------------------------
+        Course cnCourse = new Course(
+                "Computer Networks & Protocols",
+                "computer-networks",
+                "Master the OSI 7-Layer Model, TCP/IP Suite, Subnetting, TCP 3-Way Handshake, Flow & Congestion Control, DNS, HTTP/2, HTTP/3, and WebSockets.",
+                "Complete computer networks curriculum for campus placements.",
+                "NETWORKS",
+                "INTERMEDIATE",
+                28,
+                4,
+                PublishStatus.PUBLISHED
+        );
+        cnCourse.setCoverImageUrl("https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80");
+        cnCourse = courseRepository.save(cnCourse);
+
+        CourseModule cnMod1 = new CourseModule(
+                cnCourse,
+                "Module 1: OSI & TCP/IP Network Models",
+                "osi-and-tcp-ip-models",
+                "Deep dive into 7 OSI layers and the 4-layer TCP/IP Internet protocol stack.",
+                1,
+                PublishStatus.PUBLISHED
+        );
+        cnMod1 = courseModuleRepository.save(cnMod1);
+
+        Lesson cnL1 = new Lesson(
+                cnMod1,
+                "1.1 OSI 7-Layer Architecture Explained",
+                "osi-7-layer-architecture-explained",
+                20,
+                1,
+                PublishStatus.PUBLISHED,
+                "# OSI 7-Layer Architecture Explained\n\nThe **Open Systems Interconnection (OSI)** model characterizes computing network communications into 7 distinct layers:\n\n1. **Application Layer (Layer 7)**: HTTP, HTTPS, FTP, DNS, SMTP.\n2. **Presentation Layer (Layer 6)**: Encryption (TLS/SSL), Compression, Data formatting.\n3. **Session Layer (Layer 5)**: Authentication, session management.\n4. **Transport Layer (Layer 4)**: End-to-end communication via TCP (reliable) and UDP (connectionless).\n5. **Network Layer (Layer 3)**: Logical addressing (IP) and packet routing.\n6. **Data Link Layer (Layer 2)**: Physical addressing (MAC), frames, and switch forwarding.\n7. **Physical Layer (Layer 1)**: Raw bits over cables, fiber optics, or radio waves.",
+                "# OSI 7-Layer Model Detail Me\n\n**OSI (Open Systems Interconnection)** model network communication ko 7 layers me divide karta hai:\n\n1. **Application Layer (L7)**: End-user apps jaise Browser (HTTP, HTTPS, DNS).\n2. **Presentation Layer (L6)**: Encryption (SSL/TLS) aur data formatting.\n3. **Session Layer (L5)**: Connection session maintain karna.\n4. **Transport Layer (L4)**: End-to-end data delivery (TCP reliable ya UDP fast).\n5. **Network Layer (L3)**: IP Addressing aur Routers ke through best path find karna.\n6. **Data Link Layer (L2)**: MAC Address aur Switches ke through frame delivery.\n7. **Physical Layer (L1)**: Wires aur signals ke through 0 aur 1 (bits) bhejna.",
+                HinglishStatus.PUBLISHED
+        );
+        lessonRepository.save(cnL1);
+
+        logger.info("Successfully seeded launch Computer Science curriculum tracks (DSA, OS, DBMS, Networks).");
     }
 }

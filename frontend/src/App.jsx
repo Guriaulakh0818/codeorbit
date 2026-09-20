@@ -1,16 +1,16 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { LibraryProvider } from './context/LibraryContext';
-import { CartProvider } from './context/CartContext';
 import { LearningProgressProvider } from './context/LearningProgressContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
-import { CartDrawer } from './components/CartDrawer';
 
 import { HomePage } from './pages/HomePage';
-import { CatalogPage } from './pages/CatalogPage';
-import { EbookDetailPage } from './pages/EbookDetailPage';
+import { CoursesPage } from './pages/CoursesPage';
+import { CourseDetailPage } from './pages/CourseDetailPage';
+import { LessonReaderPage } from './pages/LessonReaderPage';
+import { QuizPlayerPage } from './pages/QuizPlayerPage';
+import { CertificateVerifyPage } from './pages/CertificateVerifyPage';
 import { StudentDashboardPage } from './pages/StudentDashboardPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { LoginPage } from './pages/LoginPage';
@@ -19,12 +19,6 @@ import { ContactUsPage } from './pages/ContactUsPage';
 import { TermsConditionsPage } from './pages/TermsConditionsPage';
 import { RefundPolicyPage } from './pages/RefundPolicyPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
-
-import { CoursesPage } from './pages/CoursesPage';
-import { CourseDetailPage } from './pages/CourseDetailPage';
-import { LessonReaderPage } from './pages/LessonReaderPage';
-import { QuizPlayerPage } from './pages/QuizPlayerPage';
-import { CertificateVerifyPage } from './pages/CertificateVerifyPage';
 
 // Protected Route Guard
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -45,29 +39,27 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   return children;
 };
 
-import { RazorpayCheckoutModal } from './components/RazorpayCheckoutModal';
-
 function MainLayout() {
-  const [isCheckoutOpen, setIsCheckoutOpen] = React.useState(false);
-
   return (
     <div className="flex flex-col min-h-screen bg-[#080d1e] text-slate-100 selection:bg-brand-500 selection:text-white">
       <Navbar />
 
       <main className="flex-1">
         <Routes>
-          <Route path="/" element={<HomePage onBuyNow={() => setIsCheckoutOpen(true)} />} />
+          {/* Public CS Learning Portal Routes */}
+          <Route path="/" element={<HomePage />} />
           <Route path="/courses" element={<CoursesPage />} />
           <Route path="/courses/:courseSlug" element={<CourseDetailPage />} />
           <Route path="/courses/:courseSlug/lessons/:lessonSlug" element={<LessonReaderPage />} />
           <Route path="/courses/:courseSlug/quizzes/:quizSlug" element={<QuizPlayerPage />} />
+          
+          {/* Certificate Verification */}
           <Route path="/certificates/verify/:certificateCode" element={<CertificateVerifyPage />} />
           <Route path="/certificates/verify" element={<CertificateVerifyPage />} />
           <Route path="/verify/:certificateCode" element={<CertificateVerifyPage />} />
-          <Route path="/catalog" element={<CatalogPage onBuyNow={() => setIsCheckoutOpen(true)} />} />
-          <Route path="/ebook/:id" element={<EbookDetailPage onBuyNow={() => setIsCheckoutOpen(true)} />} />
-          
-          {/* Student Dashboard & Library */}
+          <Route path="/verify" element={<CertificateVerifyPage />} />
+
+          {/* Student Dashboard & Learning History */}
           <Route
             path="/student/dashboard"
             element={
@@ -85,7 +77,7 @@ function MainLayout() {
             }
           />
 
-          {/* Store Owner / Admin Dashboard */}
+          {/* Admin Curriculum Management Console */}
           <Route
             path="/admin/dashboard"
             element={
@@ -94,25 +86,27 @@ function MainLayout() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/admin"
+            element={<Navigate to="/admin/dashboard" replace />}
+          />
 
-          {/* Policy Pages for Cashfree Whitelisting */}
-          <Route path="/contact" element={<ContactUsPage />} />
-          <Route path="/terms" element={<TermsConditionsPage />} />
-          <Route path="/refund-policy" element={<RefundPolicyPage />} />
-          <Route path="/cancellation-refund-policy" element={<RefundPolicyPage />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-
-          {/* Auth Pages */}
+          {/* Authentication */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          
+
+          {/* SEO & Legal Policy Pages for AdSense Compliance */}
+          <Route path="/contact" element={<ContactUsPage />} />
+          <Route path="/terms" element={<TermsConditionsPage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/refund" element={<RefundPolicyPage />} />
+
+          {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
 
       <Footer />
-      <CartDrawer onProceedToCheckout={() => setIsCheckoutOpen(true)} />
-      <RazorpayCheckoutModal isOpen={isCheckoutOpen} onClose={() => setIsCheckoutOpen(false)} />
     </div>
   );
 }
@@ -121,18 +115,12 @@ export function App() {
   return (
     <Router>
       <AuthProvider>
-        <LibraryProvider>
-          <CartProvider>
-            <LearningProgressProvider>
-              <MainLayout />
-            </LearningProgressProvider>
-          </CartProvider>
-        </LibraryProvider>
+        <LearningProgressProvider>
+          <MainLayout />
+        </LearningProgressProvider>
       </AuthProvider>
     </Router>
   );
 }
 
 export default App;
-
-
