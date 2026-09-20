@@ -145,7 +145,9 @@ export const TutorialSidebar = ({
                   <div className="px-2 pb-2 pt-1 space-y-1 border-t border-slate-100">
                     {lessons.map((lesson) => {
                       const isActive = lesson.slug === activeLessonSlug;
-                      const isCompleted = isLessonCompleted ? isLessonCompleted(lesson.id) : false;
+                      const isCompleted = isLessonCompleted
+                        ? (isLessonCompleted(lesson.id) || isLessonCompleted(lesson.slug))
+                        : false;
 
                       return (
                         <Link

@@ -67,20 +67,19 @@ The top navbar includes an instant **Demo Role Switcher** so you can test all 3 
 
 ---
 
-## 💳 Payment & Razorpay Testing
+## 🎓 Open Learning & Verifiable Certificates
 
-1. Add any e-book to your cart or click **"Instant Buy Now"**.
-2. Apply promo code **`ENGINEER50`** for a 50% discount.
-3. Choose your payment method (UPI / QR / Card / NetBanking) and click **"Authorize & Pay"**.
-4. The system cryptographically verifies the transaction, triggers celebratory confetti, and automatically unlocks the e-book inside your **My Library** dashboard.
+1. Browse any computer science subject track (DSA, OS, DBMS, Networks).
+2. Complete interactive lessons and test your knowledge with module quizzes.
+3. Earn official academic certificates with scannable QR codes and permanent online verification URLs.
+4. Download high-resolution A4 landscape PDF credentials directly for resumes and LinkedIn.
 
 ---
 
 ## 🛡️ Security Architecture
 
-1. **Stateless JWT**: Spring Security filter validates JWT tokens on private routes (`/api/orders/**`, `/api/instructor/**`, `/api/admin/**`).
-2. **Private PDF Storage**: PDF files are never exposed to public URLs. Downloads require purchase ownership checks and generate time-limited signed tokens.
-3. **DRM Stamping**: In-app reader embeds student registration email watermarks to deter piracy.
+1. **Stateless JWT**: Spring Security filter validates JWT tokens on protected routes (`/api/student/**`, `/api/admin/**`).
+2. **Permanent Credential Registry**: Public verification system with unique cryptographic IDs and QR codes.
 
 ---
 
@@ -90,24 +89,23 @@ The top navbar includes an instant **Demo Role Switcher** so you can test all 3 
 CodeOrbit/
 ├── frontend/
 │   ├── src/
-│   │   ├── components/       # Navbar, Footer, EbookCard, CategoryPills, PdfPreviewModal, CartDrawer, RazorpayCheckoutModal
-│   │   ├── context/          # AuthContext, CartContext, LibraryContext
-│   │   ├── data/             # Curated CSE/IT mock data & categories
-│   │   ├── pages/            # Home, Catalog, Detail, Library, Reader, Dashboards, Auth
-│   │   ├── index.css         # Custom tokens, gradients, animations
+│   │   ├── components/       # Navbar, Footer, OfficialCertificateFrame, etc.
+│   │   ├── context/          # AuthContext, LearningProgressContext
+│   │   ├── pages/            # Home, Courses, Detail, LessonReader, QuizPlayer, CertificateVerify, Dashboards
+│   │   ├── index.css         # Custom tokens, gradients, animations, print layout
 │   │   └── App.jsx           # Client routes
 │   └── package.json
 └── backend/
     ├── src/main/java/com/codeorbit/
-    │   ├── config/           # SecurityConfig, JwtAuthFilter, JwtUtils, DataInitializer
-    │   ├── controller/       # AuthController, EbookController, OrderController, InstructorController, AdminController
+    │   ├── config/           # SecurityConfig, JwtAuthFilter, JwtUtils
+    │   ├── controller/       # AuthController, CourseController, StudentLearningController, CertificateVerificationController
     │   ├── dto/              # Request / Response payloads
-    │   ├── entity/           # User, Role, Category, Ebook, Chapter, Order, OrderItem, Review
-    │   ├── repository/       # JPA Repositories with custom query methods
-    │   └── service/          # AuthService, EbookService, OrderService, RazorpayService, StorageService
+    │   ├── entity/           # User, Role, Course, Lesson, Quiz, Certificate
+    │   ├── repository/       # JPA Repositories
+    │   └── service/          # AuthService, CourseService, CertificateService
     ├── src/main/resources/
     │   ├── application.yml   # Server & DB configurations
-    │   └── schema.sql        # MySQL 8.0 DDL table scripts
+    │   └── db/migration/     # Flyway SQL migrations
     └── pom.xml
 ```
 

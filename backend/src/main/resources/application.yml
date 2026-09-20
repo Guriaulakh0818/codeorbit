@@ -29,16 +29,12 @@ app:
   jwt:
     secret: ${JWT_SECRET:CodeOrbitSecureDefaultSecretKeyForJwtSigningMustBeAtLeast256BitsLong2026!}
     expiration-ms: ${JWT_EXPIRATION_MS:86400000}
-  razorpay:
-    key-id: ${RAZORPAY_KEY_ID:rzp_test_Tdcey9J28qwa6k}
-    key-secret: ${RAZORPAY_KEY_SECRET:CaoFenS2A7RPK3LIywV340Bd}
-    webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:rzp_webhook_secret_placeholder789}
   admin:
     bootstrap:
       enabled: ${ADMIN_BOOTSTRAP_ENABLED:false}
       email: ${ADMIN_BOOTSTRAP_EMAIL:admin@codeorbit.dev}
       password: ${ADMIN_BOOTSTRAP_PASSWORD:Admin@CodeOrbit2026!}
-      name: ${ADMIN_BOOTSTRAP_NAME:CodeOrbit Store Admin}
+      name: ${ADMIN_BOOTSTRAP_NAME:CodeOrbit Academy Admin}
 
 codeorbit:
   seed-demo-data: ${SEED_DEMO_DATA:true}

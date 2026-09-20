@@ -29,6 +29,7 @@ import { TutorialSidebar } from '../components/tutorial/TutorialSidebar';
 import { TableOfContents } from '../components/tutorial/TableOfContents';
 import { LanguageSelector } from '../components/LanguageSelector';
 import { translateToHinglish } from '../utils/hinglishTranslator';
+import confetti from 'canvas-confetti';
 
 export const LessonReaderPage = () => {
   const { courseSlug, lessonSlug } = useParams();
@@ -118,7 +119,29 @@ export const LessonReaderPage = () => {
   const prevLesson = currentIndex > 0 ? allLessons[currentIndex - 1] : null;
   const nextLesson = currentIndex >= 0 && currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1] : null;
 
-  const isCompleted = lesson ? isLessonCompleted(lesson.id) : false;
+  const isCompleted = lesson
+    ? (isLessonCompleted(lesson.id) || isLessonCompleted(lesson.slug) || (lessonSlug && isLessonCompleted(lessonSlug)))
+    : (lessonSlug ? isLessonCompleted(lessonSlug) : false);
+
+  const handleToggleCompletion = async (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    
+    const target = lesson || lessonSlug;
+    if (!target) return;
+    
+    const nowCompleted = await toggleLessonCompletion(target, courseSlug, lessonSlug);
+    if (nowCompleted) {
+      try {
+        confetti({
+          particleCount: 60,
+          spread: 70,
+          origin: { y: 0.8 },
+          colors: ['#10b981', '#34d399', '#f59e0b', '#6366f1']
+        });
+      } catch (err) {}
+    }
+  };
 
   const handleShare = () => {
     if (navigator.share) {
@@ -287,14 +310,15 @@ export const LessonReaderPage = () => {
                 </div>
 
                 <button
-                  onClick={() => lesson && toggleLessonCompletion(lesson.id)}
-                  className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                  type="button"
+                  onClick={handleToggleCompletion}
+                  className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs active:scale-95 ${
                     isCompleted
-                      ? 'bg-emerald-600 text-white shadow-xs'
-                      : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300'
+                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                      : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-300'
                   }`}
                 >
-                  <CheckCircle2 className="w-4 h-4" />
+                  <CheckCircle2 className={`w-4 h-4 ${isCompleted ? 'text-white' : 'text-slate-400'}`} />
                   <span>{isCompleted ? 'Completed ✓' : 'Mark as Completed'}</span>
                 </button>
               </div>

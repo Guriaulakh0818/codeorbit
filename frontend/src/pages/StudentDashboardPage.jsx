@@ -27,9 +27,17 @@ export const StudentDashboardPage = () => {
   const { completedLessonIds, bookmarkedLessonIds, courseProgressMap } = useLearningProgress();
 
   const [activeTab, setActiveTab] = useState('courses'); // 'courses' | 'certificates' | 'profile'
-  const [courses, setCourses] = useState([]);
-  const [certificates, setCertificates] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [copiedCode, setCopiedCode] = useState(null);
+
+  const handleCopyLink = (code) => {
+    const isLocal = typeof window !== 'undefined' && window.location.hostname.includes('localhost');
+    const origin = isLocal ? window.location.origin : 'https://www.codeorbit.online';
+    const url = `${origin}/verify/${code}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopiedCode(code);
+      setTimeout(() => setCopiedCode(null), 2500);
+    });
+  };
 
   useEffect(() => {
     async function loadData() {
@@ -321,23 +329,20 @@ export const StudentDashboardPage = () => {
                       <span>{cert.issuedAt ? new Date(cert.issuedAt).toLocaleDateString() : 'Verified'}</span>
                     </div>
 
-                    <div className="flex items-center gap-3 pt-2">
+                    <div className="flex items-center gap-2.5 pt-2">
                       <Link
-                        to={`/certificates/verify/${cert.certificateCode}`}
+                        to={`/verify/${cert.certificateCode}`}
                         className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-colors shadow-2xs cursor-pointer flex-1 justify-center"
                       >
-                        <GraduationCap className="w-3.5 h-3.5" /> View & Print
+                        <GraduationCap className="w-3.5 h-3.5" /> View & Download PDF
                       </Link>
 
                       <button
-                        onClick={() => {
-                          const url = `${window.location.origin}/certificates/verify/${cert.certificateCode}`;
-                          navigator.clipboard.writeText(url);
-                          alert('Verification link copied to clipboard!');
-                        }}
-                        className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition-colors cursor-pointer"
+                        onClick={() => handleCopyLink(cert.certificateCode)}
+                        className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition-colors cursor-pointer"
+                        title="Copy live verification link for resume or recruiter"
                       >
-                        Copy Link
+                        {copiedCode === cert.certificateCode ? 'Copied!' : 'Copy Link'}
                       </button>
                     </div>
                   </div>

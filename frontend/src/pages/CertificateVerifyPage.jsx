@@ -1,30 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   ShieldCheck, 
   Search, 
-  Award, 
   CheckCircle2, 
   XCircle, 
-  Calendar, 
-  BookOpen, 
-  ExternalLink, 
   AlertCircle, 
   RefreshCw, 
-  ArrowLeft,
-  Copy,
-  Check
+  ArrowLeft, 
+  Copy, 
+  Check, 
+  Printer, 
+  Download, 
+  Share2, 
+  ExternalLink, 
+  BookOpen,
+  QrCode,
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 import { certificateApi } from '../services/certificateApi';
 import { SeoHead } from '../components/seo/SeoHead';
+import { OfficialCertificateFrame } from '../components/certificate/OfficialCertificateFrame';
 
 export const CertificateVerifyPage = () => {
   const { certificateCode } = useParams();
   const navigate = useNavigate();
+  const certificateRef = useRef(null);
 
   const [inputCode, setInputCode] = useState(certificateCode || '');
   const [cert, setCert] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
   const [error, setError] = useState(null);
   const [is404, setIs404] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -68,25 +75,100 @@ export const CertificateVerifyPage = () => {
     }
   };
 
+  const getVerifyUrl = () => {
+    const code = cert?.certificateCode || inputCode.trim();
+    if (typeof window !== 'undefined' && window.location.origin) {
+      const isLocal = window.location.hostname.includes('localhost');
+      const origin = isLocal ? window.location.origin : 'https://www.codeorbit.online';
+      return `${origin}/verify/${code}`;
+    }
+    return `https://www.codeorbit.online/verify/${code}`;
+  };
+
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href).then(() => {
+    const link = getVerifyUrl();
+    navigator.clipboard.writeText(link).then(() => {
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), 2500);
     });
   };
 
+  const handleDownloadPdf = async () => {
+    if (!cert || !certificateRef.current) return;
+    setDownloadingPdf(true);
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      const { jsPDF } = await import('jspdf');
+
+      const element = certificateRef.current;
+
+      const canvas = await html2canvas(element, {
+        scale: 2.5,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+
+      const renderWidth = imgWidth * ratio;
+      const renderHeight = imgHeight * ratio;
+      const marginX = (pdfWidth - renderWidth) / 2;
+      const marginY = (pdfHeight - renderHeight) / 2;
+
+      pdf.addImage(imgData, 'PNG', marginX, marginY, renderWidth, renderHeight, undefined, 'FAST');
+      
+      const sanitizedName = (cert.studentFullName || 'Student').replace(/[^a-zA-Z0-9]/g, '_');
+      const sanitizedCode = (cert.certificateCode || 'CERT').replace(/[^a-zA-Z0-9]/g, '_');
+      pdf.save(`CodeOrbit_Certificate_${sanitizedName}_${sanitizedCode}.pdf`);
+    } catch (err) {
+      console.error('Failed to generate PDF automatically, falling back to print dialog:', err);
+      window.print();
+    } finally {
+      setDownloadingPdf(false);
+    }
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleLinkedInShare = () => {
+    if (!cert) return;
+    const certUrl = getVerifyUrl();
+    const certName = encodeURIComponent(cert.courseTitle);
+    const orgName = encodeURIComponent('CodeOrbit');
+    const certId = encodeURIComponent(cert.certificateCode);
+    
+    const linkedinUrl = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${certName}&organizationName=${orgName}&certUrl=${encodeURIComponent(certUrl)}&certId=${certId}`;
+    window.open(linkedinUrl, '_blank', 'noopener,noreferrer');
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 py-10 px-4 sm:px-6 lg:px-8 flex flex-col selection:bg-emerald-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-800 py-8 px-4 sm:px-6 lg:px-8 flex flex-col selection:bg-emerald-500 selection:text-white">
       <SeoHead
-        title="Verify Certificate — CodeOrbit"
-        description="Verify the authenticity of computer science course completion credentials issued by CodeOrbit."
-        canonicalUrl="https://www.codeorbit.online/certificates/verify"
+        title={cert ? `${cert.studentFullName} — ${cert.courseTitle} Certificate | CodeOrbit` : 'Verify Certificate — CodeOrbit'}
+        description={cert ? `Official verified certificate of completion awarded to ${cert.studentFullName} for ${cert.courseTitle}. Verification ID: ${cert.certificateCode}.` : 'Verify the authenticity of computer science course completion credentials issued by CodeOrbit.'}
+        canonicalUrl={`https://www.codeorbit.online/certificates/verify/${certificateCode || ''}`}
       />
 
-      <div className="max-w-3xl mx-auto w-full space-y-8 flex-1">
+      <div className="max-w-6xl mx-auto w-full space-y-8 flex-1">
         
-        {/* Navigation Bar */}
-        <div className="flex items-center justify-between">
+        {/* Navigation Bar (Hidden during Print) */}
+        <div className="no-print flex items-center justify-between">
           <Link
             to="/courses"
             className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-emerald-700 transition-colors bg-white px-3.5 py-1.5 rounded-xl border border-slate-200 shadow-2xs cursor-pointer"
@@ -94,25 +176,25 @@ export const CertificateVerifyPage = () => {
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Subject Tracks
           </Link>
           <span className="text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-            <ShieldCheck className="w-4 h-4 text-emerald-600" /> Public Registry
+            <ShieldCheck className="w-4 h-4 text-emerald-600" /> Public Registry & Cryptographic Verification
           </span>
         </div>
 
-        {/* Header Title */}
-        <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold uppercase tracking-wider">
-            <ShieldCheck className="w-3.5 h-3.5" /> CodeOrbit Official Credential Verification
+        {/* Header Title (Hidden during Print) */}
+        <div className="no-print text-center space-y-3">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold uppercase tracking-wider">
+            <ShieldCheck className="w-3.5 h-3.5" /> CodeOrbit Official Credential Registry
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-            Certificate Verification System
+            Academic Certificate Verification
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 max-w-xl mx-auto leading-relaxed">
-            Verify the authenticity of computer science course completion credentials issued by CodeOrbit.
+            Verify the authenticity of computer science course completion diplomas and professional credentials issued by CodeOrbit.
           </p>
         </div>
 
-        {/* Verification Lookup Form */}
-        <form onSubmit={handleSearchSubmit} className="relative max-w-xl mx-auto">
+        {/* Verification Lookup Form (Hidden during Print) */}
+        <form onSubmit={handleSearchSubmit} className="no-print relative max-w-xl mx-auto">
           <Search className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
@@ -132,7 +214,7 @@ export const CertificateVerifyPage = () => {
 
         {/* Loading State */}
         {loading && (
-          <div className="bg-white border border-slate-200 rounded-3xl p-8 sm:p-12 space-y-4 animate-pulse max-w-xl mx-auto text-center shadow-xs">
+          <div className="no-print bg-white border border-slate-200 rounded-3xl p-8 sm:p-12 space-y-4 animate-pulse max-w-xl mx-auto text-center shadow-xs">
             <div className="w-12 h-12 bg-slate-100 rounded-full mx-auto" />
             <div className="h-6 bg-slate-100 rounded w-1/2 mx-auto" />
             <div className="h-10 bg-slate-100 rounded w-3/4 mx-auto" />
@@ -141,7 +223,7 @@ export const CertificateVerifyPage = () => {
 
         {/* 404 Not Found State */}
         {!loading && is404 && (
-          <div className="bg-white border border-rose-200 rounded-3xl p-8 text-center space-y-4 max-w-xl mx-auto shadow-xs animate-in fade-in duration-200">
+          <div className="no-print bg-white border border-rose-200 rounded-3xl p-8 text-center space-y-4 max-w-xl mx-auto shadow-xs animate-in fade-in duration-200">
             <div className="w-14 h-14 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center mx-auto border border-rose-200">
               <XCircle className="w-7 h-7" />
             </div>
@@ -154,7 +236,7 @@ export const CertificateVerifyPage = () => {
 
         {/* Error State */}
         {!loading && !is404 && error && (
-          <div className="bg-rose-50 border border-rose-200 rounded-3xl p-8 text-center space-y-4 max-w-xl mx-auto">
+          <div className="no-print bg-rose-50 border border-rose-200 rounded-3xl p-8 text-center space-y-4 max-w-xl mx-auto">
             <div className="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto border border-rose-200">
               <AlertCircle className="w-6 h-6" />
             </div>
@@ -169,110 +251,137 @@ export const CertificateVerifyPage = () => {
           </div>
         )}
 
-        {/* Verified Credential Card */}
+        {/* Verified Certificate Section */}
         {!loading && !is404 && !error && cert && (
-          <div className="relative overflow-hidden rounded-3xl bg-white border border-emerald-200 p-8 sm:p-12 shadow-sm space-y-8 animate-in fade-in duration-300 max-w-2xl mx-auto">
+          <div className="space-y-6 animate-in fade-in duration-300">
             
-            {/* Top Seal & Validity Badge */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+            {/* Top Verification Status & Download Toolbar (Hidden during Print) */}
+            <div className="no-print bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col lg:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center shadow-2xs flex-shrink-0">
-                  <Award className="w-6 h-6 text-emerald-700" />
+                <div className="w-11 h-11 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center flex-shrink-0 shadow-2xs">
+                  <CheckCircle2 className="w-6 h-6 text-emerald-600" />
                 </div>
                 <div>
-                  <div className="text-xs text-slate-500 uppercase tracking-wider font-bold">CodeOrbit Open CS Academy</div>
-                  <div className="text-sm font-extrabold text-slate-900">Verified Certificate of Completion</div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-extrabold text-slate-900">Authentic CodeOrbit Credential</span>
+                    <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full">
+                      VERIFIED & VALID
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 font-mono mt-0.5">
+                    Code: <strong className="text-slate-800">{cert.certificateCode}</strong> • Recipient: <strong className="text-slate-800">{cert.studentFullName}</strong>
+                  </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
-                  cert.valid
-                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                    : 'bg-rose-50 text-rose-800 border-rose-200'
-                }`}>
-                  {cert.valid ? (
+              {/* Action Toolbar */}
+              <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto justify-end">
+                {/* 1-Click PDF Download Button */}
+                <button
+                  onClick={handleDownloadPdf}
+                  disabled={downloadingPdf}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer flex-1 sm:flex-initial"
+                  title="Download high-resolution official PDF certificate"
+                >
+                  {downloadingPdf ? (
                     <>
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> VALID CREDENTIAL
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Generating PDF...</span>
                     </>
                   ) : (
                     <>
-                      <XCircle className="w-3.5 h-3.5 text-rose-600" /> {cert.status || 'REVOKED'}
+                      <Download className="w-4 h-4" />
+                      <span>Download PDF</span>
                     </>
                   )}
-                </span>
+                </button>
+
+                {/* Print Button */}
+                <button
+                  onClick={handlePrint}
+                  className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition-colors cursor-pointer"
+                  title="Print certificate or save via browser print dialog"
+                >
+                  <Printer className="w-4 h-4 text-slate-600" />
+                  <span className="hidden sm:inline">Print</span>
+                </button>
+
+                {/* Copy Verification Link for CV / Resume */}
+                <button
+                  onClick={handleCopyLink}
+                  className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition-colors cursor-pointer"
+                  title="Copy permanent verification URL for recruiters and resumes"
+                >
+                  {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-slate-500" />}
+                  <span>{copied ? 'Link Copied!' : 'Copy Link for CV'}</span>
+                </button>
+
+                {/* Add to LinkedIn Button */}
+                <button
+                  onClick={handleLinkedInShare}
+                  className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-[#0077B5] hover:bg-[#005f93] text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer"
+                  title="Add this verified certificate to your LinkedIn profile certifications"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>Add to LinkedIn</span>
+                </button>
               </div>
             </div>
 
-            {/* Recipient Details */}
-            <div className="space-y-6 text-center sm:text-left">
-              <div className="space-y-1">
-                <span className="text-xs text-slate-500 font-medium">Awarded To</span>
-                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                  {cert.studentFullName}
-                </h2>
-              </div>
+            {/* Official Academic Certificate Frame */}
+            <OfficialCertificateFrame ref={certificateRef} cert={cert} />
 
-              <div className="space-y-1">
-                <span className="text-xs text-slate-500 font-medium">For Successfully Completing</span>
-                <h3 className="text-lg sm:text-xl font-bold text-emerald-700">
-                  {cert.courseTitle}
+            {/* Recruiter & Resume Integration Guide (Hidden during Print) */}
+            <div className="no-print bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  How Recruiters & Employers Verify This Certificate
                 </h3>
+                <span className="text-[11px] font-mono text-slate-500 font-medium">100% Cryptographically Verifiable</span>
               </div>
 
-              {/* Certificate Metadata Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-slate-100">
-                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
-                  <span className="text-[11px] text-slate-500 block mb-0.5">Verification Code</span>
-                  <span className="text-xs font-mono font-bold text-emerald-800 select-all">
-                    {cert.certificateCode}
-                  </span>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-600">
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                  <div className="flex items-center gap-2 text-slate-900 font-bold">
+                    <QrCode className="w-4 h-4 text-emerald-600" />
+                    <span>1. Instant QR Code Scan</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed">
+                    Recruiters can scan the QR code printed on the bottom right of the certificate with any phone camera to immediately open the authentic registry record.
+                  </p>
                 </div>
 
-                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
-                  <span className="text-[11px] text-slate-500 block mb-0.5">Issue Date</span>
-                  <span className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                    {cert.issuedAt ? new Date(cert.issuedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'Verified'}
-                  </span>
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                  <div className="flex items-center gap-2 text-slate-900 font-bold">
+                    <Copy className="w-4 h-4 text-emerald-600" />
+                    <span>2. Direct Resume URL</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed">
+                    Add the live verification URL <code className="bg-white px-1.5 py-0.5 rounded border border-slate-200 text-emerald-800 font-bold break-all">{getVerifyUrl()}</code> directly to your Resume / CV.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                  <div className="flex items-center gap-2 text-slate-900 font-bold">
+                    <Download className="w-4 h-4 text-emerald-600" />
+                    <span>3. High-Res PDF Export</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed">
+                    Download the A4 Landscape PDF using the button above and attach it to job applications or portfolio repositories.
+                  </p>
                 </div>
               </div>
-            </div>
-
-            {/* Revocation notice if invalid */}
-            {!cert.valid && cert.revocationReason && (
-              <div className="bg-rose-50 border border-rose-200 p-4 rounded-2xl text-xs text-rose-800">
-                <span className="font-bold block mb-0.5">Revocation Notice:</span>
-                <p>{cert.revocationReason}</p>
-              </div>
-            )}
-
-            {/* Actions & Share */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-6 border-t border-slate-100">
-              <button
-                onClick={handleCopyLink}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition-colors cursor-pointer"
-              >
-                {copied ? (
-                  <>
-                    <Check className="w-3.5 h-3.5 text-emerald-600" />
-                    <span className="text-emerald-700 font-bold">Link Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Copy Verification Link</span>
-                  </>
-                )}
-              </button>
 
               {cert.courseSlug && (
-                <Link
-                  to={`/courses/${cert.courseSlug}`}
-                  className="inline-flex items-center gap-1.5 text-xs text-emerald-700 hover:text-emerald-800 font-semibold cursor-pointer"
-                >
-                  <BookOpen className="w-3.5 h-3.5" /> View Course Syllabus <ExternalLink className="w-3 h-3" />
-                </Link>
+                <div className="pt-2 flex justify-end">
+                  <Link
+                    to={`/courses/${cert.courseSlug}`}
+                    className="inline-flex items-center gap-1.5 text-xs text-emerald-700 hover:text-emerald-800 font-semibold"
+                  >
+                    <BookOpen className="w-3.5 h-3.5" /> View Full Course Curriculum & Syllabus <ExternalLink className="w-3 h-3" />
+                  </Link>
+                </div>
               )}
             </div>
 

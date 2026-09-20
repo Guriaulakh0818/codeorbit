@@ -37,7 +37,4 @@ services:
         sync: false
       - key: DB_PASSWORD
         sync: false
-      - key: RAZORPAY_KEY_ID
-        sync: false
-      - key: RAZORPAY_KEY_SECRET
-        sync: false
+

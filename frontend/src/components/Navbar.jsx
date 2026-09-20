@@ -24,7 +24,7 @@ import { useAuth } from '../context/AuthContext';
 import { LanguageSelector } from './LanguageSelector';
 
 export const Navbar = () => {
-  const { user, logout, isAuthenticated, isAdmin } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [subjectsDropdownOpen, setSubjectsDropdownOpen] = useState(false);
@@ -172,16 +172,6 @@ export const Navbar = () => {
 
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
-                {isAdmin && (
-                  <Link
-                    to="/admin"
-                    className="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 hover:bg-amber-100 text-xs font-bold flex items-center gap-1.5 transition-all"
-                  >
-                    <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
-                    <span className="hidden sm:inline">Admin</span>
-                  </Link>
-                )}
-
                 <Link
                   to="/student/dashboard"
                   className="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-200/70 text-xs font-medium flex items-center gap-1.5 transition-colors"

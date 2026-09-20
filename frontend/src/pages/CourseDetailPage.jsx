@@ -123,19 +123,19 @@ export const CourseDetailPage = () => {
     }));
   };
 
-  // Calculate totals
-  const totalLessons = (course?.modules || []).reduce(
-    (acc, m) => acc + (m.lessons?.length || 0), 
-    0
-  );
-  const totalQuizzes = (course?.modules || []).reduce(
-    (acc, m) => acc + (m.quizzes?.length || 0), 
-    0
-  );
+  // Calculate dynamic local completed lessons in this course
+  const locallyCompletedCount = useMemo(() => {
+    if (!course || !course.modules) return 0;
+    return course.modules.reduce((acc, m) => {
+      return acc + (m.lessons || []).filter((l) => isLessonCompleted(l.id) || isLessonCompleted(l.slug)).length;
+    }, 0);
+  }, [course, isLessonCompleted]);
 
   const progressData = courseProgressMap[courseSlug];
-  const completionPercentage = progressData?.completionPercentage || 0;
-  const completedLessonsCount = progressData?.completedLessons || 0;
+  const completedLessonsCount = Math.max(progressData?.completedLessons || 0, locallyCompletedCount);
+  const completionPercentage = totalLessons > 0 
+    ? Math.round((completedLessonsCount / totalLessons) * 100) 
+    : (progressData?.completionPercentage || 0);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 py-8 px-4 sm:px-6 lg:px-8 flex flex-col selection:bg-emerald-500 selection:text-white">
@@ -452,8 +452,8 @@ export const CourseDetailPage = () => {
                         <div className="px-5 pb-5 pt-1 space-y-2.5 border-t border-slate-100 bg-slate-50/50">
                           {/* Lessons List */}
                           {(module.lessons || []).map((lesson, lIdx) => {
-                            const completed = isLessonCompleted(lesson.id);
-                            const bookmarked = isLessonBookmarked(lesson.id);
+                            const completed = isLessonCompleted(lesson.id) || isLessonCompleted(lesson.slug);
+                            const bookmarked = isLessonBookmarked(lesson.id) || isLessonBookmarked(lesson.slug);
 
                             return (
                               <Link

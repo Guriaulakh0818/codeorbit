@@ -59,3 +59,79 @@
   border: 1px solid #e2e8f0;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
 }
+
+/* Certificate Typography & Styling Utilities */
+.font-cinzel {
+  font-family: 'Cinzel', Georgia, serif;
+}
+
+.font-playfair {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.font-signature {
+  font-family: 'Great Vibes', cursive;
+}
+
+/* Certificate Guilloche & Security Pattern Background */
+.bg-guilloche {
+  background-color: #ffffff;
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.05) 0%, transparent 60%),
+    repeating-linear-gradient(45deg, rgba(203, 213, 225, 0.08) 0px, rgba(203, 213, 225, 0.08) 1px, transparent 1px, transparent 12px),
+    repeating-linear-gradient(-45deg, rgba(203, 213, 225, 0.08) 0px, rgba(203, 213, 225, 0.08) 1px, transparent 1px, transparent 12px);
+}
+
+/* Gold Metallic Gradients */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #9a7218 0%, #c59b27 30%, #e6ca65 50%, #c59b27 70%, #856112 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.border-gold-gradient {
+  border-image: linear-gradient(135deg, #c59b27, #fef08a, #c59b27, #9a7218) 1;
+}
+
+/* Print Styles for Real Diploma / Certificate PDF Downloads */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+
+  body {
+    background: #ffffff !important;
+    background-image: none !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide non-printable interface */
+  nav, header, footer, .no-print, form, aside, button {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .certificate-print-frame {
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+    width: 100vw !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    padding: 1.5rem !important;
+    page-break-inside: avoid !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+  }
+}
+
