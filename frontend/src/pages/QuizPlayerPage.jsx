@@ -19,7 +19,7 @@ import {
   Sparkles,
   Check
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { triggerConfetti } from '../utils/confettiHelper';
 import { coursesApi } from '../services/coursesApi';
 import { studentLearningApi } from '../services/studentLearningApi';
 import { useAuth } from '../context/AuthContext';
@@ -87,7 +87,7 @@ export const QuizPlayerPage = () => {
   // Trigger celebratory confetti and auto-claim certificate on passing
   useEffect(() => {
     if (submissionResult && submissionResult.passed) {
-      confetti({
+      triggerConfetti({
         particleCount: 120,
         spread: 80,
         origin: { y: 0.5 }

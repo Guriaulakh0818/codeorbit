@@ -25,7 +25,7 @@ import { studentLearningApi } from '../services/studentLearningApi';
 import { useLearningProgress } from '../context/LearningProgressContext';
 import { SeoHead } from '../components/seo/SeoHead';
 import { AdSlot } from '../components/ads/AdSlot';
-import confetti from 'canvas-confetti';
+import { triggerConfetti } from '../utils/confettiHelper';
 
 export const CourseDetailPage = () => {
   const { courseSlug } = useParams();
@@ -54,7 +54,7 @@ export const CourseDetailPage = () => {
     try {
       const res = await studentLearningApi.claimCertificate(courseSlug);
       if (res.success && res.data) {
-        confetti({
+        triggerConfetti({
           particleCount: 120,
           spread: 80,
           origin: { y: 0.6 }

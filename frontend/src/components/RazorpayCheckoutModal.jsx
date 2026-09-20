@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, ShieldCheck, CheckCircle2, AlertCircle, Loader2, Sparkles, ExternalLink, RefreshCw, Smartphone, CreditCard } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { triggerConfetti } from '../utils/confettiHelper';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -21,18 +21,6 @@ export const RazorpayCheckoutModal = ({ isOpen, onClose, singleEbook = null }) =
   const totalAmount = singleEbook ? singleEbook.price : finalTotal;
 
   if (!isOpen || itemsToBuy.length === 0) return null;
-
-  const triggerConfetti = () => {
-    try {
-      confetti({
-        particleCount: 120,
-        spread: 80,
-        origin: { y: 0.6 }
-      });
-    } catch (e) {
-      // Confetti fallback
-    }
-  };
 
   const handleStartCheckout = async () => {
     if (!isAuthenticated) {
