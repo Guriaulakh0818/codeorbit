@@ -17,9 +17,11 @@ import {
   Database,
   Network,
   Server,
-  Code2
+  Code2,
+  Languages
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { LanguageSelector } from './LanguageSelector';
 
 export const Navbar = () => {
   const { user, logout, isAuthenticated, isAdmin } = useAuth();
@@ -38,26 +40,26 @@ export const Navbar = () => {
   };
 
   const csSubjects = [
-    { name: 'Data Structures & Algorithms', slug: 'dsa', icon: Terminal, color: 'text-sky-400' },
-    { name: 'Operating Systems', slug: 'operating-systems', icon: Cpu, color: 'text-amber-400' },
-    { name: 'Database Management (DBMS)', slug: 'dbms', icon: Database, color: 'text-emerald-400' },
-    { name: 'Computer Networks', slug: 'computer-networks', icon: Network, color: 'text-indigo-400' },
-    { name: 'System Design & Distributed Systems', slug: 'system-design-track-2026', icon: Server, color: 'text-purple-400' },
-    { name: 'Core Java & Python Programming', slug: 'dsa', icon: Code2, color: 'text-rose-400' }
+    { name: 'Data Structures & Algorithms', slug: 'dsa', icon: Terminal, color: 'text-sky-500' },
+    { name: 'Operating Systems', slug: 'operating-systems', icon: Cpu, color: 'text-amber-500' },
+    { name: 'Database Management (DBMS)', slug: 'dbms', icon: Database, color: 'text-emerald-500' },
+    { name: 'Computer Networks', slug: 'computer-networks', icon: Network, color: 'text-indigo-500' },
+    { name: 'System Design & Distributed Systems', slug: 'system-design-track-2026', icon: Server, color: 'text-purple-500' },
+    { name: 'Core Java & Python Programming', slug: 'dsa', icon: Code2, color: 'text-rose-500' }
   ];
 
   return (
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-4">
+        <div className="flex items-center justify-between h-16 gap-3">
           
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 group flex-shrink-0">
+          <Link to="/" className="flex items-center gap-2.5 group flex-shrink-0">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-all duration-300">
               <Terminal className="w-5 h-5 text-white" />
             </div>
             <div className="flex flex-col">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <span className="font-extrabold text-lg text-slate-900 tracking-tight group-hover:text-emerald-600 transition-colors">
                   Code<span className="text-emerald-600">Orbit</span>
                 </span>
@@ -72,12 +74,12 @@ export const Navbar = () => {
           </Link>
 
           {/* Search Bar (Desktop) */}
-          <form onSubmit={handleSearchSubmit} className="hidden md:flex flex-1 max-w-md mx-4">
+          <form onSubmit={handleSearchSubmit} className="hidden md:flex flex-1 max-w-sm lg:max-w-md mx-2">
             <div className="relative w-full group">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none group-focus-within:text-emerald-600 transition-colors" />
               <input
                 type="text"
-                placeholder="Search DSA, OS, DBMS, System Design topics..."
+                placeholder="Search DSA, OS, DBMS, System Design..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-slate-100/90 border border-slate-200 hover:border-slate-300 focus:bg-white focus:border-emerald-500 rounded-xl pl-10 pr-12 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
@@ -92,7 +94,7 @@ export const Navbar = () => {
           <nav className="hidden lg:flex items-center gap-1">
             <Link
               to="/"
-              className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-emerald-600 hover:bg-slate-100 transition-colors"
+              className="px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-emerald-600 hover:bg-slate-100 transition-colors"
             >
               Home
             </Link>
@@ -104,7 +106,7 @@ export const Navbar = () => {
               onMouseLeave={() => setSubjectsDropdownOpen(false)}
             >
               <button
-                className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-emerald-600 hover:bg-slate-100 transition-colors flex items-center gap-1.5"
+                className="px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-emerald-600 hover:bg-slate-100 transition-colors flex items-center gap-1.5 cursor-pointer"
               >
                 <span>Tutorials</span>
                 <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${subjectsDropdownOpen ? 'rotate-180 text-emerald-600' : ''}`} />
@@ -148,37 +150,41 @@ export const Navbar = () => {
 
             <Link
               to="/courses"
-              className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-emerald-600 hover:bg-slate-100 transition-colors"
+              className="px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-emerald-600 hover:bg-slate-100 transition-colors"
             >
               All Tracks
             </Link>
 
             <Link
               to="/certificates/verify"
-              className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-emerald-600 hover:bg-slate-100 transition-colors flex items-center gap-1.5"
+              className="px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-emerald-600 hover:bg-slate-100 transition-colors flex items-center gap-1.5"
             >
               <Award className="w-3.5 h-3.5 text-amber-500" />
               <span>Verify Cert</span>
             </Link>
           </nav>
 
-          {/* Right Action Icons & User Menu */}
-          <div className="flex items-center gap-3">
+          {/* Right Action: Language Selector + User Menu */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            
+            {/* Global Language Selector */}
+            <LanguageSelector variant="navbar" />
+
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
                 {isAdmin && (
                   <Link
-                    to="/admin/dashboard"
+                    to="/admin"
                     className="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 hover:bg-amber-100 text-xs font-bold flex items-center gap-1.5 transition-all"
                   >
                     <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
-                    <span className="hidden sm:inline">Admin Panel</span>
+                    <span className="hidden sm:inline">Admin</span>
                   </Link>
                 )}
 
                 <Link
                   to="/student/dashboard"
-                  className="px-3.5 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-200/70 text-xs font-medium flex items-center gap-1.5 transition-colors"
+                  className="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-200/70 text-xs font-medium flex items-center gap-1.5 transition-colors"
                 >
                   <User className="w-3.5 h-3.5 text-emerald-600" />
                   <span className="hidden sm:inline">{user?.fullName || 'Profile'}</span>
@@ -187,22 +193,22 @@ export const Navbar = () => {
                 <button
                   onClick={logout}
                   title="Sign Out"
-                  className="p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                  className="p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2">
                 <Link
                   to="/login"
-                  className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-emerald-600 hover:bg-slate-100 transition-colors"
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-emerald-600 hover:bg-slate-100 transition-colors"
                 >
                   Log in
                 </Link>
                 <Link
                   to="/register"
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-all hover:-translate-y-0.5"
+                  className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-2xs transition-all hover:-translate-y-0.5 cursor-pointer"
                 >
                   Sign up Free
                 </Link>
@@ -212,7 +218,7 @@ export const Navbar = () => {
             {/* Mobile Menu Toggle Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl text-slate-600 hover:text-slate-900 bg-slate-100 border border-slate-200"
+              className="lg:hidden p-2 rounded-xl text-slate-600 hover:text-slate-900 bg-slate-100 border border-slate-200 cursor-pointer"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -234,6 +240,14 @@ export const Navbar = () => {
                 className="w-full bg-slate-100 border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500"
               />
             </form>
+
+            <div className="flex items-center justify-between p-3 rounded-xl bg-slate-100 border border-slate-200">
+              <span className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                <Languages className="w-4 h-4 text-emerald-600" />
+                Reading Language:
+              </span>
+              <LanguageSelector variant="pill" />
+            </div>
 
             <nav className="flex flex-col space-y-1 text-xs font-semibold">
               <Link
@@ -265,3 +279,5 @@ export const Navbar = () => {
     </header>
   );
 };
+
+export default Navbar;

@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext';
 import { LearningProgressProvider } from './context/LearningProgressContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
@@ -133,9 +134,11 @@ export function App() {
   return (
     <Router>
       <AuthProvider>
-        <LearningProgressProvider>
-          <MainLayout />
-        </LearningProgressProvider>
+        <LanguageProvider>
+          <LearningProgressProvider>
+            <MainLayout />
+          </LearningProgressProvider>
+        </LanguageProvider>
       </AuthProvider>
     </Router>
   );

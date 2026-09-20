@@ -20,24 +20,26 @@ import {
 import { coursesApi } from '../services/coursesApi';
 import { studentLearningApi } from '../services/studentLearningApi';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useLearningProgress } from '../context/LearningProgressContext';
 import { MarkdownRenderer } from '../components/MarkdownRenderer';
 import { SeoHead } from '../components/seo/SeoHead';
 import { AdSlot } from '../components/ads/AdSlot';
 import { TutorialSidebar } from '../components/tutorial/TutorialSidebar';
 import { TableOfContents } from '../components/tutorial/TableOfContents';
+import { LanguageSelector } from '../components/LanguageSelector';
 
 export const LessonReaderPage = () => {
   const { courseSlug, lessonSlug } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { language, setLanguage, isHinglish } = useLanguage();
   const { isLessonCompleted, isCourseBookmarked, toggleLessonCompletion, toggleCourseBookmark } = useLearningProgress();
 
   const [course, setCourse] = useState(null);
   const [lesson, setLesson] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [language, setLanguage] = useState('en'); // 'en' | 'hinglish'
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -57,7 +59,7 @@ export const LessonReaderPage = () => {
     loadCourse();
   }, [courseSlug]);
 
-  // Load lesson content in selected language
+  // Load lesson content in selected language (syncs with global LanguageContext)
   useEffect(() => {
     async function loadLesson() {
       if (!courseSlug || !lessonSlug) return;
@@ -133,7 +135,7 @@ export const LessonReaderPage = () => {
         <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={() => setIsSidebarOpen(true)}
-            className="lg:hidden p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900"
+            className="lg:hidden p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 cursor-pointer"
             aria-label="Open Syllabus"
           >
             <Menu className="w-4 h-4" />
@@ -160,35 +162,13 @@ export const LessonReaderPage = () => {
 
         {/* Action Controls: Hinglish Switch & Share */}
         <div className="flex items-center gap-2">
-          {/* English / Hinglish Toggle */}
-          <div className="flex items-center bg-slate-100 border border-slate-200 rounded-xl p-0.5 shadow-2xs">
-            <button
-              onClick={() => setLanguage('en')}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
-                language === 'en'
-                  ? 'bg-emerald-600 text-white shadow-xs font-bold'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              English
-            </button>
-            <button
-              onClick={() => setLanguage('hinglish')}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
-                language === 'hinglish'
-                  ? 'bg-teal-700 text-white shadow-xs font-bold'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <span>Hinglish</span>
-              <span className="text-[10px]">🇮🇳</span>
-            </button>
-          </div>
+          {/* Global Language Selector Pill */}
+          <LanguageSelector variant="pill" />
 
           <button
             onClick={handleShare}
-            title="Share Tutorial"
-            className="p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 transition-colors"
+            title={copied ? "Link Copied!" : "Share Tutorial"}
+            className="p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 transition-colors cursor-pointer"
           >
             <Share2 className="w-4 h-4" />
           </button>
@@ -227,7 +207,7 @@ export const LessonReaderPage = () => {
               <p className="text-xs text-rose-700 max-w-md mx-auto">{error}</p>
               <Link
                 to={`/courses/${courseSlug}`}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-white transition-all"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-white transition-all cursor-pointer"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Back to Subject Syllabus</span>
@@ -246,11 +226,12 @@ export const LessonReaderPage = () => {
                     <Clock className="w-3.5 h-3.5 text-slate-400" />
                     {lesson.estimatedMinutes || 15} mins read
                   </span>
-                  {lesson.hinglishStatus && language === 'hinglish' && (
+                  {isHinglish && (
                     <>
                       <span className="text-slate-400">•</span>
-                      <span className="text-emerald-800 font-semibold text-[11px] bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                        Hinglish Edition 🇮🇳
+                      <span className="text-emerald-800 font-semibold text-[11px] bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 flex items-center gap-1">
+                        <span>Hinglish Edition</span>
+                        <span>🇮🇳</span>
                       </span>
                     </>
                   )}
@@ -283,7 +264,7 @@ export const LessonReaderPage = () => {
 
                 <button
                   onClick={() => lesson && toggleLessonCompletion(lesson.id)}
-                  className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                  className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
                     isCompleted
                       ? 'bg-emerald-600 text-white shadow-xs'
                       : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300'
@@ -356,3 +337,5 @@ export const LessonReaderPage = () => {
     </div>
   );
 };
+
+export default LessonReaderPage;
