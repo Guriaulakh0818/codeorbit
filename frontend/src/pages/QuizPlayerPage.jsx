@@ -45,6 +45,7 @@ export const QuizPlayerPage = () => {
   const [userAnswers, setUserAnswers] = useState({}); // { [questionId]: selectedOptionId }
   const [submitting, setSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState(null);
+  const [submissionResult, setSubmissionResult] = useState(null);
   // Certificate state
   const [claimedCertificate, setClaimedCertificate] = useState(null);
   const [claimingCert, setClaimingCert] = useState(false);
