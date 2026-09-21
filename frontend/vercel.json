@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/api/:match*",
-      "destination": "https://api.codeorbit.dev/api/:match*"
+      "destination": "https://codeorbit-backend-tq3l.onrender.com/api/:match*"
     },
     {
       "source": "/(.*)",

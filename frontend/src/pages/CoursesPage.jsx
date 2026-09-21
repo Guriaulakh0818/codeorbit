@@ -18,6 +18,7 @@ import {
   Code2
 } from 'lucide-react';
 import { coursesApi } from '../services/coursesApi';
+import { CURRICULUM_DATA } from '../data/curriculumData';
 import { SeoHead } from '../components/seo/SeoHead';
 import { AdSlot } from '../components/ads/AdSlot';
 
@@ -26,8 +27,14 @@ export const CoursesPage = () => {
   const initialSearch = searchParams.get('search') || '';
   const initialTrack = searchParams.get('track') || 'ALL';
 
-  const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [courses, setCourses] = useState(() => {
+    let initial = [...CURRICULUM_DATA];
+    if (initialTrack && initialTrack !== 'ALL') {
+      initial = initial.filter((c) => c.track?.toUpperCase() === initialTrack.toUpperCase());
+    }
+    return initial;
+  });
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState(initialSearch);
   const [selectedTrack, setSelectedTrack] = useState(initialTrack);
   const [totalPages, setTotalPages] = useState(1);

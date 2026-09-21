@@ -1,4 +1,4 @@
-import { API_BASE, getAuthHeaders } from './apiConfig';
+import { API_BASE, getAuthHeaders, fetchWithTimeout } from './apiConfig';
 import { CURRICULUM_DATA } from '../data/curriculumData';
 
 export const coursesApi = {
@@ -18,9 +18,9 @@ export const coursesApi = {
       params.set('page', String(page));
       params.set('size', String(size));
 
-      const res = await fetch(`${API_BASE}/courses?${params.toString()}`, {
+      const res = await fetchWithTimeout(`${API_BASE}/courses?${params.toString()}`, {
         headers: getAuthHeaders(false)
-      });
+      }, 2500);
 
       if (res.ok) {
         const json = await res.json();
@@ -70,9 +70,9 @@ export const coursesApi = {
    */
   async getCourseBySlug(slug) {
     try {
-      const res = await fetch(`${API_BASE}/courses/${encodeURIComponent(slug)}`, {
+      const res = await fetchWithTimeout(`${API_BASE}/courses/${encodeURIComponent(slug)}`, {
         headers: getAuthHeaders(false)
-      });
+      }, 2500);
 
       if (res.ok) {
         const json = await res.json();
@@ -110,11 +110,12 @@ export const coursesApi = {
       const params = new URLSearchParams();
       if (lang) params.set('lang', lang);
 
-      const res = await fetch(
+      const res = await fetchWithTimeout(
         `${API_BASE}/courses/${encodeURIComponent(courseSlug)}/lessons/${encodeURIComponent(lessonSlug)}?${params.toString()}`,
         {
           headers: getAuthHeaders(false)
-        }
+        },
+        3000
       );
 
       if (res.ok) {
@@ -186,11 +187,12 @@ export const coursesApi = {
       const params = new URLSearchParams();
       if (lang) params.set('lang', lang);
 
-      const res = await fetch(
+      const res = await fetchWithTimeout(
         `${API_BASE}/courses/${encodeURIComponent(courseSlug)}/quizzes/${encodeURIComponent(quizSlug)}?${params.toString()}`,
         {
           headers: getAuthHeaders(false)
-        }
+        },
+        3000
       );
 
       if (res.ok) {

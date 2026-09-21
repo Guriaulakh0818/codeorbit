@@ -19,3 +19,25 @@ export const getAuthHeaders = (includeJson = true) => {
   }
   return headers;
 };
+
+/**
+ * Enhanced fetch wrapper with fast timeout and AbortController to prevent long UI hangs
+ * @param {string} url 
+ * @param {RequestInit} [options={}] 
+ * @param {number} [timeoutMs=3500] 
+ * @returns {Promise<Response>}
+ */
+export const fetchWithTimeout = async (url, options = {}, timeoutMs = 3500) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+    return response;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+};

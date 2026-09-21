@@ -133,6 +133,7 @@ export const CourseDetailPage = () => {
     (acc, m) => acc + (m.quizzes?.length || 0), 
     0
   );
+  const progressData = (courseSlug && courseProgressMap?.[courseSlug]) || (course?.id && courseProgressMap?.[course.id]) || null;
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 py-8 px-4 sm:px-6 lg:px-8 flex flex-col selection:bg-emerald-500 selection:text-white">

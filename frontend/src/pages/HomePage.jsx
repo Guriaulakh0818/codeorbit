@@ -20,13 +20,14 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { coursesApi } from '../services/coursesApi';
+import { CURRICULUM_DATA } from '../data/curriculumData';
 import { SeoHead } from '../components/seo/SeoHead';
 import { AdSlot } from '../components/ads/AdSlot';
 
 export const HomePage = () => {
   const navigate = useNavigate();
-  const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [courses, setCourses] = useState(() => CURRICULUM_DATA.slice(0, 8));
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
