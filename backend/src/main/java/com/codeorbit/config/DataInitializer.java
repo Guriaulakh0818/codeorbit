@@ -150,7 +150,7 @@ public class DataInitializer implements CommandLineRunner {
         dsaCourse.setCoverImageUrl("https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=600&auto=format&fit=crop&q=80");
         dsaCourse = courseRepository.save(dsaCourse);
 
-        // 2. Module 1: Algorithmic Complexity & Foundations
+        // 2. Module 1: Algorithmic Complexity & Foundations (Beginner Level)
         CourseModule mod1 = new CourseModule(
                 dsaCourse,
                 "Module 1: Algorithmic Complexity & Foundations",
@@ -159,6 +159,7 @@ public class DataInitializer implements CommandLineRunner {
                 1,
                 PublishStatus.PUBLISHED
         );
+        mod1.setCurriculumLevel(CurriculumLevel.BEGINNER);
         mod1 = courseModuleRepository.save(mod1);
 
         // Lesson 1.1
@@ -195,16 +196,18 @@ public class DataInitializer implements CommandLineRunner {
         l2.setCodeSnippetPython("def two_sum(numbers, target):\n    left, right = 0, len(numbers) - 1\n    while left < right:\n        curr_sum = numbers[left] + numbers[right]\n        if curr_sum == target:\n            return [left + 1, right + 1]\n        elif curr_sum < target:\n            left += 1\n        else:\n            right -= 1\n    return []");
         lessonRepository.save(l2);
 
-        // 3. Module 1 Quiz
+        // 3. Module 1 Quiz (10-Question Module Quiz, 75% Passing Threshold)
         Quiz q1 = new Quiz(
                 mod1,
                 "Module 1 Assessment: Complexity & Two Pointers",
                 "module-1-quiz",
-                "Test your understanding of algorithmic complexity and the two-pointer technique.",
-                80,
+                "Test your understanding of algorithmic complexity and the two-pointer technique (10 Questions, 75% to pass).",
+                75,
                 null,
                 PublishStatus.PUBLISHED
         );
+        q1.setQuizType(QuizType.MODULE_QUIZ);
+        q1.setCurriculumLevel(CurriculumLevel.BEGINNER);
         q1 = quizRepository.save(q1);
 
         QuizQuestion qq1 = new QuizQuestion(
@@ -233,7 +236,125 @@ public class DataInitializer implements CommandLineRunner {
         );
         quizQuestionRepository.save(qq2);
 
-        logger.info("Successfully seeded launch DSA track.");
+        // Beginner Final Quiz (25 Questions, 80% passing threshold)
+        Quiz begFinalQuiz = new Quiz(
+                mod1,
+                "Beginner Level Comprehensive Assessment (25 Questions)",
+                "dsa-beginner-final-quiz",
+                "Grand evaluation of foundational Big-O analysis and two-pointer algorithms. 80% required to graduate Beginner level.",
+                80,
+                null,
+                PublishStatus.PUBLISHED
+        );
+        begFinalQuiz.setQuizType(QuizType.LEVEL_FINAL_QUIZ);
+        begFinalQuiz.setCurriculumLevel(CurriculumLevel.BEGINNER);
+        quizRepository.save(begFinalQuiz);
+
+        // 3. Module 2: Trees & Graph Traversal (Intermediate Level)
+        CourseModule mod2 = new CourseModule(
+                dsaCourse,
+                "Module 2: Non-Linear Structures — Trees & Graphs",
+                "trees-and-graphs",
+                "Binary Search Trees, BFS, DFS, and topological sorting with placement problem patterns.",
+                2,
+                PublishStatus.PUBLISHED
+        );
+        mod2.setCurriculumLevel(CurriculumLevel.INTERMEDIATE);
+        mod2 = courseModuleRepository.save(mod2);
+
+        Lesson l3 = new Lesson(
+                mod2,
+                "2.1 Tree Traversals: Inorder, Preorder, and Postorder",
+                "tree-traversals-inorder-preorder-postorder",
+                25,
+                1,
+                PublishStatus.PUBLISHED,
+                "# Tree Traversals (DFS)\n\nTree traversal visits all nodes in a hierarchical tree data structure.\n\n* **Inorder (L-Root-R)**: Yields sorted order for BST.\n* **Preorder (Root-L-R)**: Used to clone trees.\n* **Postorder (L-R-Root)**: Used for subtree deletion.",
+                "# Tree Traversals (DFS)\n\nTree traversal ka matlab tree ke har ek node ko systematically visit karna hota hai.\n\n* **Inorder (Left -> Root -> Right)**: Binary Search Tree me sorted order deta hai.\n* **Preorder (Root -> Left -> Right)**: Tree copy karne me use hota hai.\n* **Postorder (Left -> Right -> Root)**: Bottom-up deletion me use hota hai.",
+                HinglishStatus.PUBLISHED
+        );
+        l3.setCodeSnippetJava("public void inorder(TreeNode root) {\n    if (root == null) return;\n    inorder(root.left);\n    System.out.print(root.val + \" \");\n    inorder(root.right);\n}");
+        l3.setCodeSnippetPython("def inorder(root):\n    if not root: return\n    inorder(root.left)\n    print(root.val, end=' ')\n    inorder(root.right)");
+        lessonRepository.save(l3);
+
+        Quiz q2 = new Quiz(
+                mod2,
+                "Module 2 Assessment: Trees & Graph Traversal",
+                "trees-and-graphs-quiz",
+                "Test your mastery of recursive traversals and graph algorithms (10 Questions, 75% to pass).",
+                75,
+                null,
+                PublishStatus.PUBLISHED
+        );
+        q2.setQuizType(QuizType.MODULE_QUIZ);
+        q2.setCurriculumLevel(CurriculumLevel.INTERMEDIATE);
+        quizRepository.save(q2);
+
+        // 4. Module 3: Dynamic Programming & Advanced Algorithms (Advanced Level)
+        CourseModule mod3 = new CourseModule(
+                dsaCourse,
+                "Module 3: Dynamic Programming Mastery",
+                "dynamic-programming-mastery",
+                "Memoization, 1D/2D Tabulation, 0/1 Knapsack, and Longest Common Subsequence.",
+                3,
+                PublishStatus.PUBLISHED
+        );
+        mod3.setCurriculumLevel(CurriculumLevel.ADVANCED);
+        mod3 = courseModuleRepository.save(mod3);
+
+        Lesson l4 = new Lesson(
+                mod3,
+                "3.1 Dynamic Programming 0/1 Knapsack Pattern",
+                "0-1-knapsack-dp-pattern",
+                30,
+                1,
+                PublishStatus.PUBLISHED,
+                "# 0/1 Knapsack Problem\n\nGiven weights and values of items, determine the maximum value that can fit into a knapsack of capacity $W$.\n\n### Recurrence Relation\n$$DP[i][w] = \\max(DP[i-1][w], \\text{val}[i] + DP[i-1][w - \\text{wt}[i]])$$",
+                "# 0/1 Knapsack Problem\n\nItems ke weights aur values diye hote hain, aur hume capacity $W$ ke andar maximum profit calculate karna hota hai.",
+                HinglishStatus.PUBLISHED
+        );
+        lessonRepository.save(l4);
+
+        Quiz q3 = new Quiz(
+                mod3,
+                "Module 3 Assessment: Dynamic Programming",
+                "dp-mastery-quiz",
+                "Test your understanding of state transitions and memoization (10 Questions, 75% to pass).",
+                75,
+                null,
+                PublishStatus.PUBLISHED
+        );
+        q3.setQuizType(QuizType.MODULE_QUIZ);
+        q3.setCurriculumLevel(CurriculumLevel.ADVANCED);
+        quizRepository.save(q3);
+
+        // Advanced Level Final Quiz (25 Questions, 80% passing threshold - Unlocks ₹9 Certificate)
+        Quiz advFinalQuiz = new Quiz(
+                mod3,
+                "Advanced Level Comprehensive Assessment (25 Questions)",
+                "dsa-advanced-final-quiz",
+                "Grand graduation assessment across Beginner, Intermediate, and Advanced DSA. Score 80%+ to unlock Verified Certificate.",
+                80,
+                null,
+                PublishStatus.PUBLISHED
+        );
+        advFinalQuiz.setQuizType(QuizType.LEVEL_FINAL_QUIZ);
+        advFinalQuiz.setCurriculumLevel(CurriculumLevel.ADVANCED);
+        quizRepository.save(advFinalQuiz);
+
+        // 5. Module 4: Placement Ready Track (₹29 Paid Unlock)
+        CourseModule mod4 = new CourseModule(
+                dsaCourse,
+                "Placement Ready: Top Product Company Interview Problems",
+                "placement-ready-interview-problems",
+                "Targeted Google, Amazon, Microsoft, and Uber technical interview problems and live coding patterns.",
+                4,
+                PublishStatus.PUBLISHED
+        );
+        mod4.setCurriculumLevel(CurriculumLevel.PLACEMENT_READY);
+        courseModuleRepository.save(mod4);
+
+        logger.info("Successfully seeded complete 4-tier DSA curriculum (Beginner, Intermediate, Advanced, Placement Ready).");
 
         // -------------------------------------------------------------
         // 2. Seed Operating Systems (OS) Track
@@ -260,6 +381,7 @@ public class DataInitializer implements CommandLineRunner {
                 1,
                 PublishStatus.PUBLISHED
         );
+        osMod1.setCurriculumLevel(CurriculumLevel.BEGINNER);
         osMod1 = courseModuleRepository.save(osMod1);
 
         Lesson osL1 = new Lesson(
@@ -302,6 +424,7 @@ public class DataInitializer implements CommandLineRunner {
                 1,
                 PublishStatus.PUBLISHED
         );
+        dbmsMod1.setCurriculumLevel(CurriculumLevel.BEGINNER);
         dbmsMod1 = courseModuleRepository.save(dbmsMod1);
 
         Lesson dbmsL1 = new Lesson(
@@ -343,6 +466,7 @@ public class DataInitializer implements CommandLineRunner {
                 1,
                 PublishStatus.PUBLISHED
         );
+        cnMod1.setCurriculumLevel(CurriculumLevel.BEGINNER);
         cnMod1 = courseModuleRepository.save(cnMod1);
 
         Lesson cnL1 = new Lesson(

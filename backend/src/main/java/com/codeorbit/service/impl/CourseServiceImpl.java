@@ -96,6 +96,7 @@ public class CourseServiceImpl implements CourseService {
             modDto.setSlug(module.getSlug());
             modDto.setDescription(module.getDescription());
             modDto.setOrderIndex(module.getOrderIndex());
+            modDto.setCurriculumLevel(module.getCurriculumLevel() != null ? module.getCurriculumLevel().name() : "BEGINNER");
 
             // Published Lessons
             List<Lesson> lessons = lessonRepository
@@ -115,14 +116,21 @@ public class CourseServiceImpl implements CourseService {
             // Published Quizzes
             List<Quiz> quizzes = quizRepository.findByModuleIdAndStatus(module.getId(), PublishStatus.PUBLISHED);
             List<QuizSummaryDto> quizDtos = quizzes.stream()
-                    .map(q -> new QuizSummaryDto(
-                            q.getId(),
-                            q.getTitle(),
-                            q.getSlug(),
-                            q.getMinPassScorePercentage(),
-                            q.getMaxAttempts(),
-                            (int) quizQuestionRepository.countByQuizId(q.getId())
-                    ))
+                    .map(q -> {
+                        QuizSummaryDto qDto = new QuizSummaryDto(
+                                q.getId(),
+                                q.getTitle(),
+                                q.getSlug(),
+                                q.getMinPassScorePercentage(),
+                                q.getMaxAttempts(),
+                                (int) quizQuestionRepository.countByQuizId(q.getId())
+                        );
+                        qDto.setModuleId(module.getId());
+                        qDto.setStatus(q.getStatus());
+                        qDto.setQuizType(q.getQuizType() != null ? q.getQuizType().name() : "MODULE_QUIZ");
+                        qDto.setCurriculumLevel(q.getCurriculumLevel() != null ? q.getCurriculumLevel().name() : (module.getCurriculumLevel() != null ? module.getCurriculumLevel().name() : "BEGINNER"));
+                        return qDto;
+                    })
                     .collect(Collectors.toList());
             modDto.setQuizzes(quizDtos);
 

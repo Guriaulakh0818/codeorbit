@@ -36,10 +36,19 @@ public class Quiz {
     private String description;
 
     @Column(name = "min_pass_score_percentage", nullable = false)
-    private int minPassScorePercentage = 80;
+    private int minPassScorePercentage = 75;
 
     @Column(name = "max_attempts")
     private Integer maxAttempts;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "quiz_type", nullable = false, length = 32)
+    private QuizType quizType = QuizType.MODULE_QUIZ;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "curriculum_level", length = 32)
+    private CurriculumLevel curriculumLevel;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -134,6 +143,22 @@ public class Quiz {
 
     public void setMaxAttempts(Integer maxAttempts) {
         this.maxAttempts = maxAttempts;
+    }
+
+    public QuizType getQuizType() {
+        return quizType;
+    }
+
+    public void setQuizType(QuizType quizType) {
+        this.quizType = quizType != null ? quizType : QuizType.MODULE_QUIZ;
+    }
+
+    public CurriculumLevel getCurriculumLevel() {
+        return curriculumLevel;
+    }
+
+    public void setCurriculumLevel(CurriculumLevel curriculumLevel) {
+        this.curriculumLevel = curriculumLevel;
     }
 
     public PublishStatus getStatus() {

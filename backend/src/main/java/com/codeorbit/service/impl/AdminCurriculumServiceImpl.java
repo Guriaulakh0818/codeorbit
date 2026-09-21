@@ -174,6 +174,13 @@ public class AdminCurriculumServiceImpl implements AdminCurriculumService {
         module.setSlug(slug);
         module.setDescription(request.getDescription());
         module.setOrderIndex(request.getOrderIndex());
+        if (request.getCurriculumLevel() != null && !request.getCurriculumLevel().isBlank()) {
+            try {
+                module.setCurriculumLevel(CurriculumLevel.valueOf(request.getCurriculumLevel().trim().toUpperCase()));
+            } catch (Exception ignored) {
+                module.setCurriculumLevel(CurriculumLevel.BEGINNER);
+            }
+        }
         module.setStatus(request.getStatus() != null ? request.getStatus() : PublishStatus.DRAFT);
 
         module = moduleRepository.save(module);
@@ -194,6 +201,11 @@ public class AdminCurriculumServiceImpl implements AdminCurriculumService {
         module.setSlug(slug);
         module.setDescription(request.getDescription());
         module.setOrderIndex(request.getOrderIndex());
+        if (request.getCurriculumLevel() != null && !request.getCurriculumLevel().isBlank()) {
+            try {
+                module.setCurriculumLevel(CurriculumLevel.valueOf(request.getCurriculumLevel().trim().toUpperCase()));
+            } catch (Exception ignored) {}
+        }
         if (request.getStatus() != null) {
             module.setStatus(request.getStatus());
         }
@@ -333,6 +345,18 @@ public class AdminCurriculumServiceImpl implements AdminCurriculumService {
         quiz.setDescription(request.getDescription());
         quiz.setMinPassScorePercentage(request.getMinPassScorePercentage());
         quiz.setMaxAttempts(request.getMaxAttempts());
+        if (request.getQuizType() != null && !request.getQuizType().isBlank()) {
+            try {
+                quiz.setQuizType(QuizType.valueOf(request.getQuizType().trim().toUpperCase()));
+            } catch (Exception ignored) {
+                quiz.setQuizType(QuizType.MODULE_QUIZ);
+            }
+        }
+        if (request.getCurriculumLevel() != null && !request.getCurriculumLevel().isBlank()) {
+            try {
+                quiz.setCurriculumLevel(CurriculumLevel.valueOf(request.getCurriculumLevel().trim().toUpperCase()));
+            } catch (Exception ignored) {}
+        }
         quiz.setStatus(request.getStatus() != null ? request.getStatus() : PublishStatus.DRAFT);
 
         quiz = quizRepository.save(quiz);
@@ -354,6 +378,16 @@ public class AdminCurriculumServiceImpl implements AdminCurriculumService {
         quiz.setDescription(request.getDescription());
         quiz.setMinPassScorePercentage(request.getMinPassScorePercentage());
         quiz.setMaxAttempts(request.getMaxAttempts());
+        if (request.getQuizType() != null && !request.getQuizType().isBlank()) {
+            try {
+                quiz.setQuizType(QuizType.valueOf(request.getQuizType().trim().toUpperCase()));
+            } catch (Exception ignored) {}
+        }
+        if (request.getCurriculumLevel() != null && !request.getCurriculumLevel().isBlank()) {
+            try {
+                quiz.setCurriculumLevel(CurriculumLevel.valueOf(request.getCurriculumLevel().trim().toUpperCase()));
+            } catch (Exception ignored) {}
+        }
         if (request.getStatus() != null) {
             quiz.setStatus(request.getStatus());
         }
@@ -506,6 +540,7 @@ public class AdminCurriculumServiceImpl implements AdminCurriculumService {
         dto.setSlug(m.getSlug());
         dto.setDescription(m.getDescription());
         dto.setOrderIndex(m.getOrderIndex());
+        dto.setCurriculumLevel(m.getCurriculumLevel() != null ? m.getCurriculumLevel().name() : "BEGINNER");
         dto.setStatus(m.getStatus());
 
         List<LessonSummaryDto> lessonDtos = (m.getLessons() != null ? m.getLessons() : Collections.<Lesson>emptyList())
@@ -534,6 +569,8 @@ public class AdminCurriculumServiceImpl implements AdminCurriculumService {
                     qDto.setSlug(q.getSlug());
                     qDto.setMinPassScorePercentage(q.getMinPassScorePercentage());
                     qDto.setMaxAttempts(q.getMaxAttempts());
+                    qDto.setQuizType(q.getQuizType() != null ? q.getQuizType().name() : "MODULE_QUIZ");
+                    qDto.setCurriculumLevel(q.getCurriculumLevel() != null ? q.getCurriculumLevel().name() : (m.getCurriculumLevel() != null ? m.getCurriculumLevel().name() : "BEGINNER"));
                     qDto.setStatus(q.getStatus());
                     qDto.setQuestionCount(q.getQuestions() != null ? q.getQuestions().size() : 0);
                     return qDto;
@@ -572,6 +609,8 @@ public class AdminCurriculumServiceImpl implements AdminCurriculumService {
         dto.setDescription(q.getDescription());
         dto.setMinPassScorePercentage(q.getMinPassScorePercentage());
         dto.setMaxAttempts(q.getMaxAttempts());
+        dto.setQuizType(q.getQuizType() != null ? q.getQuizType().name() : "MODULE_QUIZ");
+        dto.setCurriculumLevel(q.getCurriculumLevel() != null ? q.getCurriculumLevel().name() : (q.getModule().getCurriculumLevel() != null ? q.getModule().getCurriculumLevel().name() : "BEGINNER"));
         dto.setStatus(q.getStatus());
         dto.setCreatedAt(q.getCreatedAt());
         dto.setUpdatedAt(q.getUpdatedAt());

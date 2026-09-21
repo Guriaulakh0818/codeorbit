@@ -8,6 +8,8 @@ public class QuizSummaryDto {
     private int minPassScorePercentage;
     private Integer maxAttempts;
     private int questionCount;
+    private String quizType = "MODULE_QUIZ";
+    private String curriculumLevel;
     private com.codeorbit.entity.PublishStatus status;
 
     public QuizSummaryDto() {
@@ -84,5 +86,21 @@ public class QuizSummaryDto {
 
     public void setQuestionCount(int questionCount) {
         this.questionCount = questionCount;
+    }
+
+    public String getQuizType() {
+        return quizType;
+    }
+
+    public void setQuizType(String quizType) {
+        this.quizType = quizType;
+    }
+
+    public String getCurriculumLevel() {
+        return curriculumLevel;
+    }
+
+    public void setCurriculumLevel(String curriculumLevel) {
+        this.curriculumLevel = curriculumLevel;
     }
 }

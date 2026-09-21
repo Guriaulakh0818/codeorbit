@@ -40,6 +40,11 @@ public class CourseModule {
 
     @NotNull
     @Enumerated(EnumType.STRING)
+    @Column(name = "curriculum_level", nullable = false, length = 32)
+    private CurriculumLevel curriculumLevel = CurriculumLevel.BEGINNER;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 32)
     private PublishStatus status = PublishStatus.DRAFT;
 
@@ -125,6 +130,14 @@ public class CourseModule {
 
     public void setOrderIndex(int orderIndex) {
         this.orderIndex = orderIndex;
+    }
+
+    public CurriculumLevel getCurriculumLevel() {
+        return curriculumLevel;
+    }
+
+    public void setCurriculumLevel(CurriculumLevel curriculumLevel) {
+        this.curriculumLevel = curriculumLevel != null ? curriculumLevel : CurriculumLevel.BEGINNER;
     }
 
     public PublishStatus getStatus() {

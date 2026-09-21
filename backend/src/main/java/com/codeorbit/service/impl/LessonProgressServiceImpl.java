@@ -94,18 +94,29 @@ public class LessonProgressServiceImpl implements LessonProgressService {
         Course course = courseRepository.findBySlugAndStatus(courseSlug, PublishStatus.PUBLISHED)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with slug: " + courseSlug));
 
+        List<CurriculumLevel> requiredLevels = List.of(
+                CurriculumLevel.BEGINNER,
+                CurriculumLevel.INTERMEDIATE,
+                CurriculumLevel.ADVANCED
+        );
+
         long totalLessons = lessonRepository.countPublishedLessonsByCourseId(course.getId());
         long completedLessons = progressRepository.countCompletedPublishedLessons(user.getId(), course.getId());
         long totalQuizzes = quizRepository.countPublishedQuizzesByCourseId(course.getId());
         long passedQuizzes = trackerRepository.countPassedPublishedQuizzesByCourse(user.getId(), course.getId());
+
+        long certReqLessons = lessonRepository.countPublishedLessonsByCourseIdAndLevels(course.getId(), requiredLevels);
+        long certCompletedLessons = progressRepository.countCompletedPublishedLessonsByLevels(user.getId(), course.getId(), requiredLevels);
+        long certReqQuizzes = quizRepository.countPublishedQuizzesByCourseIdAndLevels(course.getId(), requiredLevels);
+        long certPassedQuizzes = trackerRepository.countPassedPublishedQuizzesByCourseAndLevels(user.getId(), course.getId(), requiredLevels);
 
         int completionPercentage = 0;
         if (totalLessons > 0) {
             completionPercentage = (int) Math.round(((double) completedLessons / totalLessons) * 100.0);
         }
 
-        boolean eligibleForCertificate = (totalLessons > 0 && completedLessons >= totalLessons)
-                && (totalQuizzes == 0 || passedQuizzes >= totalQuizzes);
+        boolean eligibleForCertificate = (certReqLessons > 0 && certCompletedLessons >= certReqLessons)
+                && (certReqQuizzes == 0 || certPassedQuizzes >= certReqQuizzes);
 
         Optional<Certificate> cert = certificateRepository.findByUserIdAndCourseId(user.getId(), course.getId());
 

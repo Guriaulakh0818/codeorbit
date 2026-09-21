@@ -9,6 +9,7 @@ public class CourseModuleDto {
     private String slug;
     private String description;
     private int orderIndex;
+    private String curriculumLevel = "BEGINNER";
     private List<LessonSummaryDto> lessons = new ArrayList<>();
     private List<QuizSummaryDto> quizzes = new ArrayList<>();
 
@@ -53,6 +54,14 @@ public class CourseModuleDto {
 
     public void setOrderIndex(int orderIndex) {
         this.orderIndex = orderIndex;
+    }
+
+    public String getCurriculumLevel() {
+        return curriculumLevel;
+    }
+
+    public void setCurriculumLevel(String curriculumLevel) {
+        this.curriculumLevel = curriculumLevel;
     }
 
     public List<LessonSummaryDto> getLessons() {

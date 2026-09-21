@@ -33,4 +33,7 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
 
     @Query("SELECT COUNT(q) FROM Quiz q WHERE q.module.course.id = :courseId AND q.status = 'PUBLISHED'")
     long countPublishedQuizzesByCourseId(@Param("courseId") Long courseId);
+
+    @Query("SELECT COUNT(q) FROM Quiz q WHERE q.module.course.id = :courseId AND q.status = 'PUBLISHED' AND q.curriculumLevel IN (:levels)")
+    long countPublishedQuizzesByCourseIdAndLevels(@Param("courseId") Long courseId, @Param("levels") java.util.Collection<com.codeorbit.entity.CurriculumLevel> levels);
 }

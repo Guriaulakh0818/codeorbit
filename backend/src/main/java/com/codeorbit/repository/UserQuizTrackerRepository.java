@@ -25,4 +25,7 @@ public interface UserQuizTrackerRepository extends JpaRepository<UserQuizTracker
 
     @Query("SELECT COUNT(t) FROM UserQuizTracker t WHERE t.user.id = :userId AND t.quiz.module.course.id = :courseId AND t.hasPassed = true AND t.quiz.status = 'PUBLISHED'")
     long countPassedPublishedQuizzesByCourse(@Param("userId") Long userId, @Param("courseId") Long courseId);
+
+    @Query("SELECT COUNT(t) FROM UserQuizTracker t WHERE t.user.id = :userId AND t.quiz.module.course.id = :courseId AND t.hasPassed = true AND t.quiz.status = 'PUBLISHED' AND t.quiz.curriculumLevel IN (:levels)")
+    long countPassedPublishedQuizzesByCourseAndLevels(@Param("userId") Long userId, @Param("courseId") Long courseId, @Param("levels") java.util.Collection<com.codeorbit.entity.CurriculumLevel> levels);
 }

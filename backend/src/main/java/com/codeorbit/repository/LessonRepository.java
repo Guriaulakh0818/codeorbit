@@ -31,6 +31,9 @@ public interface LessonRepository extends JpaRepository<Lesson, Long> {
     @Query("SELECT COUNT(l) FROM Lesson l WHERE l.module.course.id = :courseId AND l.status = 'PUBLISHED'")
     long countPublishedLessonsByCourseId(@Param("courseId") Long courseId);
 
+    @Query("SELECT COUNT(l) FROM Lesson l WHERE l.module.course.id = :courseId AND l.status = 'PUBLISHED' AND l.module.curriculumLevel IN (:levels)")
+    long countPublishedLessonsByCourseIdAndLevels(@Param("courseId") Long courseId, @Param("levels") java.util.Collection<com.codeorbit.entity.CurriculumLevel> levels);
+
     @Query("SELECT l FROM Lesson l WHERE l.module.course.id = :courseId AND l.status = 'PUBLISHED' ORDER BY l.module.orderIndex ASC, l.orderIndex ASC")
     List<Lesson> findPublishedLessonsByCourseId(@Param("courseId") Long courseId);
 }

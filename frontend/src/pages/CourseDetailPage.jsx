@@ -377,163 +377,227 @@ export const CourseDetailPage = () => {
               </div>
             </div>
 
-            {/* Syllabus Section */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                    <Code2 className="w-5 h-5 text-emerald-700" /> Course Syllabus & Modules
-                  </h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Step-by-step interactive curriculum with bilingual explanations and self-tests.
-                  </p>
-                </div>
-                <span className="text-xs font-semibold text-slate-600 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-2xs">
-                  {course.modules?.length || 0} Modules Total
-                </span>
+            {/* 4-Tier Curriculum Hierarchy Section */}
+            <div className="space-y-8">
+              <div>
+                <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                  <Code2 className="w-5 h-5 text-emerald-700" /> Four-Tier Computer Science Curriculum
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Beginner through Placement Ready progressive learning path with module assessments and level final exams.
+                </p>
               </div>
 
-              {/* Empty Syllabus State */}
-              {(!course.modules || course.modules.length === 0) && (
-                <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-slate-500 text-xs">
-                  Syllabus is currently being finalized for this track. Please check back soon.
-                </div>
-              )}
+              {/* Tiers List */}
+              {[
+                { 
+                  levelKey: 'BEGINNER', 
+                  title: 'Level 1: Beginner Fundamentals', 
+                  subtitle: 'Core principles, asymptotic notation, and foundational algorithmic concepts', 
+                  badge: '100% FREE', 
+                  badgeColor: 'bg-emerald-50 text-emerald-800 border-emerald-300',
+                  accentColor: 'border-l-4 border-l-emerald-500' 
+                },
+                { 
+                  levelKey: 'INTERMEDIATE', 
+                  title: 'Level 2: Intermediate Concepts', 
+                  subtitle: 'Complex data structures, trees, graphs, and multi-paradigm problem solving', 
+                  badge: '100% FREE', 
+                  badgeColor: 'bg-emerald-50 text-emerald-800 border-emerald-300',
+                  accentColor: 'border-l-4 border-l-teal-500' 
+                },
+                { 
+                  levelKey: 'ADVANCED', 
+                  title: 'Level 3: Advanced Mastery', 
+                  subtitle: 'Dynamic programming, system concurrency, and algorithmic optimization', 
+                  badge: '100% FREE (Certificate Unlocks Here)', 
+                  badgeColor: 'bg-purple-50 text-purple-800 border-purple-300',
+                  accentColor: 'border-l-4 border-l-purple-500' 
+                },
+                { 
+                  levelKey: 'PLACEMENT_READY', 
+                  title: 'Level 4: Placement Ready', 
+                  subtitle: 'FAANG/Tier-1 Product Company mock interviews and hard problem breakdowns', 
+                  badge: '₹29 UNLOCK', 
+                  badgeColor: 'bg-amber-50 text-amber-800 border-amber-300',
+                  accentColor: 'border-l-4 border-l-amber-500' 
+                }
+              ].map((tier) => {
+                const tierModules = (course.modules || []).filter(
+                  (m) => (m.curriculumLevel || 'BEGINNER') === tier.levelKey
+                );
 
-              {/* Module Accordions */}
-              <div className="space-y-4">
-                {(course.modules || []).map((module, mIdx) => {
-                  const mId = module.id || module.slug;
-                  const isOpen = openModules[mId] !== false;
+                if (tierModules.length === 0 && tier.levelKey === 'PLACEMENT_READY') {
+                  return null;
+                }
 
-                  return (
-                    <div
-                      key={mId}
-                      className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-2xs transition-all duration-200"
-                    >
-                      {/* Module Header */}
-                      <button
-                        onClick={() => toggleModule(mId)}
-                        className="w-full flex items-center justify-between p-5 text-left hover:bg-slate-50/80 transition-colors cursor-pointer"
-                      >
-                        <div className="flex items-start gap-4">
-                          <span className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5 shadow-2xs">
-                            {String(mIdx + 1).padStart(2, '0')}
+                return (
+                  <div key={tier.levelKey} className={`bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4 ${tier.accentColor}`}>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-base font-extrabold text-slate-900">{tier.title}</h3>
+                          <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-md border ${tier.badgeColor}`}>
+                            {tier.badge}
                           </span>
-                          <div className="space-y-1">
-                            <h3 className="text-base font-bold text-slate-900">
-                              {module.title}
-                            </h3>
-                            {module.description && (
-                              <p className="text-xs text-slate-500 line-clamp-1">
-                                {module.description}
-                              </p>
-                            )}
-                          </div>
                         </div>
+                        <p className="text-xs text-slate-500 mt-0.5">{tier.subtitle}</p>
+                      </div>
+                      <span className="text-xs font-mono text-slate-500 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200 self-start sm:self-auto">
+                        {tierModules.length} Module{tierModules.length === 1 ? '' : 's'}
+                      </span>
+                    </div>
 
-                        <div className="flex items-center gap-3 flex-shrink-0">
-                          <span className="text-xs text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 font-medium">
-                            {module.lessons?.length || 0} Lessons
-                          </span>
-                          {isOpen ? (
-                            <ChevronUp className="w-4 h-4 text-slate-400" />
-                          ) : (
-                            <ChevronDown className="w-4 h-4 text-slate-400" />
-                          )}
-                        </div>
-                      </button>
+                    {tierModules.length === 0 ? (
+                      <div className="text-xs text-slate-400 italic py-2">
+                        Lessons and assessments for this tier will be published soon.
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {tierModules.map((module, mIdx) => {
+                          const mId = module.id || module.slug;
+                          const isOpen = openModules[mId] !== false;
 
-                      {/* Module Body (Lessons & Quizzes) */}
-                      {isOpen && (
-                        <div className="px-5 pb-5 pt-1 space-y-2.5 border-t border-slate-100 bg-slate-50/50">
-                          {/* Lessons List */}
-                          {(module.lessons || []).map((lesson, lIdx) => {
-                            const completed = isLessonCompleted(lesson.id) || isLessonCompleted(lesson.slug);
-                            const bookmarked = isLessonBookmarked(lesson.id) || isLessonBookmarked(lesson.slug);
-
-                            return (
-                              <Link
-                                key={lesson.id || lesson.slug}
-                                to={`/courses/${course.slug}/lessons/${lesson.slug}`}
-                                className={`flex items-center justify-between p-3.5 rounded-xl border transition-all group ${
-                                  completed
-                                    ? 'bg-emerald-50/80 border-emerald-200 hover:border-emerald-300'
-                                    : 'bg-white hover:border-emerald-400 border-slate-200 shadow-2xs hover:shadow-xs'
-                                }`}
+                          return (
+                            <div
+                              key={mId}
+                              className="border border-slate-200/90 rounded-2xl overflow-hidden bg-slate-50/40 shadow-2xs"
+                            >
+                              {/* Module Header */}
+                              <button
+                                onClick={() => toggleModule(mId)}
+                                className="w-full flex items-center justify-between p-4 text-left hover:bg-slate-100/60 transition-colors cursor-pointer"
                               >
-                                <div className="flex items-center gap-3 min-w-0">
-                                  <span className={`w-6 h-6 rounded-lg text-[11px] font-mono font-semibold flex items-center justify-center flex-shrink-0 transition-colors ${
-                                    completed
-                                      ? 'bg-emerald-600 text-white'
-                                      : 'bg-slate-100 text-slate-600 group-hover:bg-emerald-50 group-hover:text-emerald-800 border border-slate-200'
-                                  }`}>
-                                    {completed ? '✓' : `${mIdx + 1}.${lIdx + 1}`}
+                                <div className="flex items-start gap-3">
+                                  <span className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    {String(mIdx + 1).padStart(2, '0')}
                                   </span>
-                                  <div className="min-w-0 flex items-center gap-2">
-                                    <span className="text-xs font-semibold text-slate-800 group-hover:text-emerald-800 transition-colors truncate">
-                                      {lesson.title}
-                                    </span>
-                                    {bookmarked && (
-                                      <Bookmark className="w-3 h-3 fill-amber-500 text-amber-500 flex-shrink-0" />
+                                  <div>
+                                    <h4 className="text-sm font-bold text-slate-900">{module.title}</h4>
+                                    {module.description && (
+                                      <p className="text-xs text-slate-500 line-clamp-1">{module.description}</p>
                                     )}
                                   </div>
                                 </div>
 
-                                <div className="flex items-center gap-2 flex-shrink-0">
-                                  {lesson.hinglishStatus === 'PUBLISHED' && (
-                                    <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                                      <span>HI</span>
-                                      <span>🇮🇳</span>
-                                    </span>
+                                <div className="flex items-center gap-2.5 flex-shrink-0">
+                                  <span className="text-[11px] text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
+                                    {module.lessons?.length || 0} Lessons
+                                  </span>
+                                  {isOpen ? (
+                                    <ChevronUp className="w-4 h-4 text-slate-400" />
+                                  ) : (
+                                    <ChevronDown className="w-4 h-4 text-slate-400" />
                                   )}
-                                  <span className="text-[11px] text-slate-500 flex items-center gap-1">
-                                    <Clock className="w-3 h-3 text-slate-400" /> {lesson.estimatedMinutes || 10} min
-                                  </span>
-                                  <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-all ${
-                                    completed
-                                      ? 'text-emerald-800 bg-emerald-50 border-emerald-200 font-bold'
-                                      : 'text-slate-700 bg-slate-100 border-slate-200 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600'
-                                  }`}>
-                                    {completed ? 'Completed' : 'Read Lesson →'}
-                                  </span>
                                 </div>
-                              </Link>
-                            );
-                          })}
+                              </button>
 
-                          {/* Quizzes in Module */}
-                          {(module.quizzes || []).map((quiz) => (
-                            <Link
-                              key={quiz.id || quiz.slug}
-                              to={`/courses/${course.slug}/quizzes/${quiz.slug}`}
-                              className="flex items-center justify-between p-3.5 rounded-xl bg-purple-50 hover:bg-purple-100/80 border border-purple-200 transition-all group shadow-2xs"
-                            >
-                              <div className="flex items-center gap-3 min-w-0">
-                                <span className="w-6 h-6 rounded-lg bg-purple-600 text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0 shadow-2xs">
-                                  Q
-                                </span>
-                                <div>
-                                  <div className="text-xs font-bold text-purple-950 group-hover:text-purple-900 transition-colors">
-                                    {quiz.title}
-                                  </div>
-                                  <div className="text-[10px] text-purple-700">
-                                    {quiz.questionCount || 0} Questions • {quiz.minPassScorePercentage}% Pass Score
-                                  </div>
+                              {/* Module Body */}
+                              {isOpen && (
+                                <div className="px-4 pb-4 pt-1 space-y-2 border-t border-slate-100 bg-white">
+                                  {/* Lessons */}
+                                  {(module.lessons || []).map((lesson, lIdx) => {
+                                    const completed = isLessonCompleted(lesson.id) || isLessonCompleted(lesson.slug);
+                                    const bookmarked = isLessonBookmarked(lesson.id) || isLessonBookmarked(lesson.slug);
+
+                                    return (
+                                      <Link
+                                        key={lesson.id || lesson.slug}
+                                        to={`/courses/${course.slug}/lessons/${lesson.slug}`}
+                                        className={`flex items-center justify-between p-3 rounded-xl border transition-all group ${
+                                          completed
+                                            ? 'bg-emerald-50/70 border-emerald-200 hover:border-emerald-300'
+                                            : 'bg-white hover:border-emerald-400 border-slate-200 shadow-2xs hover:shadow-xs'
+                                        }`}
+                                      >
+                                        <div className="flex items-center gap-2.5 min-w-0">
+                                          <span className={`w-5 h-5 rounded text-[10px] font-mono font-semibold flex items-center justify-center flex-shrink-0 ${
+                                            completed
+                                              ? 'bg-emerald-600 text-white'
+                                              : 'bg-slate-100 text-slate-600 group-hover:bg-emerald-50 group-hover:text-emerald-800 border border-slate-200'
+                                          }`}>
+                                            {completed ? '✓' : `${mIdx + 1}.${lIdx + 1}`}
+                                          </span>
+                                          <span className="text-xs font-semibold text-slate-800 group-hover:text-emerald-800 transition-colors truncate">
+                                            {lesson.title}
+                                          </span>
+                                          {bookmarked && (
+                                            <Bookmark className="w-3 h-3 fill-amber-500 text-amber-500 flex-shrink-0" />
+                                          )}
+                                        </div>
+
+                                        <div className="flex items-center gap-2 flex-shrink-0">
+                                          {lesson.hinglishStatus === 'PUBLISHED' && (
+                                            <span className="hidden sm:inline-flex items-center text-[9px] font-bold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                                              HI 🇮🇳
+                                            </span>
+                                          )}
+                                          <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                                            <Clock className="w-3 h-3 text-slate-400" /> {lesson.estimatedMinutes || 10} min
+                                          </span>
+                                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${
+                                            completed
+                                              ? 'text-emerald-800 bg-emerald-50 border-emerald-200 font-bold'
+                                              : 'text-slate-700 bg-slate-100 border-slate-200 group-hover:bg-emerald-600 group-hover:text-white'
+                                          }`}>
+                                            {completed ? 'Done' : 'Read →'}
+                                          </span>
+                                        </div>
+                                      </Link>
+                                    );
+                                  })}
+
+                                  {/* Quizzes */}
+                                  {(module.quizzes || []).map((quiz) => {
+                                    const isFinal = quiz.quizType === 'LEVEL_FINAL_QUIZ';
+                                    return (
+                                      <Link
+                                        key={quiz.id || quiz.slug}
+                                        to={`/courses/${course.slug}/quizzes/${quiz.slug}`}
+                                        className={`flex items-center justify-between p-3.5 rounded-xl border transition-all group shadow-2xs ${
+                                          isFinal
+                                            ? 'bg-gradient-to-r from-amber-50/90 to-amber-100/50 border-amber-300 hover:border-amber-400'
+                                            : 'bg-purple-50/90 hover:bg-purple-100/80 border-purple-200 hover:border-purple-300'
+                                        }`}
+                                      >
+                                        <div className="flex items-center gap-2.5 min-w-0">
+                                          <span className={`w-6 h-6 rounded-lg text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0 shadow-2xs ${
+                                            isFinal ? 'bg-amber-600' : 'bg-purple-600'
+                                          }`}>
+                                            {isFinal ? '★' : 'Q'}
+                                          </span>
+                                          <div>
+                                            <div className={`text-xs font-bold transition-colors ${
+                                              isFinal ? 'text-amber-950 group-hover:text-amber-900' : 'text-purple-950 group-hover:text-purple-900'
+                                            }`}>
+                                              {quiz.title}
+                                            </div>
+                                            <div className={`text-[10px] ${isFinal ? 'text-amber-800' : 'text-purple-700'}`}>
+                                              {isFinal ? '25 Questions • 80% Pass Score (Level Exam)' : '10 Questions • 75% Pass Score (Module Quiz)'}
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        <span className={`text-[11px] font-bold bg-white px-3 py-1 rounded-lg border transition-colors shadow-2xs ${
+                                          isFinal
+                                            ? 'text-amber-900 border-amber-300 group-hover:bg-amber-600 group-hover:text-white group-hover:border-amber-600'
+                                            : 'text-purple-800 border-purple-200 group-hover:bg-purple-600 group-hover:text-white group-hover:border-purple-600'
+                                        }`}>
+                                          Start Assessment →
+                                        </span>
+                                      </Link>
+                                    );
+                                  })}
                                 </div>
-                              </div>
-
-                              <span className="text-[11px] font-bold text-purple-800 bg-white px-3 py-1 rounded-lg border border-purple-200 group-hover:bg-purple-600 group-hover:text-white group-hover:border-purple-600 transition-colors shadow-2xs">
-                                Start Quiz →
-                              </span>
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             {/* Bottom Ad Slot */}

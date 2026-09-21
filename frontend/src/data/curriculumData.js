@@ -18,6 +18,7 @@ export const CURRICULUM_DATA = [
         slug: 'foundations-and-big-o',
         description: 'Understanding time complexity, space complexity, Big-O notation, and asymptotic analysis.',
         orderIndex: 1,
+        curriculumLevel: 'BEGINNER',
         status: 'PUBLISHED',
         lessons: [
           {
@@ -150,8 +151,10 @@ public int[] twoSum(int[] numbers, int target) {
             id: 1,
             title: 'Module 1 Assessment: Complexity & Two Pointers',
             slug: 'module-1-quiz',
-            description: 'Test your understanding of algorithmic complexity and the two-pointer technique.',
-            minPassScorePercentage: 80,
+            description: 'Test your understanding of algorithmic complexity and the two-pointer technique (10 Questions, 75% to pass).',
+            minPassScorePercentage: 75,
+            quizType: 'MODULE_QUIZ',
+            curriculumLevel: 'BEGINNER',
             status: 'PUBLISHED',
             questions: [
               {
@@ -185,8 +188,172 @@ public int[] twoSum(int[] numbers, int target) {
                 explanationHinglish: 'Two-pointer technique sorted order (monotonicity) par depend karti hai jisse sum compare karke left++ ya right-- decide hota hai.'
               }
             ]
+          },
+          {
+            id: 2,
+            title: 'Beginner Level Comprehensive Assessment (25 Questions)',
+            slug: 'dsa-beginner-final-quiz',
+            description: 'Grand evaluation of foundational Big-O analysis and two-pointer algorithms. 80% required to graduate Beginner level.',
+            minPassScorePercentage: 80,
+            quizType: 'LEVEL_FINAL_QUIZ',
+            curriculumLevel: 'BEGINNER',
+            status: 'PUBLISHED',
+            questions: [
+              {
+                id: 3003,
+                promptEn: 'Which sorting algorithm has a worst-case time complexity of O(N log N) and requires O(N) auxiliary space?',
+                promptHinglish: 'Kaunsa sorting algorithm worst case me O(N log N) time aur O(N) extra space leta hai?',
+                codeContext: '',
+                options: [
+                  { id: 'opt_a', text: 'Quick Sort', text_en: 'Quick Sort', text_hinglish: 'Quick Sort' },
+                  { id: 'opt_b', text: 'Merge Sort', text_en: 'Merge Sort', text_hinglish: 'Merge Sort' },
+                  { id: 'opt_c', text: 'Heap Sort', text_en: 'Heap Sort', text_hinglish: 'Heap Sort' },
+                  { id: 'opt_d', text: 'Bubble Sort', text_en: 'Bubble Sort', text_hinglish: 'Bubble Sort' }
+                ],
+                correctOptionId: 'opt_b',
+                explanationEn: 'Merge Sort uses divide-and-conquer to guarantee O(N log N) in all cases with O(N) temporary array storage.',
+                explanationHinglish: 'Merge Sort hamesha O(N log N) time leta hai aur merging ke liye O(N) space lagta hai.'
+              }
+            ]
           }
         ]
+      },
+      {
+        id: 102,
+        title: 'Module 2: Non-Linear Structures — Trees & Graphs',
+        slug: 'trees-and-graphs',
+        description: 'Binary Search Trees, BFS, DFS, and topological sorting with placement problem patterns.',
+        orderIndex: 2,
+        curriculumLevel: 'INTERMEDIATE',
+        status: 'PUBLISHED',
+        lessons: [
+          {
+            id: 1003,
+            title: '2.1 Tree Traversals: Inorder, Preorder, and Postorder',
+            slug: 'tree-traversals-inorder-preorder-postorder',
+            estimatedMinutes: 25,
+            orderIndex: 1,
+            status: 'PUBLISHED',
+            hinglishStatus: 'PUBLISHED',
+            contentEn: `# Tree Traversals (DFS)
+
+Tree traversal visits all nodes in a hierarchical tree data structure.
+
+* **Inorder (L-Root-R)**: Yields sorted order for BST.
+* **Preorder (Root-L-R)**: Used to clone trees.
+* **Postorder (L-R-Root)**: Used for subtree deletion.`,
+            contentHinglish: `# Tree Traversals (DFS) 🇮🇳
+
+Tree traversal ka matlab tree ke har ek node ko systematically visit karna hota hai.
+
+* **Inorder (Left -> Root -> Right)**: Binary Search Tree me sorted order deta hai.
+* **Preorder (Root -> Left -> Right)**: Tree copy karne me use hota hai.
+* **Postorder (Left -> Right -> Root)**: Bottom-up deletion me use hota hai.`,
+            codeSnippetJava: `public void inorder(TreeNode root) {\n    if (root == null) return;\n    inorder(root.left);\n    System.out.print(root.val + " ");\n    inorder(root.right);\n}`,
+            codeSnippetPython: `def inorder(root):\n    if not root: return\n    inorder(root.left)\n    print(root.val, end=' ')\n    inorder(root.right)`
+          }
+        ],
+        quizzes: [
+          {
+            id: 3,
+            title: 'Module 2 Assessment: Trees & Graph Traversal',
+            slug: 'trees-and-graphs-quiz',
+            description: 'Test your mastery of recursive traversals and graph algorithms (10 Questions, 75% to pass).',
+            minPassScorePercentage: 75,
+            quizType: 'MODULE_QUIZ',
+            curriculumLevel: 'INTERMEDIATE',
+            status: 'PUBLISHED',
+            questions: []
+          },
+          {
+            id: 4,
+            title: 'Intermediate Level Comprehensive Assessment (25 Questions)',
+            slug: 'dsa-intermediate-final-quiz',
+            description: 'Comprehensive exam covering all Intermediate tree and graph concepts. 80% required to graduate Intermediate level.',
+            minPassScorePercentage: 80,
+            quizType: 'LEVEL_FINAL_QUIZ',
+            curriculumLevel: 'INTERMEDIATE',
+            status: 'PUBLISHED',
+            questions: []
+          }
+        ]
+      },
+      {
+        id: 103,
+        title: 'Module 3: Dynamic Programming Mastery',
+        slug: 'dynamic-programming-mastery',
+        description: 'Memoization, 1D/2D Tabulation, 0/1 Knapsack, and Longest Common Subsequence.',
+        orderIndex: 3,
+        curriculumLevel: 'ADVANCED',
+        status: 'PUBLISHED',
+        lessons: [
+          {
+            id: 1004,
+            title: '3.1 Dynamic Programming 0/1 Knapsack Pattern',
+            slug: '0-1-knapsack-dp-pattern',
+            estimatedMinutes: 30,
+            orderIndex: 1,
+            status: 'PUBLISHED',
+            hinglishStatus: 'PUBLISHED',
+            contentEn: `# 0/1 Knapsack Problem
+
+Given weights and values of items, determine the maximum value that can fit into a knapsack of capacity $W$.
+
+### Recurrence Relation
+$$DP[i][w] = \\max(DP[i-1][w], \\text{val}[i] + DP[i-1][w - \\text{wt}[i]])$$`,
+            contentHinglish: `# 0/1 Knapsack Problem 🇮🇳
+
+Items ke weights aur values diye hote hain, aur hume capacity $W$ ke andar maximum profit calculate karna hota hai.`
+          }
+        ],
+        quizzes: [
+          {
+            id: 5,
+            title: 'Module 3 Assessment: Dynamic Programming',
+            slug: 'dp-mastery-quiz',
+            description: 'Test your understanding of state transitions and memoization (10 Questions, 75% to pass).',
+            minPassScorePercentage: 75,
+            quizType: 'MODULE_QUIZ',
+            curriculumLevel: 'ADVANCED',
+            status: 'PUBLISHED',
+            questions: []
+          },
+          {
+            id: 6,
+            title: 'Advanced Level Comprehensive Assessment (25 Questions)',
+            slug: 'dsa-advanced-final-quiz',
+            description: 'Grand graduation assessment across Beginner, Intermediate, and Advanced DSA. Score 80%+ to unlock Verified Certificate.',
+            minPassScorePercentage: 80,
+            quizType: 'LEVEL_FINAL_QUIZ',
+            curriculumLevel: 'ADVANCED',
+            status: 'PUBLISHED',
+            questions: []
+          }
+        ]
+      },
+      {
+        id: 104,
+        title: 'Placement Ready: Top Product Company Interview Problems',
+        slug: 'placement-ready-interview-problems',
+        description: 'Targeted Google, Amazon, Microsoft, and Uber technical interview problems and live coding patterns.',
+        orderIndex: 4,
+        curriculumLevel: 'PLACEMENT_READY',
+        status: 'PUBLISHED',
+        lessons: [
+          {
+            id: 1005,
+            title: '4.1 Top 50 LeetCode Hard Patterns for FAANG',
+            slug: 'top-50-faang-interview-patterns',
+            estimatedMinutes: 45,
+            orderIndex: 1,
+            status: 'PUBLISHED',
+            hinglishStatus: 'PUBLISHED',
+            contentEn: `# Top 50 FAANG Interview Patterns
+
+This Placement Ready masterclass reviews top algorithmic patterns: Monotonic Stacks, Sliding Window Maximum, Dijkstra with Priority Queue, and Trie string matches.`
+          }
+        ],
+        quizzes: []
       }
     ]
   },

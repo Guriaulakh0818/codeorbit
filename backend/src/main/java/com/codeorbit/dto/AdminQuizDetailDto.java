@@ -13,6 +13,8 @@ public class AdminQuizDetailDto {
     private String description;
     private int minPassScorePercentage;
     private Integer maxAttempts;
+    private String quizType = "MODULE_QUIZ";
+    private String curriculumLevel;
     private PublishStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -75,6 +77,22 @@ public class AdminQuizDetailDto {
 
     public void setMaxAttempts(Integer maxAttempts) {
         this.maxAttempts = maxAttempts;
+    }
+
+    public String getQuizType() {
+        return quizType;
+    }
+
+    public void setQuizType(String quizType) {
+        this.quizType = quizType;
+    }
+
+    public String getCurriculumLevel() {
+        return curriculumLevel;
+    }
+
+    public void setCurriculumLevel(String curriculumLevel) {
+        this.curriculumLevel = curriculumLevel;
     }
 
     public PublishStatus getStatus() {

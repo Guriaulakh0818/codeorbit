@@ -19,6 +19,8 @@ public class AdminModuleRequestDto {
 
     private int orderIndex = 0;
 
+    private String curriculumLevel = "BEGINNER";
+
     @NotNull(message = "Publish status is required")
     private PublishStatus status = PublishStatus.DRAFT;
 
@@ -55,6 +57,14 @@ public class AdminModuleRequestDto {
 
     public void setOrderIndex(int orderIndex) {
         this.orderIndex = orderIndex;
+    }
+
+    public String getCurriculumLevel() {
+        return curriculumLevel;
+    }
+
+    public void setCurriculumLevel(String curriculumLevel) {
+        this.curriculumLevel = curriculumLevel;
     }
 
     public PublishStatus getStatus() {

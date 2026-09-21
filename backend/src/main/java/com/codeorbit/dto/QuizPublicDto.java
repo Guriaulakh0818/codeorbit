@@ -13,6 +13,8 @@ public class QuizPublicDto {
     private String description;
     private int minPassScorePercentage;
     private Integer maxAttempts;
+    private String quizType = "MODULE_QUIZ";
+    private String curriculumLevel;
     private String displayedLanguage; // 'en' or 'hinglish'
     private List<QuizQuestionPublicDto> questions = new ArrayList<>();
 
@@ -89,6 +91,22 @@ public class QuizPublicDto {
 
     public void setMaxAttempts(Integer maxAttempts) {
         this.maxAttempts = maxAttempts;
+    }
+
+    public String getQuizType() {
+        return quizType;
+    }
+
+    public void setQuizType(String quizType) {
+        this.quizType = quizType;
+    }
+
+    public String getCurriculumLevel() {
+        return curriculumLevel;
+    }
+
+    public void setCurriculumLevel(String curriculumLevel) {
+        this.curriculumLevel = curriculumLevel;
     }
 
     public String getDisplayedLanguage() {

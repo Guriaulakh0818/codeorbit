@@ -63,6 +63,8 @@ public class QuizServiceImpl implements QuizService {
         dto.setDescription(quiz.getDescription());
         dto.setMinPassScorePercentage(quiz.getMinPassScorePercentage());
         dto.setMaxAttempts(quiz.getMaxAttempts());
+        dto.setQuizType(quiz.getQuizType() != null ? quiz.getQuizType().name() : "MODULE_QUIZ");
+        dto.setCurriculumLevel(quiz.getCurriculumLevel() != null ? quiz.getCurriculumLevel().name() : (quiz.getModule().getCurriculumLevel() != null ? quiz.getModule().getCurriculumLevel().name() : "BEGINNER"));
         dto.setDisplayedLanguage(language);
 
         List<QuizQuestion> questions = new ArrayList<>(quizQuestionRepository.findByQuizIdOrderByOrderIndexAsc(quiz.getId()));

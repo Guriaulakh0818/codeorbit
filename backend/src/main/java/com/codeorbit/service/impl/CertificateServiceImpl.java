@@ -89,19 +89,25 @@ public class CertificateServiceImpl implements CertificateService {
             );
         }
 
-        // Server-side verification of completion requirements
-        long totalLessons = lessonRepository.countPublishedLessonsByCourseId(course.getId());
-        long completedLessons = progressRepository.countCompletedPublishedLessons(user.getId(), course.getId());
+        // Server-side verification of completion requirements across Beginner, Intermediate, and Advanced levels
+        List<CurriculumLevel> requiredLevels = List.of(
+                CurriculumLevel.BEGINNER,
+                CurriculumLevel.INTERMEDIATE,
+                CurriculumLevel.ADVANCED
+        );
 
-        if (totalLessons == 0 || completedLessons < totalLessons) {
-            throw new BadRequestException("Cannot claim certificate: " + (totalLessons - completedLessons) + " published lesson(s) remain incomplete.");
+        long totalLessons = lessonRepository.countPublishedLessonsByCourseIdAndLevels(course.getId(), requiredLevels);
+        long completedLessons = progressRepository.countCompletedPublishedLessonsByLevels(user.getId(), course.getId(), requiredLevels);
+
+        if (totalLessons > 0 && completedLessons < totalLessons) {
+            throw new BadRequestException("Cannot claim certificate: " + (totalLessons - completedLessons) + " published lesson(s) across Beginner, Intermediate, and Advanced remain incomplete.");
         }
 
-        long totalQuizzes = quizRepository.countPublishedQuizzesByCourseId(course.getId());
-        long passedQuizzes = trackerRepository.countPassedPublishedQuizzesByCourse(user.getId(), course.getId());
+        long totalQuizzes = quizRepository.countPublishedQuizzesByCourseIdAndLevels(course.getId(), requiredLevels);
+        long passedQuizzes = trackerRepository.countPassedPublishedQuizzesByCourseAndLevels(user.getId(), course.getId(), requiredLevels);
 
         if (totalQuizzes > 0 && passedQuizzes < totalQuizzes) {
-            throw new BadRequestException("Cannot claim certificate: " + (totalQuizzes - passedQuizzes) + " module quiz(zes) have not met the 80% passing threshold.");
+            throw new BadRequestException("Cannot claim certificate: " + (totalQuizzes - passedQuizzes) + " required module/level final quiz(zes) have not met the passing threshold across Beginner, Intermediate, and Advanced.");
         }
 
         // Generate unique code

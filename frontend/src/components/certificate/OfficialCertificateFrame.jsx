@@ -236,7 +236,7 @@ export const OfficialCertificateFrame = forwardRef(({ cert }, ref) => {
                     </span>
                     <span className="px-3 py-1 rounded-lg bg-white border border-indigo-300 font-bold flex items-center gap-1.5 shadow-2xs text-indigo-900">
                       <Globe className="w-3.5 h-3.5 text-indigo-600 flex-shrink-0" />
-                      <span>Bilingual English & Hinglish</span>
+                      <span>Verified Academic Registry</span>
                     </span>
                   </div>
                 </div>

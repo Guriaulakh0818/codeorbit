@@ -22,6 +22,9 @@ public interface UserLessonProgressRepository extends JpaRepository<UserLessonPr
     @Query("SELECT COUNT(p) FROM UserLessonProgress p WHERE p.user.id = :userId AND p.lesson.module.course.id = :courseId AND p.status = 'COMPLETED' AND p.lesson.status = 'PUBLISHED'")
     long countCompletedPublishedLessons(@Param("userId") Long userId, @Param("courseId") Long courseId);
 
+    @Query("SELECT COUNT(p) FROM UserLessonProgress p WHERE p.user.id = :userId AND p.lesson.module.course.id = :courseId AND p.status = 'COMPLETED' AND p.lesson.status = 'PUBLISHED' AND p.lesson.module.curriculumLevel IN (:levels)")
+    long countCompletedPublishedLessonsByLevels(@Param("userId") Long userId, @Param("courseId") Long courseId, @Param("levels") java.util.Collection<com.codeorbit.entity.CurriculumLevel> levels);
+
     @Query("SELECT p.lesson.id FROM UserLessonProgress p WHERE p.user.id = :userId AND p.lesson.module.course.id = :courseId AND p.status = 'COMPLETED'")
     List<Long> findCompletedLessonIdsByUserIdAndCourseId(@Param("userId") Long userId, @Param("courseId") Long courseId);
 }

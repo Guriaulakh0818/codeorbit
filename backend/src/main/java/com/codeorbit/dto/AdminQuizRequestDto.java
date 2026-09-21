@@ -21,9 +21,13 @@ public class AdminQuizRequestDto {
 
     @Min(value = 50, message = "Passing threshold percentage must be at least 50%")
     @Max(value = 100, message = "Passing threshold percentage cannot exceed 100%")
-    private int minPassScorePercentage = 80;
+    private int minPassScorePercentage = 75;
 
     private Integer maxAttempts;
+
+    private String quizType = "MODULE_QUIZ";
+
+    private String curriculumLevel;
 
     @NotNull(message = "Publish status is required")
     private PublishStatus status = PublishStatus.DRAFT;
@@ -69,6 +73,22 @@ public class AdminQuizRequestDto {
 
     public void setMaxAttempts(Integer maxAttempts) {
         this.maxAttempts = maxAttempts;
+    }
+
+    public String getQuizType() {
+        return quizType;
+    }
+
+    public void setQuizType(String quizType) {
+        this.quizType = quizType;
+    }
+
+    public String getCurriculumLevel() {
+        return curriculumLevel;
+    }
+
+    public void setCurriculumLevel(String curriculumLevel) {
+        this.curriculumLevel = curriculumLevel;
     }
 
     public PublishStatus getStatus() {
