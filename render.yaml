@@ -32,9 +32,18 @@ services:
       - key: DB_PORT
         value: "4000"
       - key: DB_NAME
-        value: codeorbit_db
+        value: test
       - key: DB_USER
         sync: false
       - key: DB_PASSWORD
         sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+
 
