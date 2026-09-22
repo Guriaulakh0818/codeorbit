@@ -33,6 +33,7 @@ public class QuizSubmissionTransactionalServiceImpl implements QuizSubmissionTra
     private final UserQuizAttemptRepository attemptRepository;
     private final UserQuizAttemptAnswerRepository attemptAnswerRepository;
     private final ObjectMapper objectMapper;
+    private final com.codeorbit.service.CurriculumProgressionService progressionService;
 
     public QuizSubmissionTransactionalServiceImpl(UserRepository userRepository,
                                                  QuizRepository quizRepository,
@@ -40,7 +41,8 @@ public class QuizSubmissionTransactionalServiceImpl implements QuizSubmissionTra
                                                  UserQuizTrackerRepository trackerRepository,
                                                  UserQuizAttemptRepository attemptRepository,
                                                  UserQuizAttemptAnswerRepository attemptAnswerRepository,
-                                                 ObjectMapper objectMapper) {
+                                                 ObjectMapper objectMapper,
+                                                 com.codeorbit.service.CurriculumProgressionService progressionService) {
         this.userRepository = userRepository;
         this.quizRepository = quizRepository;
         this.quizQuestionRepository = quizQuestionRepository;
@@ -48,6 +50,7 @@ public class QuizSubmissionTransactionalServiceImpl implements QuizSubmissionTra
         this.attemptRepository = attemptRepository;
         this.attemptAnswerRepository = attemptAnswerRepository;
         this.objectMapper = objectMapper;
+        this.progressionService = progressionService;
     }
 
     @Override
@@ -62,6 +65,9 @@ public class QuizSubmissionTransactionalServiceImpl implements QuizSubmissionTra
         if (quiz.getStatus() != PublishStatus.PUBLISHED) {
             throw new BadRequestException("Cannot submit attempt for unpublished quiz: " + quiz.getTitle());
         }
+
+        // Validate backend progression prerequisites
+        progressionService.validateQuizAccess(userId, quiz);
 
         List<QuizQuestion> questions = quizQuestionRepository.findByQuizIdOrderByOrderIndexAsc(quiz.getId());
         if (questions.isEmpty()) {

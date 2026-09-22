@@ -7,14 +7,29 @@ import React, { useEffect } from 'react';
 export const SeoHead = ({
   title = 'CodeOrbit — Free Computer Science Tutorials & Engineering Guides',
   description = 'Free high-quality tutorials, notes, cheat sheets, and practice quizzes for CSE & IT engineering students. Learn DSA, Operating Systems, DBMS, Computer Networks, and System Design.',
-  keywords = 'computer science tutorials, free CS courses, DSA notes, operating systems, DBMS, computer networks, system design, java, python, c++, interview preparation, geeksforgeeks alternative',
+  keywords = 'computer science tutorials, free CS courses, DSA notes, operating systems, DBMS, computer networks, system design, java, python, c++, interview preparation',
   canonicalUrl,
   ogType = 'website',
   article = null, // { publishedTime, modifiedTime, author, section, tags }
+  course = null, // { name, description, provider, isAccessibleForFree, educationalLevel }
+  faq = null, // [ { question: '...', answer: '...' } ]
   breadcrumbs = [] // [ { name: 'Home', url: '/' }, { name: 'DSA', url: '/courses/dsa' }, ... ]
 }) => {
-  const currentUrl = canonicalUrl || (typeof window !== 'undefined' ? window.location.href : 'https://www.codeorbit.online');
-  const siteTitle = title.includes('CodeOrbit') ? title : `${title} | CodeOrbit Free CS Portal`;
+  // Compute clean canonical URL without query parameters or hash
+  const getCleanUrl = () => {
+    if (canonicalUrl) {
+      return canonicalUrl.startsWith('http') ? canonicalUrl : `https://www.codeorbit.online${canonicalUrl}`;
+    }
+    if (typeof window !== 'undefined') {
+      const { protocol, host, pathname } = window.location;
+      const cleanPath = pathname.endsWith('/') && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+      return `${protocol}//${host}${cleanPath}`;
+    }
+    return 'https://www.codeorbit.online';
+  };
+
+  const currentUrl = getCleanUrl();
+  const siteTitle = title.includes('CodeOrbit') ? title : `${title} | CodeOrbit`;
 
   useEffect(() => {
     // 1. Update Document Title
@@ -47,19 +62,19 @@ export const SeoHead = ({
     }
     canonicalEl.setAttribute('href', currentUrl);
 
-    // 4. OpenGraph Tags (Facebook / LinkedIn / WhatsApp)
+    // 4. OpenGraph Tags
     setMetaTag('property', 'og:title', siteTitle);
     setMetaTag('property', 'og:description', description);
     setMetaTag('property', 'og:url', currentUrl);
     setMetaTag('property', 'og:type', ogType);
     setMetaTag('property', 'og:site_name', 'CodeOrbit');
-    setMetaTag('property', 'og:image', 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=1200&auto=format&fit=crop&q=80');
+    setMetaTag('property', 'og:image', 'https://www.codeorbit.online/codeorbit-logo.png');
 
     // 5. Twitter Card Tags
     setMetaTag('name', 'twitter:card', 'summary_large_image');
     setMetaTag('name', 'twitter:title', siteTitle);
     setMetaTag('name', 'twitter:description', description);
-    setMetaTag('name', 'twitter:image', 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=1200&auto=format&fit=crop&q=80');
+    setMetaTag('name', 'twitter:image', 'https://www.codeorbit.online/codeorbit-logo.png');
 
     // 6. JSON-LD Structured Data for Google Rich Snippets
     let scriptEl = document.getElementById('codeorbit-jsonld');
@@ -72,12 +87,13 @@ export const SeoHead = ({
 
     const jsonLdData = [];
 
-    // WebSite / Organization Schema
+    // WebSite / EducationalOrganization Schema
     jsonLdData.push({
       '@context': 'https://schema.org',
-      '@type': 'WebSite',
+      '@type': 'EducationalOrganization',
       'name': 'CodeOrbit',
       'url': 'https://www.codeorbit.online',
+      'logo': 'https://www.codeorbit.online/codeorbit-logo.png',
       'description': 'Free Computer Science Tutorials & Placement Preparation Portal'
     });
 
@@ -95,6 +111,24 @@ export const SeoHead = ({
       });
     }
 
+    // Course Schema
+    if (course) {
+      jsonLdData.push({
+        '@context': 'https://schema.org',
+        '@type': 'Course',
+        'name': course.name || title,
+        'description': course.description || description,
+        'provider': {
+          '@type': 'Organization',
+          'name': 'CodeOrbit',
+          'sameAs': 'https://www.codeorbit.online'
+        },
+        'isAccessibleForFree': course.isAccessibleForFree !== false,
+        'educationalLevel': course.educationalLevel || 'Beginner to Advanced',
+        'url': currentUrl
+      });
+    }
+
     // TechArticle Schema for Lessons / Articles
     if (article) {
       jsonLdData.push({
@@ -105,14 +139,14 @@ export const SeoHead = ({
         'url': currentUrl,
         'author': {
           '@type': 'Organization',
-          'name': 'CodeOrbit CS Portal'
+          'name': 'CodeOrbit Engineering'
         },
         'publisher': {
           '@type': 'Organization',
           'name': 'CodeOrbit',
           'logo': {
             '@type': 'ImageObject',
-            'url': 'https://www.codeorbit.online/favicon.svg'
+            'url': 'https://www.codeorbit.online/codeorbit-logo.png'
           }
         },
         'inLanguage': ['en', 'hi'],
@@ -121,8 +155,26 @@ export const SeoHead = ({
       });
     }
 
+    // FAQPage Schema
+    if (faq && Array.isArray(faq) && faq.length > 0) {
+      jsonLdData.push({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        'mainEntity': faq.map(f => ({
+          '@type': 'Question',
+          'name': f.question,
+          'acceptedAnswer': {
+            '@type': 'Answer',
+            'text': f.answer
+          }
+        }))
+      });
+    }
+
     scriptEl.textContent = JSON.stringify(jsonLdData);
-  }, [siteTitle, description, keywords, currentUrl, ogType, article, breadcrumbs]);
+  }, [siteTitle, description, keywords, currentUrl, ogType, article, course, faq, breadcrumbs]);
 
   return null;
 };
+
+export default SeoHead;

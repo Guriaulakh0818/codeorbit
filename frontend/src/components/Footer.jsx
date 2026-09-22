@@ -61,27 +61,27 @@ export const Footer = () => {
           {/* Col 3: Programming & Practice */}
           <div className="space-y-3">
             <h4 className="text-white font-bold text-xs uppercase tracking-wider font-mono">
-              Languages & Practice
+              Placement & Prep
             </h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/courses" className="hover:text-emerald-400 transition-colors text-slate-300">
-                  Java for Placements
-                </Link>
-              </li>
-              <li>
-                <Link to="/courses" className="hover:text-emerald-400 transition-colors text-slate-300">
-                  Python Programming
-                </Link>
-              </li>
-              <li>
-                <Link to="/courses" className="hover:text-emerald-400 transition-colors text-slate-300">
-                  C++ STL & Complexity
+                <Link to="/placement-kits" className="hover:text-emerald-400 transition-colors text-slate-300">
+                  Placement Prep Kits (₹99)
                 </Link>
               </li>
               <li>
                 <Link to="/certificates/verify" className="hover:text-emerald-400 transition-colors text-slate-300">
                   Certificate Verification
+                </Link>
+              </li>
+              <li>
+                <Link to="/courses" className="hover:text-emerald-400 transition-colors text-slate-300">
+                  All Subject Tracks
+                </Link>
+              </li>
+              <li>
+                <Link to="/ebooks" className="hover:text-emerald-400 transition-colors text-slate-300">
+                  Official Handbooks & Ebooks
                 </Link>
               </li>
             </ul>
@@ -90,9 +90,14 @@ export const Footer = () => {
           {/* Col 4: Legal & AdSense Compliance */}
           <div className="space-y-3">
             <h4 className="text-white font-bold text-xs uppercase tracking-wider font-mono">
-              Legal & Policies
+              About & Policies
             </h4>
             <ul className="space-y-2">
+              <li>
+                <Link to="/about" className="hover:text-emerald-400 transition-colors text-slate-300">
+                  About CodeOrbit
+                </Link>
+              </li>
               <li>
                 <Link to="/privacy" className="hover:text-emerald-400 transition-colors text-slate-300">
                   Privacy Policy
@@ -105,7 +110,7 @@ export const Footer = () => {
               </li>
               <li>
                 <Link to="/refund" className="hover:text-emerald-400 transition-colors text-slate-300">
-                  Free Platform Policy
+                  Free Platform & Refund Policy
                 </Link>
               </li>
               <li>

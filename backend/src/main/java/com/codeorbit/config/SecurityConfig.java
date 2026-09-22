@@ -87,21 +87,25 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public Auth & Webhook Endpoints
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/payments/webhook").permitAll()
+                        .requestMatchers("/api/payments/webhook", "/api/payments/razorpay/webhook").permitAll()
                         // Public Catalog Browsing (GET only)
                         .requestMatchers(HttpMethod.GET, "/api/ebooks/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/ebooks/categories").permitAll()
                         // Public Learning Platform Browsing & Certificate Verification (GET only)
                         .requestMatchers(HttpMethod.GET, "/api/courses/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/certificates/verify/**").permitAll()
-                        // Dev tools & system
+                        .requestMatchers(HttpMethod.GET, "/api/placement-kits", "/api/placement-kits/*").permitAll()
+                        // Dev tools & system health
+                        .requestMatchers("/api/health", "/health", "/api/public/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         // Protected Admin APIs (Role ADMIN only)
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        // Protected Student & Payment APIs (Roles STUDENT or ADMIN)
+                        // Protected Student, Certificate, Placement Kit & Payment APIs (Roles STUDENT or ADMIN)
                         .requestMatchers("/api/student/**").hasAnyRole("STUDENT", "ADMIN")
                         .requestMatchers("/api/payments/**").hasAnyRole("STUDENT", "ADMIN")
+                        .requestMatchers("/api/certificates/**").hasAnyRole("STUDENT", "ADMIN")
+                        .requestMatchers("/api/placement-kits/**").hasAnyRole("STUDENT", "ADMIN")
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
                 );

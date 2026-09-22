@@ -15,7 +15,13 @@ public interface CourseModuleRepository extends JpaRepository<CourseModule, Long
 
     List<CourseModule> findByCourseIdOrderByOrderIndexAsc(Long courseId);
 
+    List<CourseModule> findBySubcourseIdAndStatusOrderByOrderIndexAsc(Long subcourseId, PublishStatus status);
+
+    List<CourseModule> findBySubcourseIdOrderByOrderIndexAsc(Long subcourseId);
+
     Optional<CourseModule> findByCourseIdAndSlug(Long courseId, String slug);
 
     boolean existsByCourseIdAndSlug(Long courseId, String slug);
+
+    Optional<CourseModule> findByCourseIdAndCurriculumLevelAndOrderIndex(Long courseId, com.codeorbit.entity.CurriculumLevel curriculumLevel, int orderIndex);
 }

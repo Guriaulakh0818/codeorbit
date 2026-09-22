@@ -18,9 +18,11 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final com.codeorbit.service.GoogleAuthService googleAuthService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, com.codeorbit.service.GoogleAuthService googleAuthService) {
         this.authService = authService;
+        this.googleAuthService = googleAuthService;
     }
 
     /**
@@ -46,6 +48,18 @@ public class AuthController {
     ) {
         AuthResponseDto response = authService.login(loginDto);
         return ResponseEntity.ok(ApiResponse.success("Login successful", response));
+    }
+
+    /**
+     * POST /api/auth/google
+     * Authenticates or auto-registers a STUDENT using a Google ID token.
+     */
+    @PostMapping("/google")
+    public ResponseEntity<ApiResponse<AuthResponseDto>> googleLogin(
+            @Valid @RequestBody com.codeorbit.dto.GoogleLoginRequestDto requestDto
+    ) {
+        AuthResponseDto response = googleAuthService.authenticateWithGoogle(requestDto.getIdToken());
+        return ResponseEntity.ok(ApiResponse.success("Google login successful", response));
     }
 
     /**

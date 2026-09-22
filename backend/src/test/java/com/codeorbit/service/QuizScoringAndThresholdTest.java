@@ -44,6 +44,9 @@ class QuizScoringAndThresholdTest {
     @Mock
     private UserQuizAttemptAnswerRepository attemptAnswerRepository;
 
+    @Mock
+    private CurriculumProgressionService progressionService;
+
     private ObjectMapper objectMapper = new ObjectMapper();
 
     private QuizSubmissionTransactionalServiceImpl submissionService;
@@ -61,7 +64,8 @@ class QuizScoringAndThresholdTest {
                 trackerRepository,
                 attemptRepository,
                 attemptAnswerRepository,
-                objectMapper
+                objectMapper,
+                progressionService
         );
 
         user = new User("Rohan Verma", "rohan@student.edu", "hashed_pwd", Role.STUDENT);
@@ -95,7 +99,6 @@ class QuizScoringAndThresholdTest {
         List<QuizAnswerSubmissionDto> answers = new ArrayList<>();
         for (int i = 0; i < questions.size(); i++) {
             QuizQuestion q = questions.get(i);
-            // If index < correctAnswersCount, submit correct option "opt_a", else wrong option "opt_b"
             String selectedOption = (i < correctAnswersCount) ? "opt_a" : "opt_b";
             answers.add(new QuizAnswerSubmissionDto(q.getId(), selectedOption));
         }
@@ -106,9 +109,9 @@ class QuizScoringAndThresholdTest {
     }
 
     @Test
-    @DisplayName("Module Quiz (10 Qs, 75% threshold): 8/10 correct gives 80.00% and PASSES")
-    void testModuleQuiz_8Of10_Passes75PercentBoundary() {
-        Quiz moduleQuiz = new Quiz(module, "Arrays Quiz", "arrays-quiz", "10 Qs", 75, 5, PublishStatus.PUBLISHED);
+    @DisplayName("Module Quiz (10 Qs, 80% threshold): 8/10 correct gives 80.00% and PASSES")
+    void testModuleQuiz_8Of10_Passes80PercentBoundary() {
+        Quiz moduleQuiz = new Quiz(module, "Arrays Quiz", "arrays-quiz", "10 Qs", 80, 5, PublishStatus.PUBLISHED);
         moduleQuiz.setId(50L);
         moduleQuiz.setQuizType(QuizType.MODULE_QUIZ);
         moduleQuiz.setCurriculumLevel(CurriculumLevel.BEGINNER);
@@ -126,21 +129,21 @@ class QuizScoringAndThresholdTest {
             return a;
         });
 
-        QuizSubmissionRequestDto request = createSubmissionRequest(questions, 8); // 8 of 10 correct
+        QuizSubmissionRequestDto request = createSubmissionRequest(questions, 8); // 8 of 10 correct = 80%
         QuizSubmissionResultDto result = submissionService.executeSubmissionInNewTransaction(101L, 50L, request);
 
         assertNotNull(result);
         assertEquals(10, result.getTotalQuestions());
         assertEquals(8, result.getCorrectAnswers());
         assertEquals(0, new BigDecimal("80.00").compareTo(result.getScorePercentage()));
-        assertEquals(75, result.getPassThresholdPercentage());
-        assertTrue(result.isPassed(), "8/10 on 75% threshold quiz must pass");
+        assertEquals(80, result.getPassThresholdPercentage());
+        assertTrue(result.isPassed(), "8/10 on 80% threshold quiz must pass");
     }
 
     @Test
-    @DisplayName("Module Quiz (10 Qs, 75% threshold): 7/10 correct gives 70.00% and FAILS")
-    void testModuleQuiz_7Of10_Fails75PercentBoundary() {
-        Quiz moduleQuiz = new Quiz(module, "Arrays Quiz", "arrays-quiz", "10 Qs", 75, 5, PublishStatus.PUBLISHED);
+    @DisplayName("Module Quiz (10 Qs, 80% threshold): 7/10 correct gives 70.00% and FAILS")
+    void testModuleQuiz_7Of10_Fails80PercentBoundary() {
+        Quiz moduleQuiz = new Quiz(module, "Arrays Quiz", "arrays-quiz", "10 Qs", 80, 5, PublishStatus.PUBLISHED);
         moduleQuiz.setId(50L);
         moduleQuiz.setQuizType(QuizType.MODULE_QUIZ);
         moduleQuiz.setCurriculumLevel(CurriculumLevel.BEGINNER);
@@ -158,15 +161,15 @@ class QuizScoringAndThresholdTest {
             return a;
         });
 
-        QuizSubmissionRequestDto request = createSubmissionRequest(questions, 7); // 7 of 10 correct
+        QuizSubmissionRequestDto request = createSubmissionRequest(questions, 7); // 7 of 10 correct = 70%
         QuizSubmissionResultDto result = submissionService.executeSubmissionInNewTransaction(101L, 50L, request);
 
         assertNotNull(result);
         assertEquals(10, result.getTotalQuestions());
         assertEquals(7, result.getCorrectAnswers());
         assertEquals(0, new BigDecimal("70.00").compareTo(result.getScorePercentage()));
-        assertEquals(75, result.getPassThresholdPercentage());
-        assertFalse(result.isPassed(), "7/10 on 75% threshold quiz must fail");
+        assertEquals(80, result.getPassThresholdPercentage());
+        assertFalse(result.isPassed(), "7/10 on 80% threshold quiz must fail");
     }
 
     @Test
@@ -190,7 +193,7 @@ class QuizScoringAndThresholdTest {
             return a;
         });
 
-        QuizSubmissionRequestDto request = createSubmissionRequest(questions, 20); // 20 of 25 correct
+        QuizSubmissionRequestDto request = createSubmissionRequest(questions, 20); // 20 of 25 correct = 80%
         QuizSubmissionResultDto result = submissionService.executeSubmissionInNewTransaction(101L, 60L, request);
 
         assertNotNull(result);
@@ -222,7 +225,7 @@ class QuizScoringAndThresholdTest {
             return a;
         });
 
-        QuizSubmissionRequestDto request = createSubmissionRequest(questions, 19); // 19 of 25 correct
+        QuizSubmissionRequestDto request = createSubmissionRequest(questions, 19); // 19 of 25 correct = 76%
         QuizSubmissionResultDto result = submissionService.executeSubmissionInNewTransaction(101L, 60L, request);
 
         assertNotNull(result);

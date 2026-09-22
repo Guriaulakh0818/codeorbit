@@ -43,6 +43,9 @@ class StudentLearningControllerTest {
     @MockBean
     private CertificateService certificateService;
 
+    @MockBean
+    private com.codeorbit.service.StudentEnrollmentService studentEnrollmentService;
+
     @Test
     @DisplayName("POST /api/student/progress/complete - Marks lesson complete")
     void testMarkLessonCompleted() throws Exception {
@@ -125,5 +128,52 @@ class StudentLearningControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.completionPercentage").value(80));
+    }
+
+    @Test
+    @DisplayName("POST /api/student/courses/{slug}/enroll - Enrolls student into course")
+    void testEnrollInCourse() throws Exception {
+        StudentEnrollmentDto enrollmentDto = new StudentEnrollmentDto();
+        enrollmentDto.setId(101L);
+        enrollmentDto.setCourseId(1L);
+        enrollmentDto.setCourseSlug("dsa");
+        enrollmentDto.setCourseTitle("Data Structures & Algorithms");
+        enrollmentDto.setStatus("ACTIVE");
+
+        when(studentEnrollmentService.enrollInCourse(any(), eq("dsa"))).thenReturn(enrollmentDto);
+
+        mockMvc.perform(post("/api/student/courses/dsa/enroll"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.courseSlug").value("dsa"))
+                .andExpect(jsonPath("$.data.status").value("ACTIVE"));
+    }
+
+    @Test
+    @DisplayName("GET /api/student/courses/{slug}/enrollment-status - Returns enrollment status")
+    void testGetEnrollmentStatus() throws Exception {
+        when(studentEnrollmentService.isStudentEnrolled(any(), eq("dsa"))).thenReturn(true);
+
+        mockMvc.perform(get("/api/student/courses/dsa/enrollment-status"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data").value(true));
+    }
+
+    @Test
+    @DisplayName("GET /api/student/dashboard - Returns enrolled student dashboard metrics")
+    void testGetStudentDashboard() throws Exception {
+        StudentDashboardSummaryDto summary = new StudentDashboardSummaryDto();
+        summary.setTotalEnrolledCourses(1);
+        summary.setTotalCompletedLessons(10);
+        summary.setTotalBookmarks(2);
+        summary.setTotalCertificatesEarned(0);
+
+        when(studentEnrollmentService.getStudentDashboardSummary(any())).thenReturn(summary);
+
+        mockMvc.perform(get("/api/student/dashboard"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.totalEnrolledCourses").value(1));
     }
 }

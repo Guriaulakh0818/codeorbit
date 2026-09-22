@@ -27,6 +27,7 @@ public class LessonProgressServiceImpl implements LessonProgressService {
     private final UserQuizTrackerRepository trackerRepository;
     private final UserCourseBookmarkRepository bookmarkRepository;
     private final CertificateRepository certificateRepository;
+    private final com.codeorbit.service.CurriculumProgressionService progressionService;
 
     public LessonProgressServiceImpl(UserRepository userRepository,
                                      CourseRepository courseRepository,
@@ -35,7 +36,8 @@ public class LessonProgressServiceImpl implements LessonProgressService {
                                      UserLessonProgressRepository progressRepository,
                                      UserQuizTrackerRepository trackerRepository,
                                      UserCourseBookmarkRepository bookmarkRepository,
-                                     CertificateRepository certificateRepository) {
+                                     CertificateRepository certificateRepository,
+                                     com.codeorbit.service.CurriculumProgressionService progressionService) {
         this.userRepository = userRepository;
         this.courseRepository = courseRepository;
         this.lessonRepository = lessonRepository;
@@ -44,6 +46,7 @@ public class LessonProgressServiceImpl implements LessonProgressService {
         this.trackerRepository = trackerRepository;
         this.bookmarkRepository = bookmarkRepository;
         this.certificateRepository = certificateRepository;
+        this.progressionService = progressionService;
     }
 
     @Override
@@ -62,6 +65,9 @@ public class LessonProgressServiceImpl implements LessonProgressService {
     public void markLessonCompleted(UserPrincipal principal, Long lessonId) {
         User user = getUser(principal);
         Lesson lesson = getLesson(lessonId);
+
+        // Enforce sequential progression check on backend
+        progressionService.validateModuleAccess(user.getId(), lesson.getModule());
 
         UserLessonProgress progress = progressRepository.findByUserIdAndLessonId(user.getId(), lesson.getId())
                 .orElseGet(() -> new UserLessonProgress(user, lesson, LessonProgressStatus.COMPLETED));
@@ -94,29 +100,17 @@ public class LessonProgressServiceImpl implements LessonProgressService {
         Course course = courseRepository.findBySlugAndStatus(courseSlug, PublishStatus.PUBLISHED)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with slug: " + courseSlug));
 
-        List<CurriculumLevel> requiredLevels = List.of(
-                CurriculumLevel.BEGINNER,
-                CurriculumLevel.INTERMEDIATE,
-                CurriculumLevel.ADVANCED
-        );
-
         long totalLessons = lessonRepository.countPublishedLessonsByCourseId(course.getId());
         long completedLessons = progressRepository.countCompletedPublishedLessons(user.getId(), course.getId());
         long totalQuizzes = quizRepository.countPublishedQuizzesByCourseId(course.getId());
         long passedQuizzes = trackerRepository.countPassedPublishedQuizzesByCourse(user.getId(), course.getId());
-
-        long certReqLessons = lessonRepository.countPublishedLessonsByCourseIdAndLevels(course.getId(), requiredLevels);
-        long certCompletedLessons = progressRepository.countCompletedPublishedLessonsByLevels(user.getId(), course.getId(), requiredLevels);
-        long certReqQuizzes = quizRepository.countPublishedQuizzesByCourseIdAndLevels(course.getId(), requiredLevels);
-        long certPassedQuizzes = trackerRepository.countPassedPublishedQuizzesByCourseAndLevels(user.getId(), course.getId(), requiredLevels);
 
         int completionPercentage = 0;
         if (totalLessons > 0) {
             completionPercentage = (int) Math.round(((double) completedLessons / totalLessons) * 100.0);
         }
 
-        boolean eligibleForCertificate = (certReqLessons > 0 && certCompletedLessons >= certReqLessons)
-                && (certReqQuizzes == 0 || certPassedQuizzes >= certReqQuizzes);
+        boolean eligibleForCertificate = progressionService.isEligibleForCertificate(user.getId(), course.getId());
 
         Optional<Certificate> cert = certificateRepository.findByUserIdAndCourseId(user.getId(), course.getId());
 

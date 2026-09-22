@@ -28,9 +28,18 @@ public class User {
     @Column(nullable = false, unique = true, length = 255)
     private String email;
 
-    @NotBlank(message = "Password hash is required")
-    @Column(name = "password_hash", nullable = false, length = 255)
+    @Column(name = "password_hash", length = 255)
     private String passwordHash;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "auth_provider", nullable = false, length = 32)
+    private AuthProvider authProvider = AuthProvider.LOCAL;
+
+    @Column(name = "google_id", length = 255)
+    private String googleId;
+
+    @Column(name = "avatar_url", length = 1000)
+    private String avatarUrl;
 
     @NotNull(message = "Role is required")
     @Enumerated(EnumType.STRING)
@@ -54,6 +63,17 @@ public class User {
         this.email = email;
         this.passwordHash = passwordHash;
         this.role = role != null ? role : Role.STUDENT;
+        this.authProvider = AuthProvider.LOCAL;
+        this.active = true;
+    }
+
+    public User(String fullName, String email, String googleId, String avatarUrl, Role role) {
+        this.fullName = fullName;
+        this.email = email;
+        this.googleId = googleId;
+        this.avatarUrl = avatarUrl;
+        this.role = role != null ? role : Role.STUDENT;
+        this.authProvider = AuthProvider.GOOGLE;
         this.active = true;
     }
 
@@ -101,6 +121,30 @@ public class User {
 
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
+    }
+
+    public AuthProvider getAuthProvider() {
+        return authProvider;
+    }
+
+    public void setAuthProvider(AuthProvider authProvider) {
+        this.authProvider = authProvider;
+    }
+
+    public String getGoogleId() {
+        return googleId;
+    }
+
+    public void setGoogleId(String googleId) {
+        this.googleId = googleId;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 
     public Role getRole() {

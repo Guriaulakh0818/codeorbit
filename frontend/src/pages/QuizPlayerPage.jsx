@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, 
@@ -27,6 +27,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useLearningProgress } from '../context/LearningProgressContext';
 import { LanguageSelector } from '../components/LanguageSelector';
 import { translateToHinglish } from '../utils/hinglishTranslator';
+import { Button, Badge, Card, ProgressBar, Skeleton, EmptyState } from '../components/ui';
 
 export const QuizPlayerPage = () => {
   const { courseSlug, quizSlug } = useParams();
@@ -46,11 +47,13 @@ export const QuizPlayerPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState(null);
   const [submissionResult, setSubmissionResult] = useState(null);
+  
   // Certificate state
   const [claimedCertificate, setClaimedCertificate] = useState(null);
   const [claimingCert, setClaimingCert] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [guestName, setGuestName] = useState('');
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const loadQuiz = async () => {
     if (!courseSlug || !quizSlug) return;
@@ -133,8 +136,6 @@ export const QuizPlayerPage = () => {
     }));
   };
 
-  const [showLoginModal, setShowLoginModal] = useState(false);
-
   const handleSubmitQuiz = async () => {
     if (!quiz || submitting) return;
 
@@ -178,18 +179,52 @@ export const QuizPlayerPage = () => {
   const totalQuestions = questions.length;
   const answeredCount = Object.keys(userAnswers).length;
 
+  // Keyboard accessibility: 1-4 or A-D to select options, Arrow keys to navigate
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (submissionResult || !currentQuestion || loading) return;
+      
+      // Ignore if user is typing in an input
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+
+      const key = e.key.toUpperCase();
+      const options = currentQuestion.options || [];
+
+      if (['1', '2', '3', '4'].includes(key)) {
+        const idx = parseInt(key, 10) - 1;
+        if (options[idx]) {
+          handleSelectOption(currentQuestion.id, options[idx].id);
+        }
+      } else if (['A', 'B', 'C', 'D'].includes(key)) {
+        const idx = key.charCodeAt(0) - 65;
+        if (options[idx]) {
+          handleSelectOption(currentQuestion.id, options[idx].id);
+        }
+      } else if (e.key === 'ArrowRight') {
+        setCurrentQuestionIdx((prev) => Math.min(totalQuestions - 1, prev + 1));
+      } else if (e.key === 'ArrowLeft') {
+        setCurrentQuestionIdx((prev) => Math.max(0, prev - 1));
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [submissionResult, currentQuestion, totalQuestions, loading]);
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-6">
         
         {/* Navigation Bar */}
         <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-200">
-          <Link
-            to={`/courses/${courseSlug}`}
-            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-emerald-700 transition-colors bg-white px-3.5 py-1.5 rounded-xl border border-slate-200 shadow-2xs"
+          <Button
+            variant="outline"
+            size="sm"
+            href={`/courses/${courseSlug}`}
+            icon={ArrowLeft}
           >
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to Syllabus
-          </Link>
+            Back to Syllabus
+          </Button>
 
           {/* Bilingual Switcher (only when not submitted) */}
           {!submissionResult && (
@@ -204,50 +239,40 @@ export const QuizPlayerPage = () => {
 
         {/* Loading State */}
         {loading && (
-          <div className="bg-white border border-slate-200 rounded-3xl p-8 sm:p-12 space-y-6 animate-pulse shadow-xs">
-            <div className="h-6 bg-slate-100 rounded w-1/4" />
-            <div className="h-10 bg-slate-100 rounded w-2/3" />
-            <div className="space-y-4 pt-4">
-              <div className="h-12 bg-slate-100 rounded w-full" />
-              <div className="h-12 bg-slate-100 rounded w-full" />
-              <div className="h-12 bg-slate-100 rounded w-full" />
+          <div className="space-y-6">
+            <Skeleton variant="text" width="40%" height="28px" />
+            <Skeleton variant="rectangular" height="160px" />
+            <div className="space-y-3">
+              <Skeleton variant="rectangular" height="60px" />
+              <Skeleton variant="rectangular" height="60px" />
+              <Skeleton variant="rectangular" height="60px" />
             </div>
           </div>
         )}
 
         {/* 404 Not Found */}
         {!loading && is404 && (
-          <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center space-y-5 max-w-lg mx-auto shadow-xs">
-            <div className="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center mx-auto">
-              <HelpCircle className="w-7 h-7" />
-            </div>
-            <h2 className="text-2xl font-bold text-slate-900">Quiz Not Found</h2>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              We couldn't find the quiz <span className="font-mono text-emerald-700 font-semibold">"{quizSlug}"</span> for this course.
-            </p>
-            <Link
-              to={`/courses/${courseSlug}`}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
-            >
-              Return to Syllabus
-            </Link>
+          <div className="min-h-[50vh] flex items-center justify-center p-4">
+            <EmptyState
+              icon={HelpCircle}
+              title="Quiz Not Found"
+              description={`We couldn't find the quiz "${quizSlug}" for this course track.`}
+              actionText="Return to Syllabus"
+              actionHref={`/courses/${courseSlug}`}
+            />
           </div>
         )}
 
         {/* Error State */}
         {!loading && !is404 && error && (
-          <div className="bg-rose-50 border border-rose-200 rounded-3xl p-8 text-center space-y-4 max-w-lg mx-auto shadow-xs">
-            <div className="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto">
-              <AlertCircle className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-slate-900">Error Loading Quiz</h3>
-            <p className="text-xs text-rose-700">{error}</p>
-            <button
-              onClick={loadQuiz}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer"
-            >
-              <RefreshCw className="w-3.5 h-3.5" /> Retry
-            </button>
+          <div className="min-h-[50vh] flex items-center justify-center p-4">
+            <EmptyState
+              icon={AlertCircle}
+              title="Error Loading Quiz"
+              description={error}
+              actionText="Retry Loading"
+              onAction={loadQuiz}
+            />
           </div>
         )}
 
@@ -256,14 +281,14 @@ export const QuizPlayerPage = () => {
           <div className="space-y-6">
             
             {/* Quiz Info Header */}
-            <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-3 shadow-xs">
+            <Card className="p-6 sm:p-8 space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 uppercase tracking-wider">
+                <Badge variant="primary" size="sm">
                   {quiz.moduleTitle || 'Module Assessment'}
-                </span>
-                <span className="px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                </Badge>
+                <Badge variant="default" size="sm">
                   {quiz.minPassScorePercentage}% Pass Threshold
-                </span>
+                </Badge>
               </div>
 
               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
@@ -276,21 +301,30 @@ export const QuizPlayerPage = () => {
                 </p>
               )}
 
-              {/* Progress Counters */}
-              <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs">
-                <span className="text-slate-500 font-medium">
-                  Question {currentQuestionIdx + 1} of {totalQuestions}
-                </span>
-                <span className="text-emerald-700 font-semibold">
-                  {answeredCount} of {totalQuestions} Answered
-                </span>
+              {/* Progress Counters & Bar */}
+              <div className="pt-3 border-t border-slate-100 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-500 font-medium">
+                    Question {currentQuestionIdx + 1} of {totalQuestions}
+                  </span>
+                  <span className="text-emerald-700 font-semibold">
+                    {answeredCount} of {totalQuestions} Answered
+                  </span>
+                </div>
+                <ProgressBar
+                  value={answeredCount}
+                  max={totalQuestions || 1}
+                  variant="primary"
+                  size="sm"
+                  showPercentage={false}
+                />
               </div>
-            </div>
+            </Card>
 
             {/* Question Progress Dots */}
             <div className="flex items-center gap-2 overflow-x-auto p-2.5 bg-white border border-slate-200 rounded-2xl shadow-2xs">
               {questions.map((q, idx) => {
-                const isAnswered = !userAnswers[q.id];
+                const isAnswered = !!userAnswers[q.id];
                 const isCurrent = idx === currentQuestionIdx;
                 return (
                   <button
@@ -312,16 +346,16 @@ export const QuizPlayerPage = () => {
 
             {/* Current Question Card */}
             {currentQuestion && (
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
+              <Card className="p-6 sm:p-8 space-y-6">
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-emerald-700 font-mono uppercase tracking-wider">
                       Question {currentQuestionIdx + 1}
                     </span>
                     {isHinglish && (
-                      <span className="bg-emerald-50 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+                      <Badge variant="info" size="xs">
                         Hinglish 🇮🇳
-                      </span>
+                      </Badge>
                     )}
                   </div>
                   <h2 className="text-lg sm:text-xl font-bold text-slate-900 leading-snug">
@@ -371,7 +405,11 @@ export const QuizPlayerPage = () => {
                     );
                   })}
                 </div>
-              </div>
+
+                <div className="text-[11px] text-slate-400 font-mono text-right">
+                  Tip: Press <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded font-bold">1-4</kbd> or <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded font-bold">A-D</kbd> to select option
+                </div>
+              </Card>
             )}
 
             {/* Error banner during submission */}
@@ -382,51 +420,50 @@ export const QuizPlayerPage = () => {
                   <span>{submissionError}</span>
                 </div>
                 {!user && (
-                  <Link
-                    to="/login"
-                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 transition-colors"
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    href="/login"
+                    icon={LogIn}
                   >
-                    <LogIn className="w-3.5 h-3.5" /> Login
-                  </Link>
+                    Login
+                  </Button>
                 )}
               </div>
             )}
 
             {/* Navigation & Submit Footer */}
             <div className="flex items-center justify-between gap-4 pt-4">
-              <button
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setCurrentQuestionIdx((prev) => Math.max(0, prev - 1))}
                 disabled={currentQuestionIdx === 0}
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none text-slate-700 text-xs font-bold rounded-xl border border-slate-200 transition-colors cursor-pointer shadow-2xs"
+                icon={ChevronLeft}
               >
-                <ChevronLeft className="w-4 h-4" /> Previous
-              </button>
+                Previous
+              </Button>
 
               {currentQuestionIdx < totalQuestions - 1 ? (
-                <button
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={() => setCurrentQuestionIdx((prev) => Math.min(totalQuestions - 1, prev + 1))}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer"
+                  icon={ChevronRight}
+                  iconPosition="right"
                 >
-                  Next Question <ChevronRight className="w-4 h-4" />
-                </button>
+                  Next Question
+                </Button>
               ) : (
-                <button
+                <Button
+                  variant="primary"
+                  size="md"
                   onClick={handleSubmitQuiz}
-                  disabled={submitting}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer"
+                  loading={submitting}
+                  icon={CheckCircle2}
                 >
-                  {submitting ? (
-                    <>
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                      <span>Evaluating Server-Side...</span>
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="w-4 h-4" />
-                      <span>Submit Assessment</span>
-                    </>
-                  )}
-                </button>
+                  Submit Assessment
+                </Button>
               )}
             </div>
 
@@ -438,7 +475,7 @@ export const QuizPlayerPage = () => {
           <div className="space-y-8 animate-in fade-in duration-300">
             
             {/* Score Banner Card */}
-            <div className={`rounded-3xl p-8 sm:p-10 border shadow-xs space-y-6 ${
+            <Card className={`p-8 sm:p-10 space-y-6 ${
               submissionResult.passed
                 ? 'bg-emerald-50/70 border-emerald-200'
                 : 'bg-amber-50/70 border-amber-200'
@@ -446,13 +483,9 @@ export const QuizPlayerPage = () => {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider border ${
-                      submissionResult.passed
-                        ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                        : 'bg-amber-100 text-amber-800 border-amber-300'
-                    }`}>
+                    <Badge variant={submissionResult.passed ? 'success' : 'warning'} size="sm">
                       {submissionResult.passed ? 'Assessment Passed' : 'Needs Retake'}
-                    </span>
+                    </Badge>
                     <span className="text-xs text-slate-600 bg-white px-2.5 py-1 rounded-md border border-slate-200">
                       Attempt #{submissionResult.attemptNumber}
                     </span>
@@ -485,21 +518,24 @@ export const QuizPlayerPage = () => {
 
               {/* Action Buttons */}
               <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-slate-200/80">
-                <button
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={loadQuiz}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer"
+                  icon={RotateCcw}
                 >
-                  <RotateCcw className="w-3.5 h-3.5" /> Retake Quiz (Randomized)
-                </button>
+                  Retake Quiz (Randomized)
+                </Button>
 
-                <Link
-                  to={`/courses/${courseSlug}`}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 transition-colors shadow-2xs"
+                <Button
+                  variant="outline"
+                  size="sm"
+                  href={`/courses/${courseSlug}`}
                 >
                   Back to Syllabus
-                </Link>
+                </Button>
               </div>
-            </div>
+            </Card>
 
             {/* Grand Certificate Card if Passed */}
             {submissionResult.passed && (
@@ -535,12 +571,15 @@ export const QuizPlayerPage = () => {
                   {/* Actions */}
                   {claimedCertificate ? (
                     <div className="flex flex-wrap items-center gap-3 relative z-10">
-                      <Link
-                        to={`/certificates/verify/${claimedCertificate.certificateCode}`}
-                        className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold rounded-xl shadow-md transition-all active:scale-95 cursor-pointer"
+                      <Button
+                        variant="primary"
+                        size="md"
+                        href={`/certificates/verify/${claimedCertificate.certificateCode}`}
+                        icon={GraduationCap}
+                        className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold"
                       >
-                        <GraduationCap className="w-4 h-4" /> View & Print Certificate
-                      </Link>
+                        View & Print Certificate
+                      </Button>
 
                       <button
                         onClick={() => {
@@ -575,12 +614,13 @@ export const QuizPlayerPage = () => {
                         onChange={(e) => setGuestName(e.target.value)}
                         className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-emerald-400 flex-1"
                       />
-                      <button
+                      <Button
+                        variant="primary"
+                        size="sm"
                         onClick={handleUpdateGuestCertificate}
-                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs cursor-pointer"
                       >
                         Update Name
-                      </button>
+                      </Button>
                     </div>
                     <Link
                       to="/login"
@@ -601,9 +641,9 @@ export const QuizPlayerPage = () => {
 
               <div className="space-y-4">
                 {(submissionResult.feedback || []).map((fb, idx) => (
-                  <div
+                  <Card
                     key={fb.questionId}
-                    className={`rounded-2xl border p-6 space-y-4 transition-colors bg-white ${
+                    className={`p-6 space-y-4 ${
                       fb.correct
                         ? 'border-emerald-200 shadow-2xs'
                         : 'border-rose-200 shadow-2xs'
@@ -619,21 +659,9 @@ export const QuizPlayerPage = () => {
                         </h3>
                       </div>
 
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold flex-shrink-0 ${
-                        fb.correct
-                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                          : 'bg-rose-50 text-rose-800 border border-rose-200'
-                      }`}>
-                        {fb.correct ? (
-                          <>
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Correct
-                          </>
-                        ) : (
-                          <>
-                            <XCircle className="w-3.5 h-3.5 text-rose-600" /> Incorrect
-                          </>
-                        )}
-                      </span>
+                      <Badge variant={fb.correct ? 'success' : 'danger'} size="sm">
+                        {fb.correct ? 'Correct' : 'Incorrect'}
+                      </Badge>
                     </div>
 
                     {fb.codeContext && (
@@ -669,14 +697,14 @@ export const QuizPlayerPage = () => {
 
                             <div className="flex items-center gap-1.5 flex-shrink-0">
                               {isUserChoice && (
-                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-800">
+                                <Badge variant="default" size="xs">
                                   Your Choice
-                                </span>
+                                </Badge>
                               )}
                               {isCorrectKey && (
-                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                <Badge variant="success" size="xs">
                                   Correct Key ✓
-                                </span>
+                                </Badge>
                               )}
                             </div>
                           </div>
@@ -691,7 +719,7 @@ export const QuizPlayerPage = () => {
                         <p className="text-slate-700 leading-relaxed">{fb.explanation}</p>
                       </div>
                     )}
-                  </div>
+                  </Card>
                 ))}
               </div>
             </div>
@@ -713,18 +741,23 @@ export const QuizPlayerPage = () => {
                 </p>
               </div>
               <div className="space-y-2.5 pt-2">
-                <Link
-                  to={`/login?redirect=${encodeURIComponent(window.location.pathname)}`}
-                  className="w-full inline-flex items-center justify-center gap-2 py-3 px-5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
+                <Button
+                  variant="primary"
+                  size="md"
+                  fullWidth={true}
+                  href={`/login?redirect=${encodeURIComponent(window.location.pathname)}`}
+                  icon={LogIn}
                 >
-                  <LogIn className="w-4 h-4" /> Login to Complete Course
-                </Link>
-                <Link
-                  to={`/register?redirect=${encodeURIComponent(window.location.pathname)}`}
-                  className="w-full inline-flex items-center justify-center gap-2 py-3 px-5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 transition-colors"
+                  Login to Complete Course
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="md"
+                  fullWidth={true}
+                  href={`/register?redirect=${encodeURIComponent(window.location.pathname)}`}
                 >
                   Create Free Account (30 Seconds)
-                </Link>
+                </Button>
                 <button
                   onClick={() => setShowLoginModal(false)}
                   className="text-xs text-slate-400 hover:text-slate-600 font-semibold cursor-pointer pt-1 block w-full"

@@ -22,6 +22,10 @@ public class CourseModule {
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subcourse_id")
+    private Subcourse subcourse;
+
     @NotBlank(message = "Module title is required")
     @Size(max = 255)
     @Column(nullable = false, length = 255)
@@ -170,5 +174,13 @@ public class CourseModule {
 
     public void setQuizzes(List<Quiz> quizzes) {
         this.quizzes = quizzes;
+    }
+
+    public Subcourse getSubcourse() {
+        return subcourse;
+    }
+
+    public void setSubcourse(Subcourse subcourse) {
+        this.subcourse = subcourse;
     }
 }

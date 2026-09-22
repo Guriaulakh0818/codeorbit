@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Lock, Mail, User, ArrowRight, Eye, EyeOff, Info, GraduationCap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { GoogleSignInButton } from '../components/auth/GoogleSignInButton';
 
 export const RegisterPage = () => {
   const { register } = useAuth();
@@ -92,6 +93,18 @@ export const RegisterPage = () => {
               {errors.form}
             </div>
           )}
+
+          {/* Google Sign-in */}
+          <div>
+            <GoogleSignInButton onError={(msg) => setErrors({ form: msg })} />
+          </div>
+
+          <div className="relative flex items-center justify-center">
+            <div className="border-t border-slate-200 w-full"></div>
+            <span className="bg-white px-3 text-[11px] font-medium text-slate-400 uppercase tracking-wider relative">
+              Or register with email
+            </span>
+          </div>
 
           {/* Form */}
           <form onSubmit={handleRegisterSubmit} className="space-y-4 text-xs">

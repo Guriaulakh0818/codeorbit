@@ -19,13 +19,16 @@ public class StudentLearningController {
     private final LessonProgressService progressService;
     private final QuizService quizService;
     private final CertificateService certificateService;
+    private final com.codeorbit.service.StudentEnrollmentService studentEnrollmentService;
 
     public StudentLearningController(LessonProgressService progressService,
                                      QuizService quizService,
-                                     CertificateService certificateService) {
+                                     CertificateService certificateService,
+                                     com.codeorbit.service.StudentEnrollmentService studentEnrollmentService) {
         this.progressService = progressService;
         this.quizService = quizService;
         this.certificateService = certificateService;
+        this.studentEnrollmentService = studentEnrollmentService;
     }
 
     /**
@@ -143,5 +146,43 @@ public class StudentLearningController {
     ) {
         List<CertificatePublicDto> certificates = certificateService.getStudentCertificates(principal);
         return ResponseEntity.ok(ApiResponse.success(certificates));
+    }
+
+    /**
+     * POST /api/student/courses/{courseSlug}/enroll
+     * Explicitly enrolls the authenticated student into the specified subject/course.
+     */
+    @PostMapping("/courses/{courseSlug}/enroll")
+    public ResponseEntity<ApiResponse<StudentEnrollmentDto>> enrollInCourse(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable String courseSlug
+    ) {
+        StudentEnrollmentDto enrollment = studentEnrollmentService.enrollInCourse(principal, courseSlug);
+        return ResponseEntity.ok(ApiResponse.success("Successfully enrolled in course", enrollment));
+    }
+
+    /**
+     * GET /api/student/courses/{courseSlug}/enrollment-status
+     * Checks whether the authenticated student is actively enrolled in the specified subject/course.
+     */
+    @GetMapping("/courses/{courseSlug}/enrollment-status")
+    public ResponseEntity<ApiResponse<Boolean>> getEnrollmentStatus(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable String courseSlug
+    ) {
+        boolean isEnrolled = studentEnrollmentService.isStudentEnrolled(principal, courseSlug);
+        return ResponseEntity.ok(ApiResponse.success(isEnrolled));
+    }
+
+    /**
+     * GET /api/student/dashboard
+     * Returns personal enrolled-only learning metrics, course cards, 4-level progress, and quick resume link.
+     */
+    @GetMapping("/dashboard")
+    public ResponseEntity<ApiResponse<StudentDashboardSummaryDto>> getStudentDashboard(
+            @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        StudentDashboardSummaryDto dashboard = studentEnrollmentService.getStudentDashboardSummary(principal);
+        return ResponseEntity.ok(ApiResponse.success(dashboard));
     }
 }

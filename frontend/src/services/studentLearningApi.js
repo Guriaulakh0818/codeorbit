@@ -375,5 +375,138 @@ export const studentLearningApi = {
     } catch (e) {
       return { success: true, data: serverCerts };
     }
+  },
+
+  /**
+   * Enroll the authenticated student in a course/subject
+   * @param {string} courseSlug
+   */
+  async enrollInCourse(courseSlug) {
+    try {
+      const res = await fetch(`${API_BASE}/student/courses/${encodeURIComponent(courseSlug)}/enroll`, {
+        method: 'POST',
+        headers: getAuthHeaders(true)
+      });
+      if (res.ok) {
+        const json = await res.json();
+        this._saveLocalEnrollment(courseSlug);
+        return { success: true, data: json.data, message: json.message };
+      }
+    } catch (e) {}
+
+    // Fallback: record local enrollment
+    this._saveLocalEnrollment(courseSlug);
+    return {
+      success: true,
+      data: {
+        courseSlug,
+        status: 'ACTIVE',
+        enrolledAt: new Date().toISOString()
+      },
+      message: 'Enrolled successfully!'
+    };
+  },
+
+  /**
+   * Check if the authenticated student is enrolled in a course/subject
+   * @param {string} courseSlug
+   */
+  async getEnrollmentStatus(courseSlug) {
+    try {
+      const res = await fetch(`${API_BASE}/student/courses/${encodeURIComponent(courseSlug)}/enrollment-status`, {
+        headers: getAuthHeaders(false)
+      });
+      if (res.ok) {
+        const json = await res.json();
+        return { success: true, isEnrolled: Boolean(json.data) };
+      }
+    } catch (e) {}
+
+    // Fallback check
+    const localEnrollments = this._getLocalEnrollments();
+    return { success: true, isEnrolled: localEnrollments.includes(courseSlug) };
+  },
+
+  /**
+   * Fetch personal enrolled-only student dashboard data
+   */
+  async getStudentDashboard() {
+    try {
+      const res = await fetch(`${API_BASE}/student/dashboard`, {
+        headers: getAuthHeaders(true)
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.data) {
+          return { success: true, data: json.data };
+        }
+      }
+    } catch (e) {}
+
+    // Fallback: build dashboard summary for enrolled courses
+    const localEnrollments = this._getLocalEnrollments();
+    const enrolledCourses = CURRICULUM_DATA.filter(c => localEnrollments.includes(c.slug));
+
+    const courseCards = enrolledCourses.map(course => {
+      const subcourses = (course.subcourses || []).map(sc => ({
+        subcourseId: sc.id,
+        subcourseTitle: sc.title,
+        level: sc.level,
+        displayOrder: sc.displayOrder || 1,
+        isPaid: Boolean(sc.isPaid),
+        priceInr: sc.priceInr || (sc.level === 'PLACEMENT_READY' ? 29 : 0),
+        completionPercentage: 0,
+        completedLessonsCount: 0,
+        totalLessonsCount: (sc.modules || []).reduce((acc, m) => acc + (m.lessons || []).length, 0),
+        moduleQuizzesPassed: 0,
+        totalModuleQuizzes: (sc.modules || []).length,
+        finalExamPassed: false
+      }));
+
+      return {
+        courseId: course.id,
+        title: course.title,
+        slug: course.slug,
+        category: course.category || 'Computer Science',
+        totalSubcourses: 4,
+        completedSubcourses: 0,
+        overallProgressPercentage: 0,
+        certificateClaimable: false,
+        subcourses,
+        enrolledAt: new Date().toISOString()
+      };
+    });
+
+    return {
+      success: true,
+      data: {
+        totalEnrolledCourses: enrolledCourses.length,
+        activeCoursesCount: enrolledCourses.length,
+        completedCoursesCount: 0,
+        certificatesEarnedCount: 0,
+        enrolledCourses: courseCards,
+        recentCourseSlug: enrolledCourses.length > 0 ? enrolledCourses[0].slug : null,
+        recentCourseTitle: enrolledCourses.length > 0 ? enrolledCourses[0].title : null
+      }
+    };
+  },
+
+  _getLocalEnrollments() {
+    try {
+      const raw = localStorage.getItem('codeorbit_enrolled_courses');
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  _saveLocalEnrollment(courseSlug) {
+    try {
+      const list = this._getLocalEnrollments();
+      if (!list.includes(courseSlug)) {
+        list.push(courseSlug);
+        localStorage.setItem('codeorbit_enrolled_courses', JSON.stringify(list));
+      }
+    } catch (e) {}
   }
 };

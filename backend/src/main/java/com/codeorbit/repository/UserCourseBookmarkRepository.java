@@ -19,5 +19,7 @@ public interface UserCourseBookmarkRepository extends JpaRepository<UserCourseBo
     @Query("SELECT b.lesson.id FROM UserCourseBookmark b WHERE b.user.id = :userId")
     List<Long> findBookmarkedLessonIdsByUserId(@Param("userId") Long userId);
 
+    long countByUserId(Long userId);
+
     void deleteByUserIdAndLessonId(Long userId, Long lessonId);
 }

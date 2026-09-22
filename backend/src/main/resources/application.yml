@@ -29,6 +29,13 @@ app:
   jwt:
     secret: ${JWT_SECRET:CodeOrbitSecureDefaultSecretKeyForJwtSigningMustBeAtLeast256BitsLong2026!}
     expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+  oauth:
+    google:
+      client-id: ${GOOGLE_CLIENT_ID:dummy-client-id.apps.googleusercontent.com}
+  razorpay:
+    key-id: ${RAZORPAY_KEY_ID:rzp_test_dummy_key_id}
+    key-secret: ${RAZORPAY_KEY_SECRET:dummy_razorpay_secret_key_2026}
+    webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:dummy_razorpay_webhook_secret_2026}
   admin:
     bootstrap:
       enabled: ${ADMIN_BOOTSTRAP_ENABLED:false}

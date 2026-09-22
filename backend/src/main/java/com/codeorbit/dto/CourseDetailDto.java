@@ -13,6 +13,7 @@ public class CourseDetailDto {
     private String difficultyLevel;
     private String coverImageUrl;
     private int estimatedHours;
+    private List<SubcourseDto> subcourses = new ArrayList<>();
     private List<CourseModuleDto> modules = new ArrayList<>();
 
     public CourseDetailDto() {
@@ -88,6 +89,14 @@ public class CourseDetailDto {
 
     public void setEstimatedHours(int estimatedHours) {
         this.estimatedHours = estimatedHours;
+    }
+
+    public List<SubcourseDto> getSubcourses() {
+        return subcourses;
+    }
+
+    public void setSubcourses(List<SubcourseDto> subcourses) {
+        this.subcourses = subcourses;
     }
 
     public List<CourseModuleDto> getModules() {

@@ -1,0 +1,26 @@
+# ==============================================================================
+# CodeOrbit Robots.txt
+# Controls web crawler access to public educational content and indexes
+# ==============================================================================
+
+User-agent: *
+Allow: /
+Allow: /courses/
+Allow: /placement-kits/
+Allow: /verify/
+Allow: /about
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+Allow: /refund
+
+# Protect private student portals, admin gateways, and internal APIs
+Disallow: /student/
+Disallow: /admin/
+Disallow: /login
+Disallow: /register
+Disallow: /api/
+Disallow: /library
+
+# Sitemaps
+Sitemap: https://www.codeorbit.online/sitemap.xml

@@ -10,6 +10,8 @@ import { Footer } from './components/Footer';
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
 const CoursesPage = lazy(() => import('./pages/CoursesPage').then(m => ({ default: m.CoursesPage })));
 const CourseDetailPage = lazy(() => import('./pages/CourseDetailPage').then(m => ({ default: m.CourseDetailPage })));
+const SubcourseDetailPage = lazy(() => import('./pages/SubcourseDetailPage').then(m => ({ default: m.SubcourseDetailPage })));
+const ModuleDetailPage = lazy(() => import('./pages/ModuleDetailPage').then(m => ({ default: m.ModuleDetailPage })));
 const LessonReaderPage = lazy(() => import('./pages/LessonReaderPage').then(m => ({ default: m.LessonReaderPage })));
 const QuizPlayerPage = lazy(() => import('./pages/QuizPlayerPage').then(m => ({ default: m.QuizPlayerPage })));
 const CertificateVerifyPage = lazy(() => import('./pages/CertificateVerifyPage').then(m => ({ default: m.CertificateVerifyPage })));
@@ -19,9 +21,13 @@ const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage').then(m => ({ 
 const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
 const RegisterPage = lazy(() => import('./pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
 const ContactUsPage = lazy(() => import('./pages/ContactUsPage').then(m => ({ default: m.ContactUsPage })));
+const AboutUsPage = lazy(() => import('./pages/AboutUsPage').then(m => ({ default: m.AboutUsPage })));
+const PlacementKitsPage = lazy(() => import('./pages/PlacementKitsPage').then(m => ({ default: m.PlacementKitsPage })));
+const PlacementKitDetailPage = lazy(() => import('./pages/PlacementKitDetailPage').then(m => ({ default: m.PlacementKitDetailPage })));
 const TermsConditionsPage = lazy(() => import('./pages/TermsConditionsPage').then(m => ({ default: m.TermsConditionsPage })));
 const RefundPolicyPage = lazy(() => import('./pages/RefundPolicyPage').then(m => ({ default: m.RefundPolicyPage })));
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then(m => ({ default: m.PrivacyPolicyPage })));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
 
 const PageLoader = () => (
   <div className="min-h-[50vh] flex items-center justify-center">
@@ -79,9 +85,16 @@ function MainLayout() {
             <Route path="/" element={<HomePage />} />
             <Route path="/courses" element={<CoursesPage />} />
             <Route path="/courses/:courseSlug" element={<CourseDetailPage />} />
+            <Route path="/courses/:courseSlug/:subcourseSlug" element={<SubcourseDetailPage />} />
+            <Route path="/courses/:courseSlug/:subcourseSlug/:moduleSlug" element={<ModuleDetailPage />} />
+            <Route path="/courses/:courseSlug/:subcourseSlug/:moduleSlug/:lessonSlug" element={<LessonReaderPage />} />
             <Route path="/courses/:courseSlug/lessons/:lessonSlug" element={<LessonReaderPage />} />
             <Route path="/courses/:courseSlug/quizzes/:quizSlug" element={<QuizPlayerPage />} />
             
+            {/* Placement Prep Kits */}
+            <Route path="/placement-kits" element={<PlacementKitsPage />} />
+            <Route path="/placement-kits/:slug" element={<PlacementKitDetailPage />} />
+
             {/* Certificate Verification */}
             <Route path="/certificates/verify/:certificateCode" element={<CertificateVerifyPage />} />
             <Route path="/certificates/verify" element={<CertificateVerifyPage />} />
@@ -122,14 +135,15 @@ function MainLayout() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
-            {/* SEO & Legal Policy Pages for AdSense Compliance */}
+            {/* SEO, About & Legal Policy Pages for AdSense Compliance */}
+            <Route path="/about" element={<AboutUsPage />} />
             <Route path="/contact" element={<ContactUsPage />} />
             <Route path="/terms" element={<TermsConditionsPage />} />
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
             <Route path="/refund" element={<RefundPolicyPage />} />
 
-            {/* Fallback */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            {/* Fallback 404 Route */}
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
       </main>

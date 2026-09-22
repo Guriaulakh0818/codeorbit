@@ -40,6 +40,9 @@ class AuthControllerTest {
     @MockBean
     private AuthService authService;
 
+    @MockBean
+    private com.codeorbit.service.GoogleAuthService googleAuthService;
+
     private AuthResponseDto sampleAuthResponse;
 
     @BeforeEach
@@ -144,5 +147,20 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.fullName").value("Aman Sharma"));
+    }
+
+    @Test
+    void testGoogleLogin_Success_Returns200() throws Exception {
+        com.codeorbit.dto.GoogleLoginRequestDto requestDto = new com.codeorbit.dto.GoogleLoginRequestDto("valid-google-id-token");
+
+        when(googleAuthService.authenticateWithGoogle("valid-google-id-token"))
+                .thenReturn(sampleAuthResponse);
+
+        mockMvc.perform(post("/api/auth/google")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.token").value("jwt_sample_token_123"));
     }
 }

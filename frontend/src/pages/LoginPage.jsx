@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, Lock, Mail, ArrowRight, Eye, EyeOff, AlertCircle, Loader2, GraduationCap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { CodeOrbitLogo } from '../components/brand/CodeOrbitLogo';
+import { GoogleSignInButton } from '../components/auth/GoogleSignInButton';
 
 export const LoginPage = () => {
   const { login } = useAuth();
@@ -67,7 +68,7 @@ export const LoginPage = () => {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-7 sm:p-8 shadow-sm space-y-6">
+        <div className="bg-white rounded-3xl border border-slate-200 p-7 sm:p-8 shadow-sm space-y-5">
           
           {/* Server Error Alert */}
           {serverError && (
@@ -76,6 +77,18 @@ export const LoginPage = () => {
               <span>{serverError}</span>
             </div>
           )}
+
+          {/* Google One-Click Login */}
+          <div>
+            <GoogleSignInButton onError={(msg) => setServerError(msg)} />
+          </div>
+
+          <div className="relative flex items-center justify-center">
+            <div className="border-t border-slate-200 w-full"></div>
+            <span className="bg-white px-3 text-[11px] font-medium text-slate-400 uppercase tracking-wider relative">
+              Or continue with email
+            </span>
+          </div>
 
           {/* Login Form */}
           <form onSubmit={handleLoginSubmit} className="space-y-4 text-xs">

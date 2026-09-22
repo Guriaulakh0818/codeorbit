@@ -2,13 +2,17 @@ package com.codeorbit.service.impl;
 
 import com.codeorbit.dto.*;
 import com.codeorbit.entity.*;
+import com.codeorbit.exception.ForbiddenException;
 import com.codeorbit.exception.ResourceNotFoundException;
 import com.codeorbit.repository.*;
+import com.codeorbit.security.UserPrincipal;
 import com.codeorbit.service.CourseService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,21 +25,27 @@ import java.util.stream.Collectors;
 public class CourseServiceImpl implements CourseService {
 
     private final CourseRepository courseRepository;
+    private final SubcourseRepository subcourseRepository;
     private final CourseModuleRepository courseModuleRepository;
     private final LessonRepository lessonRepository;
     private final QuizRepository quizRepository;
     private final QuizQuestionRepository quizQuestionRepository;
+    private final PlacementReadyEntitlementRepository entitlementRepository;
 
     public CourseServiceImpl(CourseRepository courseRepository,
+                             SubcourseRepository subcourseRepository,
                              CourseModuleRepository courseModuleRepository,
                              LessonRepository lessonRepository,
                              QuizRepository quizRepository,
-                             QuizQuestionRepository quizQuestionRepository) {
+                             QuizQuestionRepository quizQuestionRepository,
+                             PlacementReadyEntitlementRepository entitlementRepository) {
         this.courseRepository = courseRepository;
+        this.subcourseRepository = subcourseRepository;
         this.courseModuleRepository = courseModuleRepository;
         this.lessonRepository = lessonRepository;
         this.quizRepository = quizRepository;
         this.quizQuestionRepository = quizQuestionRepository;
+        this.entitlementRepository = entitlementRepository;
     }
 
     @Override
@@ -138,6 +148,50 @@ public class CourseServiceImpl implements CourseService {
         }
 
         dto.setModules(moduleDtos);
+
+        // Map subcourses hierarchy
+        List<Subcourse> publishedSubcourses = subcourseRepository.findByCourseIdAndStatusOrderByOrderIndexAsc(course.getId(), PublishStatus.PUBLISHED);
+        List<SubcourseDto> subcourseDtos = new ArrayList<>();
+
+        for (Subcourse sc : publishedSubcourses) {
+            SubcourseDto scDto = new SubcourseDto(
+                    sc.getId(),
+                    sc.getTitle(),
+                    sc.getSlug(),
+                    sc.getDescription(),
+                    sc.getCurriculumLevel().name(),
+                    sc.getPriceInr(),
+                    sc.isFree(),
+                    sc.getOrderIndex()
+            );
+
+            // Filter modules belonging to this subcourse / level
+            List<CourseModuleDto> subcourseModules = moduleDtos.stream()
+                    .filter(m -> sc.getCurriculumLevel().name().equalsIgnoreCase(m.getCurriculumLevel()))
+                    .collect(Collectors.toList());
+            scDto.setModules(subcourseModules);
+
+            // Check if there is a level final quiz for this subcourse
+            quizRepository.findByCourseIdAndQuizTypeAndCurriculumLevel(course.getId(), QuizType.LEVEL_FINAL_QUIZ, sc.getCurriculumLevel())
+                    .stream().findFirst().ifPresent(fq -> {
+                        QuizSummaryDto fqDto = new QuizSummaryDto(
+                                fq.getId(),
+                                fq.getTitle(),
+                                fq.getSlug(),
+                                fq.getMinPassScorePercentage(),
+                                fq.getMaxAttempts(),
+                                (int) quizQuestionRepository.countByQuizId(fq.getId())
+                        );
+                        fqDto.setStatus(fq.getStatus());
+                        fqDto.setQuizType(QuizType.LEVEL_FINAL_QUIZ.name());
+                        fqDto.setCurriculumLevel(sc.getCurriculumLevel().name());
+                        scDto.setFinalQuiz(fqDto);
+                    });
+
+            subcourseDtos.add(scDto);
+        }
+
+        dto.setSubcourses(subcourseDtos);
         return dto;
     }
 
@@ -145,6 +199,17 @@ public class CourseServiceImpl implements CourseService {
     public LessonPublicDto getLessonByCourseAndSlug(String courseSlug, String lessonSlug, String requestedLanguage) {
         Lesson lesson = lessonRepository.findByCourseSlugAndLessonSlugAndStatus(courseSlug, lessonSlug, PublishStatus.PUBLISHED)
                 .orElseThrow(() -> new ResourceNotFoundException("Lesson not found: " + lessonSlug + " in course: " + courseSlug));
+
+        // Placement Ready subcourse lessons require active paid entitlement
+        if (lesson.getModule().getCurriculumLevel() == CurriculumLevel.PLACEMENT_READY) {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof UserPrincipal principal)) {
+                throw new ForbiddenException("Placement Ready access requires purchase.");
+            }
+            if (!entitlementRepository.existsByUserIdAndCourseId(principal.getId(), lesson.getModule().getCourse().getId())) {
+                throw new ForbiddenException("Placement Ready access requires purchase.");
+            }
+        }
 
         LessonPublicDto dto = new LessonPublicDto();
         dto.setId(lesson.getId());

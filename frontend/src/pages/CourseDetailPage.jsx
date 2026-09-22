@@ -18,15 +18,21 @@ import {
   Bookmark,
   Award,
   Terminal,
-  ArrowRight
+  ArrowRight,
+  Lock,
+  ExternalLink
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { coursesApi } from '../services/coursesApi';
 import { studentLearningApi } from '../services/studentLearningApi';
+import { createPlacementReadyOrder, verifyPlacementReadyPayment, getPlacementReadyStatus } from '../services/paymentApi';
+import { certificateApi } from '../services/certificateApi';
+import { openRazorpayCheckout } from '../utils/useRazorpay';
 import { useLearningProgress } from '../context/LearningProgressContext';
 import { SeoHead } from '../components/seo/SeoHead';
 import { AdSlot } from '../components/ads/AdSlot';
 import { triggerConfetti } from '../utils/confettiHelper';
+import { Button, Card, CardContent, Badge, ProgressBar, Skeleton, EmptyState, ErrorState } from '../components/ui';
 
 export const CourseDetailPage = () => {
   const { courseSlug } = useParams();
@@ -45,38 +51,163 @@ export const CourseDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [is404, setIs404] = useState(false);
-  const [claimingCertificate, setClaimingCertificate] = useState(false);
-  const [claimError, setClaimError] = useState(null);
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [enrolling, setEnrolling] = useState(false);
+  const [enrollMsg, setEnrollMsg] = useState(null);
+
+  // Placement Ready ₹29 Payment States
+  const [isPlacementReadyPurchased, setIsPlacementReadyPurchased] = useState(false);
+  const [placementPaymentLoading, setPlacementPaymentLoading] = useState(false);
+  const [placementPaymentError, setPlacementPaymentError] = useState(null);
+  const [placementPaymentSuccess, setPlacementPaymentSuccess] = useState(null);
+
+  // Certificate ₹9 Payment & Status States
+  const [certStatus, setCertStatus] = useState(null);
+  const [certPaymentLoading, setCertPaymentLoading] = useState(false);
+  const [certPaymentError, setCertPaymentError] = useState(null);
+  const [certPaymentSuccess, setCertPaymentSuccess] = useState(null);
+  const [certDownloadLoading, setCertDownloadLoading] = useState(false);
   
   // Track open/closed state for module accordions (all open by default)
   const [openModules, setOpenModules] = useState({});
+  const [openFaq, setOpenFaq] = useState({});
 
-  const handleClaimCertificate = async () => {
-    if (!courseSlug || claimingCertificate) return;
+  const handleEnrollCourse = async () => {
+    if (!courseSlug || enrolling) return;
 
     if (!user) {
       navigate(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
 
-    setClaimingCertificate(true);
-    setClaimError(null);
+    setEnrolling(true);
+    setEnrollMsg(null);
     try {
-      const res = await studentLearningApi.claimCertificate(courseSlug);
-      if (res.success && res.data) {
-        triggerConfetti({
-          particleCount: 120,
-          spread: 80,
-          origin: { y: 0.6 }
-        });
-        fetchCourseProgress(courseSlug);
-      } else {
-        setClaimError(res.message || 'Unable to issue certificate at this time.');
+      const res = await studentLearningApi.enrollInCourse(courseSlug);
+      if (res.success) {
+        setIsEnrolled(true);
+        setEnrollMsg('Enrolled successfully in this subject track!');
+        triggerConfetti({ particleCount: 60, spread: 60, origin: { y: 0.7 } });
       }
     } catch (e) {
-      setClaimError('Server error during certificate issuance.');
+      setEnrollMsg('Could not complete enrollment.');
     } finally {
-      setClaimingCertificate(false);
+      setEnrolling(false);
+    }
+  };
+
+  const handleUnlockPlacementReady = async () => {
+    if (!courseSlug || placementPaymentLoading || isPlacementReadyPurchased) return;
+
+    if (!user) {
+      navigate(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+
+    setPlacementPaymentLoading(true);
+    setPlacementPaymentError(null);
+    setPlacementPaymentSuccess(null);
+
+    try {
+      const orderData = await createPlacementReadyOrder(courseSlug);
+      if (!orderData || !orderData.razorpayOrderId) {
+        throw new Error('Failed to create payment order from server.');
+      }
+
+      await openRazorpayCheckout({
+        orderData,
+        onSuccess: async (verifyPayload) => {
+          try {
+            await verifyPlacementReadyPayment(verifyPayload);
+            setIsPlacementReadyPurchased(true);
+            setPlacementPaymentSuccess('Placement Ready track unlocked successfully! You now have lifetime access.');
+            triggerConfetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            loadCourseDetail();
+          } catch (vErr) {
+            setPlacementPaymentError(vErr.response?.data?.message || vErr.message || 'Payment verification failed.');
+          } finally {
+            setPlacementPaymentLoading(false);
+          }
+        },
+        onError: (err) => {
+          setPlacementPaymentError(err.message || 'Payment transaction failed or was cancelled.');
+          setPlacementPaymentLoading(false);
+        },
+        onDismiss: () => {
+          setPlacementPaymentLoading(false);
+        }
+      });
+    } catch (err) {
+      setPlacementPaymentError(err.response?.data?.message || err.message || 'Unable to start checkout.');
+      setPlacementPaymentLoading(false);
+    }
+  };
+
+  const handlePurchaseCertificate = async () => {
+    if (!courseSlug || certPaymentLoading) return;
+
+    if (!user) {
+      navigate(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+
+    setCertPaymentLoading(true);
+    setCertPaymentError(null);
+    setCertPaymentSuccess(null);
+
+    try {
+      const orderRes = await certificateApi.createCertificateOrder(courseSlug);
+      if (!orderRes.success || !orderRes.data?.razorpayOrderId) {
+        throw new Error(orderRes.message || 'Failed to create certificate order.');
+      }
+
+      await openRazorpayCheckout({
+        orderData: orderRes.data,
+        onSuccess: async (verifyPayload) => {
+          try {
+            const verifyRes = await certificateApi.verifyCertificatePayment(courseSlug, verifyPayload);
+            if (verifyRes.success && verifyRes.data) {
+              setCertPaymentSuccess('Payment verified! Your official certificate is issued and available for download.');
+              triggerConfetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+              // Refresh status
+              const statusRes = await certificateApi.getCertificateStatus(courseSlug);
+              if (statusRes.success) setCertStatus(statusRes.data);
+              fetchCourseProgress(courseSlug);
+            } else {
+              setCertPaymentError(verifyRes.message || 'Payment verification failed.');
+            }
+          } catch (vErr) {
+            setCertPaymentError(vErr.message || 'Payment verification failed.');
+          } finally {
+            setCertPaymentLoading(false);
+          }
+        },
+        onError: (err) => {
+          setCertPaymentError(err.message || 'Payment transaction cancelled or failed.');
+          setCertPaymentLoading(false);
+        },
+        onDismiss: () => {
+          setCertPaymentLoading(false);
+        }
+      });
+    } catch (err) {
+      setCertPaymentError(err.message || 'Could not initiate certificate payment.');
+      setCertPaymentLoading(false);
+    }
+  };
+
+  const handleDownloadCertificate = async (certCode) => {
+    if (!certCode || certDownloadLoading) return;
+    setCertDownloadLoading(true);
+    try {
+      const res = await certificateApi.downloadCertificatePdf(certCode);
+      if (!res.success) {
+        alert(res.message || 'Could not download certificate PDF');
+      }
+    } catch (e) {
+      alert('Error downloading certificate PDF');
+    } finally {
+      setCertDownloadLoading(false);
     }
   };
 
@@ -99,6 +230,27 @@ export const CourseDetailPage = () => {
 
         // Fetch authoritative student progress for this course
         fetchCourseProgress(courseSlug);
+
+        // Check enrollment, certificate and Placement Ready status if authenticated
+        if (user) {
+          studentLearningApi.getEnrollmentStatus(courseSlug).then((eRes) => {
+            if (eRes.success) {
+              setIsEnrolled(eRes.isEnrolled);
+            }
+          }).catch(() => {});
+
+          getPlacementReadyStatus(courseSlug).then((pRes) => {
+            if (pRes && pRes.hasAccess) {
+              setIsPlacementReadyPurchased(true);
+            }
+          }).catch(() => {});
+
+          certificateApi.getCertificateStatus(courseSlug).then((cRes) => {
+            if (cRes.success && cRes.data) {
+              setCertStatus(cRes.data);
+            }
+          }).catch(() => {});
+        }
       } else {
         if (res.status === 404) {
           setIs404(true);
@@ -115,7 +267,7 @@ export const CourseDetailPage = () => {
 
   useEffect(() => {
     loadCourseDetail();
-  }, [courseSlug]);
+  }, [courseSlug, user]);
 
   const toggleModule = (moduleId) => {
     setOpenModules((prev) => ({
@@ -135,14 +287,52 @@ export const CourseDetailPage = () => {
   );
   const progressData = (courseSlug && courseProgressMap?.[courseSlug]) || (course?.id && courseProgressMap?.[course.id]) || null;
 
+  const faqs = useMemo(() => {
+    if (!course) return [];
+    return [
+      {
+        question: `Is the ${course.title} course completely free on CodeOrbit?`,
+        answer: `Yes, all Level 1 (Beginner), Level 2 (Intermediate), and Level 3 (Advanced) lessons, notes, code examples, and module quizzes for ${course.title} are 100% free with no hidden charges.`
+      },
+      {
+        question: `Are lessons available in both English and Hinglish?`,
+        answer: `Yes! CodeOrbit provides complete bilingual support. You can seamlessly switch between polished English and conversational Hinglish explanations for every lesson.`
+      },
+      {
+        question: `How do I earn an official academic certificate for ${course.title}?`,
+        answer: `Complete all Level 1-3 module quizzes and final exams with a passing score of 80% or higher. Once eligible, you can claim your cryptographically verifiable certificate with QR code for ₹9.`
+      },
+      {
+        question: `What is included in the Placement Ready track?`,
+        answer: `The Placement Ready track contains curated FAANG & top product company interview question breakdowns, system patterns, and advanced problem-solving strategies available for a one-time ₹29 unlock.`
+      }
+    ];
+  }, [course]);
+
+  const toggleFaq = (idx) => {
+    setOpenFaq(prev => ({ ...prev, [idx]: !prev[idx] }));
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 py-8 px-4 sm:px-6 lg:px-8 flex flex-col selection:bg-emerald-500 selection:text-white">
       {/* SEO Dynamic Head */}
       {course && (
         <SeoHead
-          title={`${course.title} Syllabus & Notes — CodeOrbit`}
-          description={course.shortDescription || `Complete syllabus, verified code examples, and practice quizzes for ${course.title}. 100% Free in English & Hinglish.`}
-          canonicalUrl={`https://www.codeorbit.online/courses/${courseSlug}`}
+          title={`${course.title} Syllabus, Tutorials & Practice Quizzes`}
+          description={course.shortDescription || `Master ${course.title} from beginner to advanced. Complete syllabus, verified code examples, practice quizzes, and placement notes in English and Hinglish.`}
+          canonicalUrl={`/courses/${courseSlug}`}
+          course={{
+            name: course.title,
+            description: course.description || course.shortDescription,
+            isAccessibleForFree: true,
+            educationalLevel: course.difficultyLevel || 'Beginner to Advanced'
+          }}
+          breadcrumbs={[
+            { name: 'Home', url: '/' },
+            { name: 'Courses', url: '/courses' },
+            { name: course.title, url: `/courses/${courseSlug}` }
+          ]}
+          faq={faqs}
         />
       )}
 
@@ -248,6 +438,66 @@ export const CourseDetailPage = () => {
                 </p>
               </div>
 
+              {/* Enrollment Status & Actions */}
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 border ${
+                    isEnrolled ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-white text-slate-700 border-slate-200'
+                  }`}>
+                    <GraduationCap className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-slate-900 flex items-center gap-2">
+                      <span>{isEnrolled ? 'You are Enrolled in this Course' : 'Free Student Enrollment'}</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                        isEnrolled ? 'bg-emerald-50 text-emerald-800 border-emerald-300' : 'bg-slate-100 text-slate-600 border-slate-200'
+                      }`}>
+                        {isEnrolled ? 'ACTIVE ENROLLMENT' : 'NOT ENROLLED'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500">
+                      {isEnrolled
+                        ? 'Track your 4-level progress, take quizzes, and earn your certificate on your dashboard.'
+                        : 'Enroll for free to add this subject to your Student Dashboard and save your learning progress.'}
+                    </p>
+                  </div>
+                </div>
+
+                {!isEnrolled ? (
+                  <button
+                    onClick={handleEnrollCourse}
+                    disabled={enrolling}
+                    className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-all shadow-xs flex-shrink-0 cursor-pointer active:scale-95"
+                  >
+                    {enrolling ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Enrolling...
+                      </>
+                    ) : (
+                      <>
+                        <span>Enroll for Free</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <Link
+                    to="/student/dashboard"
+                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-emerald-800 text-xs font-semibold rounded-xl transition-colors flex-shrink-0 shadow-2xs"
+                  >
+                    <span>View in Dashboard</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                )}
+              </div>
+
+              {enrollMsg && (
+                <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                  <span>{enrollMsg}</span>
+                </div>
+              )}
+
               {/* Progress Bar (if authenticated / progress available) */}
               {progressData && (
                 <div className="space-y-3">
@@ -268,73 +518,167 @@ export const CourseDetailPage = () => {
                     </div>
                   </div>
 
-                  {/* Certificate Status & Claim Box */}
-                  {progressData.certificateCode ? (
-                    <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in duration-300">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center flex-shrink-0 border border-emerald-200">
-                          <Award className="w-5 h-5" />
+                  {/* Certificate Status & ₹9 Purchase / Download Section */}
+                  <div className="bg-gradient-to-br from-white via-slate-50 to-emerald-50/30 border-2 border-emerald-200/90 rounded-3xl p-5 sm:p-6 shadow-xs space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-300 flex items-center justify-center text-emerald-800 shadow-2xs flex-shrink-0">
+                          <Award className="w-6 h-6" />
                         </div>
                         <div>
-                          <div className="text-xs font-bold text-slate-900 flex items-center gap-2">
-                            <span>Course Certificate Issued</span>
-                            <span className="font-mono text-emerald-800 bg-white px-2 py-0.5 rounded border border-emerald-200 text-[10px] font-bold">
-                              {progressData.certificateCode}
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-sm sm:text-base font-extrabold text-slate-900">
+                              Official Subject Academic Certificate
+                            </h3>
+                            <span className="bg-amber-100 text-amber-900 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-amber-300">
+                              ₹9 INR
                             </span>
                           </div>
-                          <p className="text-[11px] text-slate-600">
-                            Congratulations! Your verifiable completion credential is registered.
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            Verifiable credential with public QR verification & official PDF download.
                           </p>
                         </div>
                       </div>
 
-                      <Link
-                        to={`/certificates/verify/${progressData.certificateCode}`}
-                        className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-colors flex-shrink-0 shadow-xs"
-                      >
-                        <Award className="w-3.5 h-3.5" /> View Certificate
-                      </Link>
-                    </div>
-                  ) : progressData.eligibleForCertificate ? (
-                    <div className="bg-emerald-50 border border-emerald-300 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center flex-shrink-0 border border-emerald-200">
-                          <Award className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                            <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Certificate Ready to Claim!
-                          </div>
-                          <p className="text-[11px] text-slate-600">
-                            You have completed all lessons and passed all module quizzes.
-                          </p>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={handleClaimCertificate}
-                        disabled={claimingCertificate}
-                        className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all flex-shrink-0 shadow-xs active:scale-95 cursor-pointer"
-                      >
-                        {claimingCertificate ? (
-                          <>
-                            <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Issuing...
-                          </>
+                      {/* Top Action / Status Badge */}
+                      <div className="flex items-center gap-2 self-start sm:self-auto">
+                        {certStatus?.issued || progressData?.certificateCode ? (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-[11px] font-bold border border-emerald-300">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> ISSUED & VERIFIED
+                          </span>
+                        ) : certStatus?.eligible ? (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-[11px] font-bold border border-amber-300 animate-pulse">
+                            <Sparkles className="w-3.5 h-3.5 text-amber-600" /> READY TO CLAIM
+                          </span>
                         ) : (
-                          <>
-                            <Award className="w-3.5 h-3.5" /> Claim Certificate
-                          </>
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-[11px] font-semibold border border-slate-200">
+                            <Clock className="w-3.5 h-3.5 text-slate-400" /> IN PROGRESS
+                          </span>
                         )}
-                      </button>
+                      </div>
                     </div>
-                  ) : null}
 
-                  {claimError && (
-                    <div className="bg-rose-50 border border-rose-200 p-3 rounded-xl text-xs text-rose-800 flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
-                      <span>{claimError}</span>
+                    {/* Progress Requirements Breakdown */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                      <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
+                        <div className="flex justify-between text-slate-600 font-semibold">
+                          <span>1. Module Quizzes Passed (Levels 1-3)</span>
+                          <span className="font-mono font-bold text-slate-900">
+                            {certStatus?.completedModuleQuizzes ?? 0} / 12 (80%+ score)
+                          </span>
+                        </div>
+                        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-emerald-600 rounded-full transition-all"
+                            style={{ width: `${Math.min(100, ((certStatus?.completedModuleQuizzes ?? 0) / 12) * 100)}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
+                        <div className="flex justify-between text-slate-600 font-semibold">
+                          <span>2. Final Exams Passed (Levels 1-3)</span>
+                          <span className="font-mono font-bold text-slate-900">
+                            {certStatus?.completedFinalQuizzes ?? 0} / 3 (80%+ score)
+                          </span>
+                        </div>
+                        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-emerald-600 rounded-full transition-all"
+                            style={{ width: `${Math.min(100, ((certStatus?.completedFinalQuizzes ?? 0) / 3) * 100)}%` }}
+                          />
+                        </div>
+                      </div>
                     </div>
-                  )}
+
+                    <p className="text-[11px] text-slate-500 italic">
+                      * Certificate eligibility requires passing all 12 module quizzes and 3 level exams across Beginner, Intermediate, and Advanced. Placement Ready is NOT required.
+                    </p>
+
+                    {/* Action Area Based on State */}
+                    {certStatus?.issued || progressData?.certificateCode ? (
+                      <div className="pt-2 flex flex-wrap items-center justify-between gap-3 bg-emerald-50/60 p-4 rounded-2xl border border-emerald-200">
+                        <div>
+                          <div className="text-xs font-bold text-slate-900 flex items-center gap-2">
+                            <span>Certificate ID:</span>
+                            <code className="font-mono bg-white px-2 py-0.5 rounded border border-emerald-300 text-emerald-900 font-bold">
+                              {certStatus?.certificateCode || progressData?.certificateCode}
+                            </code>
+                          </div>
+                          <p className="text-[11px] text-slate-600 mt-0.5">
+                            Cryptographically registered in the official CodeOrbit registry.
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-2.5">
+                          <button
+                            onClick={() => handleDownloadCertificate(certStatus?.certificateCode || progressData?.certificateCode)}
+                            disabled={certDownloadLoading}
+                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
+                          >
+                            <Award className="w-3.5 h-3.5" />
+                            <span>{certDownloadLoading ? 'Downloading PDF...' : 'Download Official PDF'}</span>
+                          </button>
+
+                          <Link
+                            to={`/verify/${certStatus?.certificateCode || progressData?.certificateCode}`}
+                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-white hover:bg-slate-50 text-slate-800 text-xs font-semibold rounded-xl border border-slate-200 shadow-2xs transition-colors"
+                          >
+                            <span>Verify Online</span>
+                            <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                          </Link>
+                        </div>
+                      </div>
+                    ) : certStatus?.eligible ? (
+                      <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-amber-50/70 p-4 rounded-2xl border border-amber-300 shadow-2xs">
+                        <div>
+                          <div className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
+                            <Sparkles className="w-3.5 h-3.5 text-amber-600" /> All Requirements Satisfied!
+                          </div>
+                          <p className="text-[11px] text-slate-600 mt-0.5">
+                            Unlock and generate your official verified certificate for a one-time fee of ₹9.
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={handlePurchaseCertificate}
+                          disabled={certPaymentLoading}
+                          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-xs font-bold rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer self-start sm:self-auto"
+                        >
+                          {certPaymentLoading ? (
+                            <>
+                              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                              <span>Processing Payment...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Award className="w-3.5 h-3.5" />
+                              <span>Get Certificate — ₹9</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="pt-2 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 flex items-center gap-2">
+                        <Lock className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                        <span>Complete the remaining module quizzes and final exams to unlock your ₹9 certificate.</span>
+                      </div>
+                    )}
+
+                    {certPaymentError && (
+                      <div className="bg-rose-50 border border-rose-200 p-3 rounded-xl text-xs text-rose-800 flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                        <span>{certPaymentError}</span>
+                      </div>
+                    )}
+
+                    {certPaymentSuccess && (
+                      <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-xs text-emerald-800 flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                        <span>{certPaymentSuccess}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -424,6 +768,8 @@ export const CourseDetailPage = () => {
                   accentColor: 'border-l-4 border-l-amber-500' 
                 }
               ].map((tier) => {
+                const subcourseObj = (course.subcourses || []).find(s => s.curriculumLevel === tier.levelKey);
+                const subcourseSlug = subcourseObj?.slug || tier.levelKey.toLowerCase().replace('_', '-');
                 const tierModules = (course.modules || []).filter(
                   (m) => (m.curriculumLevel || 'BEGINNER') === tier.levelKey
                 );
@@ -444,10 +790,75 @@ export const CourseDetailPage = () => {
                         </div>
                         <p className="text-xs text-slate-500 mt-0.5">{tier.subtitle}</p>
                       </div>
-                      <span className="text-xs font-mono text-slate-500 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200 self-start sm:self-auto">
-                        {tierModules.length} Module{tierModules.length === 1 ? '' : 's'}
-                      </span>
+                      <div className="flex items-center gap-2 self-start sm:self-auto">
+                        <Link
+                          to={`/courses/${course.slug}/${subcourseSlug}`}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-800 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100/70 px-2.5 py-1 rounded-lg border border-emerald-200 transition-colors"
+                        >
+                          <span>Track Overview</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </Link>
+                        <span className="text-xs font-mono text-slate-500 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
+                          {tierModules.length} Module{tierModules.length === 1 ? '' : 's'}
+                        </span>
+                      </div>
                     </div>
+
+                    {tier.levelKey === 'PLACEMENT_READY' && (
+                      <div className={`p-4 rounded-2xl border ${isPlacementReadyPurchased ? 'bg-emerald-50/70 border-emerald-200' : 'bg-amber-50/70 border-amber-200'} space-y-3`}>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm ${isPlacementReadyPurchased ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900'}`}>
+                              {isPlacementReadyPurchased ? '✓' : '₹29'}
+                            </div>
+                            <div>
+                              <h4 className="text-sm font-bold text-slate-900">
+                                {isPlacementReadyPurchased ? 'Placement Ready Track Unlocked' : 'Unlock Placement Ready Interview Kit'}
+                              </h4>
+                              <p className="text-xs text-slate-500">
+                                {isPlacementReadyPurchased
+                                  ? 'You have full lifetime access to FAANG question breakdowns and mock assessments.'
+                                  : 'One-time ₹29 unlock for this subject. All other 3 levels remain 100% free.'}
+                              </p>
+                            </div>
+                          </div>
+
+                          {!isPlacementReadyPurchased && (
+                            <button
+                              onClick={handleUnlockPlacementReady}
+                              disabled={placementPaymentLoading}
+                              className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 disabled:opacity-60 text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center gap-2 cursor-pointer self-start sm:self-auto"
+                            >
+                              {placementPaymentLoading ? (
+                                <>
+                                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                  <span>Processing Payment...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Sparkles className="w-3.5 h-3.5" />
+                                  <span>Unlock for ₹29</span>
+                                </>
+                              )}
+                            </button>
+                          )}
+                        </div>
+
+                        {placementPaymentError && (
+                          <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl flex items-center gap-2">
+                            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                            <span>{placementPaymentError}</span>
+                          </div>
+                        )}
+
+                        {placementPaymentSuccess && (
+                          <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                            <span>{placementPaymentSuccess}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {tierModules.length === 0 ? (
                       <div className="text-xs text-slate-400 italic py-2">
@@ -465,33 +876,49 @@ export const CourseDetailPage = () => {
                               className="border border-slate-200/90 rounded-2xl overflow-hidden bg-slate-50/40 shadow-2xs"
                             >
                               {/* Module Header */}
-                              <button
-                                onClick={() => toggleModule(mId)}
-                                className="w-full flex items-center justify-between p-4 text-left hover:bg-slate-100/60 transition-colors cursor-pointer"
-                              >
-                                <div className="flex items-start gap-3">
+                              <div className="flex items-center justify-between p-4 bg-slate-50/70 hover:bg-slate-100/60 transition-colors">
+                                <button
+                                  onClick={() => toggleModule(mId)}
+                                  className="flex items-start gap-3 text-left flex-1 cursor-pointer"
+                                >
                                   <span className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5">
                                     {String(mIdx + 1).padStart(2, '0')}
                                   </span>
                                   <div>
-                                    <h4 className="text-sm font-bold text-slate-900">{module.title}</h4>
+                                    <h4 className="text-sm font-bold text-slate-900 hover:text-emerald-800 transition-colors">
+                                      {module.title}
+                                    </h4>
                                     {module.description && (
                                       <p className="text-xs text-slate-500 line-clamp-1">{module.description}</p>
                                     )}
                                   </div>
-                                </div>
+                                </button>
 
-                                <div className="flex items-center gap-2.5 flex-shrink-0">
+                                <div className="flex items-center gap-2.5 flex-shrink-0 ml-3">
+                                  <Link
+                                    to={`/courses/${course.slug}/${subcourseSlug}/${module.slug}`}
+                                    className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 hover:text-emerald-800 bg-white px-2 py-0.5 rounded border border-slate-200 hover:border-emerald-300 transition-colors shadow-2xs"
+                                    title="View dedicated module page"
+                                  >
+                                    <span>Module Notes</span>
+                                    <ExternalLink className="w-3 h-3" />
+                                  </Link>
                                   <span className="text-[11px] text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
                                     {module.lessons?.length || 0} Lessons
                                   </span>
-                                  {isOpen ? (
-                                    <ChevronUp className="w-4 h-4 text-slate-400" />
-                                  ) : (
-                                    <ChevronDown className="w-4 h-4 text-slate-400" />
-                                  )}
+                                  <button
+                                    onClick={() => toggleModule(mId)}
+                                    className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer"
+                                    aria-label="Toggle Module Accordion"
+                                  >
+                                    {isOpen ? (
+                                      <ChevronUp className="w-4 h-4 text-slate-400" />
+                                    ) : (
+                                      <ChevronDown className="w-4 h-4 text-slate-400" />
+                                    )}
+                                  </button>
                                 </div>
-                              </button>
+                              </div>
 
                               {/* Module Body */}
                               {isOpen && (
@@ -504,7 +931,7 @@ export const CourseDetailPage = () => {
                                     return (
                                       <Link
                                         key={lesson.id || lesson.slug}
-                                        to={`/courses/${course.slug}/lessons/${lesson.slug}`}
+                                        to={`/courses/${course.slug}/${subcourseSlug}/${module.slug}/${lesson.slug}`}
                                         className={`flex items-center justify-between p-3 rounded-xl border transition-all group ${
                                           completed
                                             ? 'bg-emerald-50/70 border-emerald-200 hover:border-emerald-300'
@@ -574,7 +1001,7 @@ export const CourseDetailPage = () => {
                                               {quiz.title}
                                             </div>
                                             <div className={`text-[10px] ${isFinal ? 'text-amber-800' : 'text-purple-700'}`}>
-                                              {isFinal ? '25 Questions • 80% Pass Score (Level Exam)' : '10 Questions • 75% Pass Score (Module Quiz)'}
+                                              {isFinal ? '25 Questions • 80% Pass Score (Level Exam)' : '10 Questions • 80% Pass Score (Module Quiz)'}
                                             </div>
                                           </div>
                                         </div>
@@ -599,6 +1026,45 @@ export const CourseDetailPage = () => {
                   </div>
                 );
               })}
+            </div>
+
+            {/* Frequently Asked Questions (FAQ) Section */}
+            <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs space-y-5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center">
+                  <HelpCircle className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-extrabold text-slate-900">Frequently Asked Questions</h3>
+                  <p className="text-xs text-slate-500">Everything you need to know about {course.title} on CodeOrbit</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {faqs.map((faqItem, fIdx) => {
+                  const isOpen = openFaq[fIdx];
+                  return (
+                    <div key={fIdx} className="border border-slate-200/80 rounded-2xl overflow-hidden bg-slate-50/40">
+                      <button
+                        onClick={() => toggleFaq(fIdx)}
+                        className="w-full flex items-center justify-between p-4 text-left font-bold text-xs sm:text-sm text-slate-800 hover:text-emerald-800 transition-colors cursor-pointer"
+                      >
+                        <span>{faqItem.question}</span>
+                        {isOpen ? (
+                          <ChevronUp className="w-4 h-4 text-slate-400 flex-shrink-0 ml-2" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0 ml-2" />
+                        )}
+                      </button>
+                      {isOpen && (
+                        <div className="px-4 pb-4 pt-1 text-xs text-slate-600 leading-relaxed border-t border-slate-100 bg-white">
+                          {faqItem.answer}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Bottom Ad Slot */}

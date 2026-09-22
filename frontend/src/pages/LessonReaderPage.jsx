@@ -29,10 +29,11 @@ import { TutorialSidebar } from '../components/tutorial/TutorialSidebar';
 import { TableOfContents } from '../components/tutorial/TableOfContents';
 import { LanguageSelector } from '../components/LanguageSelector';
 import { translateToHinglish } from '../utils/hinglishTranslator';
+import { Button, Badge, Card, Skeleton, EmptyState } from '../components/ui';
 import confetti from 'canvas-confetti';
 
 export const LessonReaderPage = () => {
-  const { courseSlug, lessonSlug } = useParams();
+  const { courseSlug, subcourseSlug, moduleSlug, lessonSlug } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { language, setLanguage, isHinglish } = useLanguage();
@@ -111,8 +112,14 @@ export const LessonReaderPage = () => {
 
   // Flatten all lessons in course to find prev/next navigation
   const allLessons = useMemo(() => {
-    if (!course || !course.modules) return [];
-    return course.modules.flatMap((m) => m.lessons || []);
+    if (!course) return [];
+    if (course.subcourses) {
+      return course.subcourses.flatMap((s) => (s.modules || []).flatMap((m) => m.lessons || []));
+    }
+    if (course.modules) {
+      return course.modules.flatMap((m) => m.lessons || []);
+    }
+    return [];
   }, [course]);
 
   const currentIndex = allLessons.findIndex((l) => l.slug === lessonSlug);
@@ -156,6 +163,39 @@ export const LessonReaderPage = () => {
     }
   };
 
+  // Build hierarchical canonical URL and Breadcrumb array
+  const { canonicalUrl, breadcrumbs } = useMemo(() => {
+    const list = [
+      { name: 'Home', url: '/' },
+      { name: 'Courses', url: '/courses' }
+    ];
+
+    if (course) {
+      list.push({ name: course.title, url: `/courses/${courseSlug}` });
+    }
+
+    let url = `https://www.codeorbit.online/courses/${courseSlug}`;
+
+    if (subcourseSlug) {
+      list.push({ name: subcourseSlug.replace(/-/g, ' ').toUpperCase(), url: `/courses/${courseSlug}/${subcourseSlug}` });
+      url += `/${subcourseSlug}`;
+    }
+
+    if (moduleSlug) {
+      list.push({ name: moduleSlug.replace(/-/g, ' ').toUpperCase(), url: `/courses/${courseSlug}/${subcourseSlug}/${moduleSlug}` });
+      url += `/${moduleSlug}`;
+    }
+
+    if (lesson) {
+      list.push({ name: lesson.title, url: subcourseSlug && moduleSlug ? `${url}/${lessonSlug}` : `/courses/${courseSlug}/lessons/${lessonSlug}` });
+      url = subcourseSlug && moduleSlug ? `${url}/${lessonSlug}` : `https://www.codeorbit.online/courses/${courseSlug}/lessons/${lessonSlug}`;
+    } else {
+      url = `https://www.codeorbit.online/courses/${courseSlug}/lessons/${lessonSlug}`;
+    }
+
+    return { canonicalUrl: url, breadcrumbs: list };
+  }, [course, courseSlug, subcourseSlug, moduleSlug, lesson, lessonSlug]);
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col selection:bg-emerald-500 selection:text-white">
       {/* SEO Dynamic Head */}
@@ -163,16 +203,16 @@ export const LessonReaderPage = () => {
         <SeoHead
           title={`${lesson.title} — ${course?.title || 'Computer Science'}`}
           description={lesson.shortDescription || `Learn ${lesson.title} with clear explanations, code examples, and practice questions in English & Hinglish.`}
-          canonicalUrl={`https://www.codeorbit.online/courses/${courseSlug}/lessons/${lessonSlug}`}
-          breadcrumbs={[
-            { name: 'Home', url: '/' },
-            { name: 'Tutorials', url: '/courses' },
-            { name: course?.title || 'Course', url: `/courses/${courseSlug}` },
-            { name: lesson.title, url: `/courses/${courseSlug}/lessons/${lessonSlug}` }
-          ]}
+          canonicalUrl={canonicalUrl}
+          breadcrumbs={breadcrumbs}
           article={{
             section: course?.track || 'Computer Science',
             tags: [course?.track, 'Tutorial', 'DSA', 'Computer Science'].filter(Boolean)
+          }}
+          course={{
+            name: `${course?.title || 'Computer Science'} — ${lesson.title}`,
+            description: lesson.shortDescription || `Free lesson on ${lesson.title}`,
+            isAccessibleForFree: true
           }}
         />
       )}
@@ -188,28 +228,36 @@ export const LessonReaderPage = () => {
             <Menu className="w-4 h-4" />
           </button>
 
-          <div className="flex items-center gap-2 text-xs text-slate-500 truncate">
+          {/* Visible Breadcrumbs in top bar */}
+          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-slate-500 truncate">
             <Link to="/courses" className="hover:text-emerald-700 transition-colors">
-              Tutorials
+              Courses
             </Link>
             <span>/</span>
-            <Link to={`/courses/${courseSlug}`} className="text-emerald-700 hover:underline truncate max-w-[140px] sm:max-w-[200px] font-semibold">
+            <Link to={`/courses/${courseSlug}`} className="text-emerald-700 hover:underline truncate max-w-[120px] font-semibold">
               {course?.title || courseSlug}
             </Link>
+            {subcourseSlug && (
+              <>
+                <span>/</span>
+                <Link to={`/courses/${courseSlug}/${subcourseSlug}`} className="hover:text-emerald-700 truncate hidden md:inline max-w-[120px]">
+                  {subcourseSlug}
+                </Link>
+              </>
+            )}
             {lesson && (
               <>
-                <span className="hidden sm:inline">/</span>
-                <span className="text-slate-900 font-semibold truncate hidden sm:inline max-w-[180px]">
+                <span>/</span>
+                <span className="text-slate-900 font-semibold truncate max-w-[180px]">
                   {lesson.title}
                 </span>
               </>
             )}
-          </div>
+          </nav>
         </div>
 
         {/* Action Controls: Hinglish Switch & Share */}
         <div className="flex items-center gap-2">
-          {/* Global Language Selector Pill */}
           <LanguageSelector variant="pill" />
 
           <button
@@ -238,36 +286,32 @@ export const LessonReaderPage = () => {
           <AdSlot slotType="leaderboard" />
 
           {loading ? (
-            <div className="space-y-6 animate-pulse">
-              <div className="h-8 bg-slate-200 rounded-xl w-3/4"></div>
-              <div className="h-4 bg-slate-200 rounded w-1/2"></div>
+            <div className="space-y-6">
+              <Skeleton variant="text" width="60%" height="36px" />
+              <Skeleton variant="text" width="40%" height="20px" />
               <div className="space-y-3 pt-4">
-                <div className="h-4 bg-slate-200 rounded w-full"></div>
-                <div className="h-4 bg-slate-200 rounded w-5/6"></div>
-                <div className="h-4 bg-slate-200 rounded w-4/6"></div>
+                <Skeleton variant="rectangular" height="20px" />
+                <Skeleton variant="rectangular" height="20px" />
+                <Skeleton variant="rectangular" height="120px" />
+                <Skeleton variant="rectangular" height="20px" />
               </div>
             </div>
           ) : error ? (
-            <div className="p-8 rounded-2xl bg-rose-50 border border-rose-200 text-center space-y-4">
-              <AlertCircle className="w-12 h-12 text-rose-600 mx-auto" />
-              <h2 className="text-xl font-bold text-slate-900">Tutorial Not Found</h2>
-              <p className="text-xs text-rose-700 max-w-md mx-auto">{error}</p>
-              <Link
-                to={`/courses/${courseSlug}`}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-white transition-all cursor-pointer"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Back to Subject Syllabus</span>
-              </Link>
-            </div>
+            <EmptyState
+              icon={AlertCircle}
+              title="Tutorial Not Found"
+              description={error}
+              actionText="Back to Subject Syllabus"
+              actionHref={`/courses/${courseSlug}`}
+            />
           ) : lesson ? (
             <article className="space-y-6">
               {/* Article Header */}
               <header className="space-y-3 border-b border-slate-200 pb-6">
                 <div className="flex items-center gap-2 text-xs font-mono">
-                  <span className="px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold uppercase tracking-wider">
+                  <Badge variant="primary" size="sm">
                     {course?.track || 'CS Core'}
-                  </span>
+                  </Badge>
                   <span className="text-slate-400">•</span>
                   <span className="flex items-center gap-1 text-slate-500">
                     <Clock className="w-3.5 h-3.5 text-slate-400" />
@@ -276,10 +320,9 @@ export const LessonReaderPage = () => {
                   {isHinglish && (
                     <>
                       <span className="text-slate-400">•</span>
-                      <span className="text-emerald-800 font-semibold text-[11px] bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 flex items-center gap-1">
-                        <span>Hinglish Edition</span>
-                        <span>🇮🇳</span>
-                      </span>
+                      <Badge variant="info" size="xs">
+                        Hinglish Edition 🇮🇳
+                      </Badge>
                     </>
                   )}
                 </div>
@@ -290,15 +333,15 @@ export const LessonReaderPage = () => {
               </header>
 
               {/* Markdown Content (Eye-friendly typography & high contrast code) */}
-              <div className="prose prose-slate max-w-none prose-headings:text-slate-900 prose-headings:font-bold prose-headings:tracking-tight prose-p:text-slate-700 prose-p:leading-relaxed prose-li:text-slate-700 prose-strong:text-slate-900 prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-pre:border prose-pre:border-slate-800 prose-a:text-emerald-700 hover:prose-a:underline">
+              <section className="prose prose-slate max-w-none prose-headings:text-slate-900 prose-headings:font-bold prose-headings:tracking-tight prose-p:text-slate-700 prose-p:leading-relaxed prose-li:text-slate-700 prose-strong:text-slate-900 prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-pre:border prose-pre:border-slate-800 prose-a:text-emerald-700 hover:prose-a:underline">
                 <MarkdownRenderer content={activeContent} />
-              </div>
+              </section>
 
               {/* In-Article Mid-Way Ad Slot */}
               <AdSlot slotType="in_article" />
 
               {/* Lesson Completion & Feedback Bar */}
-              <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+              <Card className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-3 text-left">
                   <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 flex-shrink-0 shadow-2xs">
                     <Sparkles className="w-5 h-5" />
@@ -309,22 +352,18 @@ export const LessonReaderPage = () => {
                   </div>
                 </div>
 
-                <button
-                  type="button"
+                <Button
+                  variant={isCompleted ? 'success' : 'outline'}
+                  size="sm"
                   onClick={handleToggleCompletion}
-                  className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs active:scale-95 ${
-                    isCompleted
-                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                      : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-300'
-                  }`}
+                  icon={CheckCircle2}
                 >
-                  <CheckCircle2 className={`w-4 h-4 ${isCompleted ? 'text-white' : 'text-slate-400'}`} />
-                  <span>{isCompleted ? 'Completed ✓' : 'Mark as Completed'}</span>
-                </button>
-              </div>
+                  {isCompleted ? 'Completed ✓' : 'Mark as Completed'}
+                </Button>
+              </Card>
 
               {/* Previous / Next Topic Navigation */}
-              <nav className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-slate-200">
+              <nav aria-label="Adjacent Lessons" className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-slate-200">
                 {prevLesson ? (
                   <Link
                     to={`/courses/${courseSlug}/lessons/${prevLesson.slug}`}
@@ -355,14 +394,14 @@ export const LessonReaderPage = () => {
                   </Link>
                 ) : (
                   <Link
-                    to={`/courses/${courseSlug}/quizzes/module-1-quiz`}
+                    to={`/courses/${courseSlug}`}
                     className="group p-4 rounded-2xl bg-emerald-50 border border-emerald-300 hover:border-emerald-500 hover:shadow-xs transition-all flex flex-col items-end gap-1 text-right"
                   >
                     <span className="text-[11px] font-mono text-emerald-800 flex items-center gap-1 font-bold">
-                      Track Completed <Award className="w-3.5 h-3.5 text-amber-500" />
+                      Curriculum Finished <Award className="w-3.5 h-3.5 text-amber-500" />
                     </span>
                     <span className="text-sm font-extrabold text-emerald-900 group-hover:text-emerald-950 truncate w-full">
-                      Take Quiz & Unlock Certificate →
+                      View Subject Syllabus & Certificate →
                     </span>
                   </Link>
                 )}
@@ -377,8 +416,6 @@ export const LessonReaderPage = () => {
         {/* Right Column: Dynamic Table of Contents & Sticky AdSense Banner */}
         <aside className="hidden xl:block w-72 h-[calc(100vh-5rem)] sticky top-20 p-4 space-y-4 overflow-y-auto custom-scrollbar">
           {lesson && <TableOfContents markdownContent={activeContent} />}
-
-          {/* Sticky Sidebar Banner Ad */}
           <AdSlot slotType="sidebar" />
         </aside>
       </div>

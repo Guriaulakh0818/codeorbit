@@ -14,14 +14,15 @@ import {
   Download, 
   Share2, 
   ExternalLink, 
-  BookOpen,
-  QrCode,
-  Sparkles,
+  BookOpen, 
+  QrCode, 
+  Sparkles, 
   Loader2
 } from 'lucide-react';
 import { certificateApi } from '../services/certificateApi';
 import { SeoHead } from '../components/seo/SeoHead';
 import { OfficialCertificateFrame } from '../components/certificate/OfficialCertificateFrame';
+import { Button, Badge, Card, Skeleton, EmptyState } from '../components/ui';
 
 export const CertificateVerifyPage = () => {
   const { certificateCode } = useParams();
@@ -169,12 +170,14 @@ export const CertificateVerifyPage = () => {
         
         {/* Navigation Bar (Hidden during Print) */}
         <div className="no-print flex items-center justify-between">
-          <Link
-            to="/courses"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-emerald-700 transition-colors bg-white px-3.5 py-1.5 rounded-xl border border-slate-200 shadow-2xs cursor-pointer"
+          <Button
+            variant="outline"
+            size="sm"
+            href="/courses"
+            icon={ArrowLeft}
           >
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to Subject Tracks
-          </Link>
+            Back to Subject Tracks
+          </Button>
           <span className="text-xs text-slate-500 flex items-center gap-1.5 font-medium">
             <ShieldCheck className="w-4 h-4 text-emerald-600" /> Public Registry & Cryptographic Verification
           </span>
@@ -182,9 +185,9 @@ export const CertificateVerifyPage = () => {
 
         {/* Header Title (Hidden during Print) */}
         <div className="no-print text-center space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold uppercase tracking-wider">
+          <Badge variant="primary" size="md">
             <ShieldCheck className="w-3.5 h-3.5" /> CodeOrbit Official Credential Registry
-          </div>
+          </Badge>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
             Academic Certificate Verification
           </h1>
@@ -214,40 +217,36 @@ export const CertificateVerifyPage = () => {
 
         {/* Loading State */}
         {loading && (
-          <div className="no-print bg-white border border-slate-200 rounded-3xl p-8 sm:p-12 space-y-4 animate-pulse max-w-xl mx-auto text-center shadow-xs">
-            <div className="w-12 h-12 bg-slate-100 rounded-full mx-auto" />
-            <div className="h-6 bg-slate-100 rounded w-1/2 mx-auto" />
-            <div className="h-10 bg-slate-100 rounded w-3/4 mx-auto" />
+          <div className="no-print max-w-xl mx-auto space-y-4">
+            <Skeleton variant="card" height="180px" />
           </div>
         )}
 
         {/* 404 Not Found State */}
         {!loading && is404 && (
-          <div className="no-print bg-white border border-rose-200 rounded-3xl p-8 text-center space-y-4 max-w-xl mx-auto shadow-xs animate-in fade-in duration-200">
-            <div className="w-14 h-14 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center mx-auto border border-rose-200">
-              <XCircle className="w-7 h-7" />
-            </div>
-            <h3 className="text-lg font-bold text-slate-900">Certificate Not Found</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              No issued certificate matches the code <span className="font-mono text-rose-600 font-bold">"{inputCode}"</span> in the CodeOrbit verification registry. Please check for typos and re-enter.
-            </p>
+          <div className="no-print max-w-xl mx-auto">
+            <Card className="p-8 text-center">
+              <EmptyState
+                icon={XCircle}
+                title="Certificate Not Found"
+                description={`No issued certificate matches the code "${inputCode}" in the CodeOrbit verification registry. Please check for typos and re-enter.`}
+              />
+            </Card>
           </div>
         )}
 
         {/* Error State */}
         {!loading && !is404 && error && (
-          <div className="no-print bg-rose-50 border border-rose-200 rounded-3xl p-8 text-center space-y-4 max-w-xl mx-auto">
-            <div className="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto border border-rose-200">
-              <AlertCircle className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-slate-900">Verification Error</h3>
-            <p className="text-xs text-rose-700">{error}</p>
-            <button
-              onClick={() => fetchVerification(inputCode)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer"
-            >
-              <RefreshCw className="w-3.5 h-3.5" /> Retry
-            </button>
+          <div className="no-print max-w-xl mx-auto">
+            <Card className="p-8 text-center">
+              <EmptyState
+                icon={AlertCircle}
+                title="Verification Error"
+                description={error}
+                actionText="Retry Verification"
+                onAction={() => fetchVerification(inputCode)}
+              />
+            </Card>
           </div>
         )}
 
@@ -256,7 +255,7 @@ export const CertificateVerifyPage = () => {
           <div className="space-y-6 animate-in fade-in duration-300">
             
             {/* Top Verification Status & Download Toolbar (Hidden during Print) */}
-            <div className="no-print bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col lg:flex-row items-center justify-between gap-4">
+            <Card className="no-print p-4 sm:p-5 flex flex-col lg:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center flex-shrink-0 shadow-2xs">
                   <CheckCircle2 className="w-6 h-6 text-emerald-600" />
@@ -264,9 +263,9 @@ export const CertificateVerifyPage = () => {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-extrabold text-slate-900">Authentic CodeOrbit Credential</span>
-                    <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full">
+                    <Badge variant="success" size="xs">
                       VERIFIED & VALID
-                    </span>
+                    </Badge>
                   </div>
                   <p className="text-xs text-slate-500 font-mono mt-0.5">
                     Code: <strong className="text-slate-800">{cert.certificateCode}</strong> • Recipient: <strong className="text-slate-800">{cert.studentFullName}</strong>
@@ -276,47 +275,34 @@ export const CertificateVerifyPage = () => {
 
               {/* Action Toolbar */}
               <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto justify-end">
-                {/* 1-Click PDF Download Button */}
-                <button
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={handleDownloadPdf}
-                  disabled={downloadingPdf}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer flex-1 sm:flex-initial"
-                  title="Download high-resolution official PDF certificate"
+                  loading={downloadingPdf}
+                  icon={Download}
                 >
-                  {downloadingPdf ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Generating PDF...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Download className="w-4 h-4" />
-                      <span>Download PDF</span>
-                    </>
-                  )}
-                </button>
+                  Download PDF
+                </Button>
 
-                {/* Print Button */}
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={handlePrint}
-                  className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition-colors cursor-pointer"
-                  title="Print certificate or save via browser print dialog"
+                  icon={Printer}
                 >
-                  <Printer className="w-4 h-4 text-slate-600" />
-                  <span className="hidden sm:inline">Print</span>
-                </button>
+                  Print
+                </Button>
 
-                {/* Copy Verification Link for CV / Resume */}
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={handleCopyLink}
-                  className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition-colors cursor-pointer"
-                  title="Copy permanent verification URL for recruiters and resumes"
+                  icon={copied ? Check : Copy}
                 >
-                  {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-slate-500" />}
-                  <span>{copied ? 'Link Copied!' : 'Copy Link for CV'}</span>
-                </button>
+                  {copied ? 'Link Copied!' : 'Copy Link for CV'}
+                </Button>
 
-                {/* Add to LinkedIn Button */}
                 <button
                   onClick={handleLinkedInShare}
                   className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-[#0077B5] hover:bg-[#005f93] text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer"
@@ -326,13 +312,13 @@ export const CertificateVerifyPage = () => {
                   <span>Add to LinkedIn</span>
                 </button>
               </div>
-            </div>
+            </Card>
 
             {/* Official Academic Certificate Frame */}
             <OfficialCertificateFrame ref={certificateRef} cert={cert} />
 
             {/* Recruiter & Resume Integration Guide (Hidden during Print) */}
-            <div className="no-print bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs space-y-4">
+            <Card className="no-print p-6 sm:p-8 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-emerald-600" />
@@ -383,7 +369,7 @@ export const CertificateVerifyPage = () => {
                   </Link>
                 </div>
               )}
-            </div>
+            </Card>
 
           </div>
         )}

@@ -40,6 +40,10 @@ public class Certificate {
     @Column(name = "course_title", nullable = false, length = 255)
     private String courseTitle;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_id")
+    private CertificatePayment payment;
+
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 32)
@@ -62,6 +66,16 @@ public class Certificate {
         this.certificateCode = certificateCode;
         this.user = user;
         this.course = course;
+        this.studentFullName = studentFullName;
+        this.courseTitle = courseTitle;
+        this.status = status;
+    }
+
+    public Certificate(String certificateCode, User user, Course course, CertificatePayment payment, String studentFullName, String courseTitle, CertificateStatus status) {
+        this.certificateCode = certificateCode;
+        this.user = user;
+        this.course = course;
+        this.payment = payment;
         this.studentFullName = studentFullName;
         this.courseTitle = courseTitle;
         this.status = status;
@@ -142,8 +156,20 @@ public class Certificate {
         this.revocationReason = revocationReason;
     }
 
+    public CertificatePayment getPayment() {
+        return payment;
+    }
+
+    public void setPayment(CertificatePayment payment) {
+        this.payment = payment;
+    }
+
     public LocalDateTime getIssuedAt() {
         return issuedAt;
+    }
+
+    public void setIssuedAt(LocalDateTime issuedAt) {
+        this.issuedAt = issuedAt;
     }
 
     public LocalDateTime getUpdatedAt() {

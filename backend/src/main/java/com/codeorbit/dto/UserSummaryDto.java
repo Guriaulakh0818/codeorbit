@@ -9,6 +9,8 @@ public class UserSummaryDto {
     private String fullName;
     private String email;
     private Role role;
+    private String authProvider;
+    private String avatarUrl;
     private LocalDateTime createdAt;
 
     public UserSummaryDto() {
@@ -19,6 +21,17 @@ public class UserSummaryDto {
         this.fullName = fullName;
         this.email = email;
         this.role = role;
+        this.authProvider = "LOCAL";
+        this.createdAt = createdAt;
+    }
+
+    public UserSummaryDto(Long id, String fullName, String email, Role role, String authProvider, String avatarUrl, LocalDateTime createdAt) {
+        this.id = id;
+        this.fullName = fullName;
+        this.email = email;
+        this.role = role;
+        this.authProvider = authProvider;
+        this.avatarUrl = avatarUrl;
         this.createdAt = createdAt;
     }
 
@@ -52,6 +65,22 @@ public class UserSummaryDto {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public String getAuthProvider() {
+        return authProvider;
+    }
+
+    public void setAuthProvider(String authProvider) {
+        this.authProvider = authProvider;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 
     public LocalDateTime getCreatedAt() {

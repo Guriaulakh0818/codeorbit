@@ -22,6 +22,10 @@ public class Quiz {
     @JoinColumn(name = "module_id", nullable = false)
     private CourseModule module;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subcourse_id")
+    private Subcourse subcourse;
+
     @NotBlank(message = "Quiz title is required")
     @Size(max = 255)
     @Column(nullable = false, length = 255)
@@ -36,7 +40,7 @@ public class Quiz {
     private String description;
 
     @Column(name = "min_pass_score_percentage", nullable = false)
-    private int minPassScorePercentage = 75;
+    private int minPassScorePercentage = 80;
 
     @Column(name = "max_attempts")
     private Integer maxAttempts;
@@ -183,5 +187,13 @@ public class Quiz {
 
     public void setQuestions(List<QuizQuestion> questions) {
         this.questions = questions;
+    }
+
+    public Subcourse getSubcourse() {
+        return subcourse;
+    }
+
+    public void setSubcourse(Subcourse subcourse) {
+        this.subcourse = subcourse;
     }
 }

@@ -8,18 +8,27 @@ import {
   Clock, 
   CheckCircle2, 
   Sparkles, 
-  ArrowRight,
+  ArrowRight, 
   Layers, 
   GraduationCap, 
-  Award,
-  Bookmark,
-  ShieldCheck
+  Award, 
+  Bookmark, 
+  ShieldCheck, 
+  Lock, 
+  CheckCircle, 
+  FileCheck, 
+  HelpCircle, 
+  TrendingUp, 
+  CreditCard, 
+  Briefcase
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLearningProgress } from '../context/LearningProgressContext';
-import { coursesApi } from '../services/coursesApi';
 import { studentLearningApi } from '../services/studentLearningApi';
+import { getMyPayments } from '../services/paymentApi';
+import { placementKitApi } from '../services/placementKitApi';
 import { SeoHead } from '../components/seo/SeoHead';
+import { Button, Badge, Card, ProgressBar, Skeleton, EmptyState, Tabs, SectionHeader } from '../components/ui';
 
 export const StudentDashboardPage = () => {
   const { user, logout } = useAuth();
@@ -28,14 +37,16 @@ export const StudentDashboardPage = () => {
     completedLessonIds, 
     bookmarkedLessonIds, 
     courseProgressMap, 
-    getTrackProgress,
+    getTrackProgress, 
     fetchCourseProgress 
   } = useLearningProgress();
 
-  const [courses, setCourses] = useState([]);
+  const [dashboardData, setDashboardData] = useState(null);
   const [certificates, setCertificates] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [purchasedKits, setPurchasedKits] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('courses'); // 'courses' | 'certificates' | 'profile'
+  const [activeTab, setActiveTab] = useState('courses'); // 'courses' | 'placement-kits' | 'certificates' | 'payments' | 'profile'
   const [copiedCode, setCopiedCode] = useState(null);
 
   const handleCopyLink = (code) => {
@@ -50,23 +61,31 @@ export const StudentDashboardPage = () => {
 
   useEffect(() => {
     async function loadData() {
+      setLoading(true);
       try {
-        const [coursesRes, certsRes] = await Promise.all([
-          coursesApi.getCourses({ size: 20 }),
-          studentLearningApi.getStudentCertificates()
+        const [dashRes, certsRes, paymentsRes, kitsRes] = await Promise.all([
+          studentLearningApi.getStudentDashboard(),
+          studentLearningApi.getStudentCertificates(),
+          getMyPayments().catch(() => []),
+          placementKitApi.getMyPurchasedKits().catch(() => ({ data: [] }))
         ]);
-        if (coursesRes.success && coursesRes.data) {
-          setCourses(coursesRes.data);
-          // Fetch authoritative progress for all tracks in parallel
-          coursesRes.data.forEach((c) => {
+        if (dashRes.success && dashRes.data) {
+          setDashboardData(dashRes.data);
+          (dashRes.data.enrolledCourses || []).forEach((c) => {
             if (c.slug) fetchCourseProgress(c.slug);
           });
         }
         if (certsRes.success && certsRes.data) {
           setCertificates(certsRes.data);
         }
+        if (Array.isArray(paymentsRes)) {
+          setPayments(paymentsRes);
+        }
+        if (kitsRes && kitsRes.data) {
+          setPurchasedKits(kitsRes.data);
+        }
       } catch (e) {
-        console.error('Failed to load dashboard data', e);
+        console.error('Failed to load student dashboard', e);
       } finally {
         setLoading(false);
       }
@@ -79,71 +98,100 @@ export const StudentDashboardPage = () => {
     navigate('/login');
   };
 
+  const enrolledCourses = dashboardData?.enrolledCourses || [];
   const completedCount = completedLessonIds?.length || 0;
   const bookmarkedCount = bookmarkedLessonIds?.length || 0;
+  const totalEnrolled = dashboardData?.totalEnrolledCourses ?? enrolledCourses.length;
+
+  const dashboardTabs = [
+    { id: 'courses', label: 'My Enrolled Subjects', icon: BookOpen, badge: enrolledCourses.length },
+    { id: 'placement-kits', label: 'Placement Kits', icon: Briefcase, badge: purchasedKits.length },
+    { id: 'certificates', label: 'Certificates', icon: Award, badge: certificates.length },
+    { id: 'payments', label: 'Payments & Orders', icon: CreditCard, badge: payments.length },
+    { id: 'profile', label: 'Profile & Account', icon: User }
+  ];
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 py-8 px-4 sm:px-6 lg:px-8 flex flex-col selection:bg-emerald-500 selection:text-white">
       <SeoHead
         title="Student Dashboard — CodeOrbit"
-        description="Track your computer science syllabus progress, verified certificates, and completed topics on CodeOrbit."
+        description="Track your enrolled computer science subjects, 4-tier learning progression, quiz achievements, and verified certificates."
         canonicalUrl="https://www.codeorbit.online/student/dashboard"
       />
 
       <div className="max-w-6xl mx-auto w-full space-y-8 flex-1">
         
         {/* Top Student Banner Card */}
-        <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <Card className="p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center font-extrabold text-2xl shadow-2xs flex-shrink-0">
-              {user?.name ? user.name.charAt(0).toUpperCase() : 'S'}
-            </div>
+            {user?.avatarUrl ? (
+              <img
+                src={user.avatarUrl}
+                alt={user.fullName || 'Student'}
+                className="w-16 h-16 rounded-2xl object-cover border border-slate-200 shadow-2xs flex-shrink-0"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center font-extrabold text-2xl shadow-2xs flex-shrink-0">
+                {user?.fullName ? user.fullName.charAt(0).toUpperCase() : (user?.name ? user.name.charAt(0).toUpperCase() : 'S')}
+              </div>
+            )}
             <div>
               <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800">
                 <GraduationCap className="w-3.5 h-3.5" />
-                <span>Student Learning Portal</span>
+                <span>Enrolled Student Portal</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">
-                Welcome back, {user?.name || 'Student'}!
+                Welcome back, {user?.fullName || user?.name || 'Student'}!
               </h1>
               <p className="text-xs text-slate-500 mt-0.5">
-                {user?.email || 'Logged in student'} • 100% Free Lifetime Learning Access
+                {user?.email || 'Logged in student'} • {user?.authProvider === 'GOOGLE' ? 'Google Account' : 'Standard Student Account'}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <Link
-              to="/courses"
-              className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+            <Button
+              variant="primary"
+              size="sm"
+              href="/courses"
+              icon={Sparkles}
             >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Browse All Tutorials</span>
-            </Link>
-            <button
+              Browse All Subjects
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleLogout}
-              className="px-3.5 py-2.5 bg-slate-100 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-700 hover:text-rose-700 text-xs font-semibold rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
-              title="Log out"
+              icon={LogOut}
             >
-              <LogOut className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Logout</span>
-            </button>
+              Logout
+            </Button>
           </div>
-        </div>
+        </Card>
 
         {/* Quick Stats Counter Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs flex items-center gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <Card className="p-5 flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center flex-shrink-0">
+              <BookOpen className="w-6 h-6" />
+            </div>
+            <div>
+              <span className="text-xs text-slate-500 font-medium">Enrolled Subjects</span>
+              <div className="text-2xl font-extrabold text-slate-900">{totalEnrolled}</div>
+            </div>
+          </Card>
+
+          <Card className="p-5 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center flex-shrink-0">
               <CheckCircle2 className="w-6 h-6" />
             </div>
             <div>
               <span className="text-xs text-slate-500 font-medium">Completed Topics</span>
               <div className="text-2xl font-extrabold text-slate-900">{completedCount}</div>
             </div>
-          </div>
+          </Card>
 
-          <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs flex items-center gap-4">
+          <Card className="p-5 flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center flex-shrink-0">
               <Bookmark className="w-6 h-6" />
             </div>
@@ -151,146 +199,195 @@ export const StudentDashboardPage = () => {
               <span className="text-xs text-slate-500 font-medium">Saved Bookmarks</span>
               <div className="text-2xl font-extrabold text-slate-900">{bookmarkedCount}</div>
             </div>
-          </div>
+          </Card>
 
-          <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs flex items-center gap-4">
+          <Card className="p-5 flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-purple-50 border border-purple-200 text-purple-600 flex items-center justify-center flex-shrink-0">
               <Award className="w-6 h-6" />
             </div>
             <div>
-              <span className="text-xs text-slate-500 font-medium">Verified Credentials</span>
+              <span className="text-xs text-slate-500 font-medium">Verified Certificates</span>
               <div className="text-2xl font-extrabold text-slate-900">
-                {Object.values(courseProgressMap || {}).filter(p => p.certificateCode).length}
+                {certificates.length || Object.values(courseProgressMap || {}).filter(p => p.certificateCode).length}
               </div>
             </div>
-          </div>
+          </Card>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex items-center gap-2 border-b border-slate-200 pb-3 text-xs overflow-x-auto">
-          <button
-            onClick={() => setActiveTab('courses')}
-            className={`px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-              activeTab === 'courses'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'bg-white text-slate-700 hover:text-slate-900 border border-slate-200'
-            }`}
-          >
-            <BookOpen className="w-4 h-4" />
-            <span>Subject Tracks ({courses.length})</span>
-          </button>
+        <Tabs
+          tabs={dashboardTabs}
+          activeTab={activeTab}
+          onChange={setActiveTab}
+          variant="pills"
+        />
 
-          <button
-            onClick={() => setActiveTab('certificates')}
-            className={`px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-              activeTab === 'certificates'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'bg-white text-slate-700 hover:text-slate-900 border border-slate-200'
-            }`}
-          >
-            <Award className="w-4 h-4" />
-            <span>My Certificates</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('profile')}
-            className={`px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-              activeTab === 'profile'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'bg-white text-slate-700 hover:text-slate-900 border border-slate-200'
-            }`}
-          >
-            <User className="w-4 h-4" />
-            <span>Profile & Settings</span>
-          </button>
-        </div>
-
-        {/* TAB 1: SUBJECT TRACKS PROGRESS */}
+        {/* TAB 1: ENROLLED SUBJECTS & 4-TIER PROGRESSION */}
         {activeTab === 'courses' && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-bold text-slate-900">Enrolled Computer Science Tracks</h2>
-                <p className="text-xs text-slate-500">Step-by-step verified syllabus and placement interview preparation</p>
-              </div>
-              <Link to="/courses" className="text-xs font-semibold text-emerald-700 hover:underline">
-                Explore all subjects →
-              </Link>
-            </div>
+            <SectionHeader
+              title="Your Enrolled Computer Science Subjects"
+              subtitle="Only tracks you have explicitly enrolled in appear on your dashboard"
+              action={
+                <Button variant="ghost" size="sm" href="/courses" icon={ArrowRight} iconPosition="right">
+                  Enroll in more subjects
+                </Button>
+              }
+            />
 
             {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-pulse">
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="p-6 rounded-2xl bg-white border border-slate-200 h-44" />
-                ))}
-              </div>
-            ) : courses.length === 0 ? (
-              <div className="p-12 text-center rounded-2xl bg-white border border-slate-200 space-y-3 shadow-xs">
-                <BookOpen className="w-12 h-12 text-slate-400 mx-auto" />
-                <h3 className="text-base font-bold text-slate-900">No Tracks Found</h3>
-                <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  Browse our open-access CS curriculum to start your learning journey.
-                </p>
-                <Link
-                  to="/courses"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs"
-                >
-                  <span>Explore Courses</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-            ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {courses.map((course) => {
-                  const trackProgress = getTrackProgress(course);
-                  const pct = trackProgress.completionPercentage;
-                  const completedLessons = trackProgress.completedLessons;
-                  const totalLessons = trackProgress.totalLessons;
+                <Skeleton variant="card" height="240px" />
+                <Skeleton variant="card" height="240px" />
+              </div>
+            ) : enrolledCourses.length === 0 ? (
+              <Card className="p-12 text-center max-w-lg mx-auto">
+                <EmptyState
+                  icon={GraduationCap}
+                  title="No Subjects Enrolled Yet"
+                  description="You haven't enrolled in any computer science tracks yet. Browse our open curriculum to enroll in DSA, Java, Python, DBMS, and more for 100% free."
+                  actionText="Explore & Enroll in Subjects"
+                  actionHref="/courses"
+                />
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 gap-6">
+                {enrolledCourses.map((course) => {
+                  const overallPct = course.overallProgressPercentage || 0;
+                  const subcourses = course.subcourses || [];
 
                   return (
-                    <div
-                      key={course.id}
-                      className="p-6 rounded-2xl bg-white border border-slate-200 shadow-2xs hover:border-emerald-300 hover:shadow-xs transition-all space-y-5 flex flex-col justify-between"
+                    <Card
+                      key={course.courseId || course.slug}
+                      hover={true}
+                      className="p-6 sm:p-8 space-y-6"
                     >
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between text-xs font-mono">
-                          <span className="px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold uppercase">
-                            {course.track || 'CS CORE'}
-                          </span>
-                          <span className="text-emerald-700 font-bold font-mono">{pct}% Complete</span>
+                      {/* Course Header */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="primary" size="xs">
+                              {course.category || 'Computer Science'}
+                            </Badge>
+                            <Badge variant="default" size="xs">
+                              4-Level Curriculum
+                            </Badge>
+                          </div>
+                          <h3 className="text-xl font-extrabold text-slate-900">{course.title}</h3>
                         </div>
 
-                        <div>
-                          <h3 className="text-base font-bold text-slate-900">{course.title}</h3>
-                          <p className="text-xs text-slate-600 line-clamp-2 mt-1">
-                            {course.shortDescription || course.description}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Progress Bar */}
-                      <div className="space-y-3 pt-3 border-t border-slate-100">
-                        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-emerald-600 rounded-full transition-all duration-300"
-                            style={{ width: `${pct}%` }}
-                          />
-                        </div>
-
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-slate-500 font-mono text-[11px]">
-                            {completedLessons} / {totalLessons} Lessons Completed
-                          </span>
-                          <Link
-                            to={`/courses/${course.slug}`}
-                            className="text-xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 cursor-pointer"
+                        <div className="flex items-center gap-3">
+                          <div className="text-right">
+                            <div className="text-xs font-bold text-emerald-700">{overallPct}% Overall</div>
+                            <span className="text-[10px] text-slate-400">Completion</span>
+                          </div>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            href={`/courses/${course.slug}`}
+                            icon={ArrowRight}
+                            iconPosition="right"
                           >
-                            <span>Resume Track</span>
-                            <ArrowRight className="w-3 h-3" />
-                          </Link>
+                            Resume Track
+                          </Button>
                         </div>
                       </div>
-                    </div>
+
+                      {/* 4-Tier Subcourse Breakdown Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        {subcourses.map((sc, idx) => {
+                          const levelLabels = {
+                            BEGINNER: '1. Beginner',
+                            INTERMEDIATE: '2. Intermediate',
+                            ADVANCED: '3. Advanced',
+                            PLACEMENT_READY: '4. Placement Ready'
+                          };
+                          const label = levelLabels[sc.level] || `Level ${idx + 1}`;
+                          const isPaid = sc.isPaid || sc.level === 'PLACEMENT_READY';
+
+                          return (
+                            <div
+                              key={sc.subcourseId || idx}
+                              className={`p-4 rounded-2xl border text-xs space-y-3 transition-colors ${
+                                sc.completionPercentage === 100
+                                  ? 'bg-emerald-50/70 border-emerald-200'
+                                  : isPaid
+                                  ? 'bg-amber-50/40 border-amber-200/80'
+                                  : 'bg-slate-50/70 border-slate-200'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <span className="font-bold text-slate-900 text-xs">{label}</span>
+                                <Badge variant={isPaid ? 'warning' : 'success'} size="xs">
+                                  {isPaid ? `₹${sc.priceInr || 29}` : 'FREE'}
+                                </Badge>
+                              </div>
+
+                              {/* Progress metric */}
+                              <div className="space-y-1.5">
+                                <div className="flex justify-between text-[11px] text-slate-500">
+                                  <span>Progress</span>
+                                  <span className="font-semibold text-slate-700">{sc.completionPercentage || 0}%</span>
+                                </div>
+                                <ProgressBar
+                                  value={sc.completionPercentage || 0}
+                                  max={100}
+                                  variant="primary"
+                                  size="xs"
+                                  showPercentage={false}
+                                />
+                              </div>
+
+                              {/* Status checklist */}
+                              <div className="space-y-1 text-[11px] text-slate-600 pt-1 border-t border-slate-200/60">
+                                <div className="flex items-center justify-between">
+                                  <span className="flex items-center gap-1">
+                                    <BookOpen className="w-3 h-3 text-slate-400" /> Lessons
+                                  </span>
+                                  <span className="font-mono font-medium">
+                                    {sc.completedLessonsCount || 0} / {sc.totalLessonsCount || 0}
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="flex items-center gap-1">
+                                    <HelpCircle className="w-3 h-3 text-purple-500" /> Quizzes
+                                  </span>
+                                  <span className="font-mono font-medium">
+                                    {sc.moduleQuizzesPassed || 0} / {sc.totalModuleQuizzes || 4}
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="flex items-center gap-1">
+                                    <Award className="w-3 h-3 text-amber-500" /> Level Exam
+                                  </span>
+                                  <span className={`text-[10px] font-bold ${sc.finalExamPassed ? 'text-emerald-700' : 'text-slate-400'}`}>
+                                    {sc.finalExamPassed ? 'PASSED ✓' : 'PENDING'}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Certificate readiness status */}
+                      <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                        <div className="flex items-center gap-2 text-slate-600">
+                          <Award className="w-4 h-4 text-emerald-600" />
+                          <span>
+                            {course.certificateClaimable
+                              ? '🎉 Course completed! Your verifiable certificate is ready to claim.'
+                              : 'Complete Levels 1, 2, and 3 with 80%+ on assessments to unlock your certificate.'}
+                          </span>
+                        </div>
+                        <Link
+                          to={`/courses/${course.slug}`}
+                          className="text-xs font-bold text-emerald-700 hover:text-emerald-800 self-start sm:self-auto"
+                        >
+                          View Syllabus & Quizzes →
+                        </Link>
+                      </div>
+                    </Card>
                   );
                 })}
               </div>
@@ -298,25 +395,135 @@ export const StudentDashboardPage = () => {
           </div>
         )}
 
-        {/* TAB 2: CERTIFICATES */}
+        {/* TAB 2: PLACEMENT PREP KITS */}
+        {activeTab === 'placement-kits' && (
+          <div className="space-y-6">
+            <SectionHeader
+              title={`Your Unlocked Placement Preparation Kits (${purchasedKits.length})`}
+              subtitle="Role-based interview question banks with model answers, lesson references, and live practice"
+              action={
+                <Button
+                  variant="primary"
+                  size="sm"
+                  href="/placement-kits"
+                  icon={Sparkles}
+                >
+                  Explore All 10 Role Kits
+                </Button>
+              }
+            />
+
+            {purchasedKits.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {purchasedKits.map((kit) => {
+                  const percent = kit.totalQuestions > 0 ? Math.round(((kit.attemptedQuestions || 0) / kit.totalQuestions) * 100) : 0;
+                  return (
+                    <Card
+                      key={kit.slug}
+                      hover={true}
+                      className="p-6 flex flex-col justify-between space-y-5"
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <Badge variant="primary" size="xs">
+                            {kit.targetRole || 'Interview Prep'}
+                          </Badge>
+                          <Badge variant="success" size="xs">
+                            LIFETIME UNLOCKED
+                          </Badge>
+                        </div>
+
+                        <div>
+                          <h3 className="text-base font-bold text-slate-900 line-clamp-1">{kit.title}</h3>
+                          <p className="text-xs text-slate-500 line-clamp-2 mt-1">{kit.shortDescription}</p>
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className="space-y-1.5 pt-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-semibold text-slate-700">Practice Completion</span>
+                            <span className="font-mono font-bold text-emerald-700">
+                              {kit.attemptedQuestions || 0}/{kit.totalQuestions} ({percent}%)
+                            </span>
+                          </div>
+                          <ProgressBar
+                            value={kit.attemptedQuestions || 0}
+                            max={kit.totalQuestions || 1}
+                            variant="primary"
+                            size="sm"
+                            showPercentage={false}
+                          />
+                        </div>
+
+                        {/* Category Badges */}
+                        {kit.categories && kit.categories.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 pt-1">
+                            {kit.categories.slice(0, 3).map((cat, i) => (
+                              <Badge key={i} variant="default" size="xs">
+                                {cat.name} ({cat.questionCount || 0})
+                              </Badge>
+                            ))}
+                            {kit.categories.length > 3 && (
+                              <Badge variant="default" size="xs">
+                                +{kit.categories.length - 3} more
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                        <span className="text-xs text-slate-500">
+                          {kit.correctAnswers || 0} Correct Answers
+                        </span>
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          href={`/placement-kits/${kit.slug}`}
+                          icon={ArrowRight}
+                          iconPosition="right"
+                        >
+                          Resume Practice
+                        </Button>
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            ) : (
+              <Card className="p-10 text-center max-w-lg mx-auto">
+                <EmptyState
+                  icon={Briefcase}
+                  title="No Placement Prep Kits Unlocked Yet"
+                  description="Accelerate your campus and industry job preparation with curated question banks, verified solutions, and direct links back to CodeOrbit theory lessons for only ₹99 per role."
+                  actionText="Browse All 10 Placement Kits (₹99)"
+                  actionHref="/placement-kits"
+                />
+              </Card>
+            )}
+          </div>
+        )}
+
+        {/* TAB 3: CERTIFICATES */}
         {activeTab === 'certificates' && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-bold text-slate-900">Your Verified Certificates ({certificates.length})</h2>
-                <p className="text-xs text-slate-500">Official completion credentials registered in the public verification database</p>
-              </div>
-              <Link to="/certificates/verify" className="text-xs font-semibold text-emerald-700 hover:underline">
-                Open verification registry →
-              </Link>
-            </div>
+            <SectionHeader
+              title={`Your Verified Certificates (${certificates.length})`}
+              subtitle="Official completion credentials registered in the public verification database"
+              action={
+                <Button variant="ghost" size="sm" href="/certificates/verify">
+                  Open verification registry →
+                </Button>
+              }
+            />
 
             {certificates.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {certificates.map((cert) => (
-                  <div
+                  <Card
                     key={cert.certificateCode}
-                    className="p-6 rounded-3xl bg-white border border-emerald-200 shadow-xs space-y-4 hover:shadow-md transition-shadow relative overflow-hidden"
+                    hover={true}
+                    className="p-6 space-y-4 border-emerald-200/80 relative overflow-hidden"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-center gap-3">
@@ -324,9 +531,9 @@ export const StudentDashboardPage = () => {
                           <Award className="w-6 h-6" />
                         </div>
                         <div>
-                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                          <Badge variant="success" size="xs">
                             Verified Credential
-                          </span>
+                          </Badge>
                           <h3 className="text-base font-bold text-slate-900 mt-1">
                             {cert.courseTitle}
                           </h3>
@@ -344,57 +551,133 @@ export const StudentDashboardPage = () => {
                     </div>
 
                     <div className="flex items-center gap-2.5 pt-2">
-                      <Link
-                        to={`/verify/${cert.certificateCode}`}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-colors shadow-2xs cursor-pointer flex-1 justify-center"
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        href={`/verify/${cert.certificateCode}`}
+                        icon={GraduationCap}
+                        className="flex-1"
                       >
-                        <GraduationCap className="w-3.5 h-3.5" /> View & Download PDF
-                      </Link>
+                        View & Download PDF
+                      </Button>
 
-                      <button
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => handleCopyLink(cert.certificateCode)}
-                        className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition-colors cursor-pointer"
-                        title="Copy live verification link for resume or recruiter"
                       >
                         {copiedCode === cert.certificateCode ? 'Copied!' : 'Copy Link'}
-                      </button>
+                      </Button>
                     </div>
-                  </div>
+                  </Card>
                 ))}
               </div>
             ) : null}
 
-            <div className="p-8 rounded-3xl bg-white border border-slate-200 space-y-4 shadow-xs">
+            <Card className="p-8 space-y-4 text-center">
               <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center mx-auto">
                 <ShieldCheck className="w-6 h-6" />
               </div>
-              <div className="text-center max-w-md mx-auto space-y-2">
+              <div className="max-w-md mx-auto space-y-2">
                 <h3 className="text-base font-bold text-slate-900">How to Earn More Certificates</h3>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Complete all lessons in any course track and pass the module assessment with at least 80% to instantly unlock your verifiable certificate of completion.
+                  Complete all modules in Levels 1, 2, and 3 and pass all assessments with at least 80% to instantly unlock your verifiable certificate of completion.
                 </p>
               </div>
-              <div className="text-center pt-2">
-                <Link
-                  to="/courses"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
+              <div className="pt-2">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  href="/courses"
+                  icon={BookOpen}
                 >
-                  <BookOpen className="w-4 h-4" /> Start Studying Now
-                </Link>
+                  Start Studying Now
+                </Button>
               </div>
-            </div>
+            </Card>
           </div>
         )}
 
-        {/* TAB 3: PROFILE */}
+        {/* TAB 4: PAYMENTS & ORDERS */}
+        {activeTab === 'payments' && (
+          <div className="space-y-6">
+            <SectionHeader
+              title={`Payment & Entitlement History (${payments.length})`}
+              subtitle="Official records of Placement Ready unlocks and verified transactions"
+            />
+
+            {payments.length > 0 ? (
+              <Card className="p-0 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
+                      <tr>
+                        <th className="p-4">Order #</th>
+                        <th className="p-4">Subject Track</th>
+                        <th className="p-4">Subcourse Tier</th>
+                        <th className="p-4">Amount</th>
+                        <th className="p-4">Status</th>
+                        <th className="p-4">Entitlement</th>
+                        <th className="p-4">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {payments.map((p) => (
+                        <tr key={p.id || p.orderNumber} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="p-4 font-mono font-bold text-slate-800">{p.orderNumber}</td>
+                          <td className="p-4 font-bold text-slate-900">{p.courseTitle || p.courseSlug}</td>
+                          <td className="p-4 text-slate-600">{p.subcourseTitle || 'Placement Ready'}</td>
+                          <td className="p-4 font-extrabold text-slate-900">₹{p.amountInr}</td>
+                          <td className="p-4">
+                            <Badge variant={p.status === 'PAID' ? 'success' : 'warning'} size="xs">
+                              {p.status}
+                            </Badge>
+                          </td>
+                          <td className="p-4">
+                            <Badge variant={p.entitlementActive ? 'success' : 'default'} size="xs">
+                              {p.entitlementActive ? 'ACTIVE ✓' : 'LOCKED'}
+                            </Badge>
+                          </td>
+                          <td className="p-4 text-slate-500 font-mono text-[11px]">
+                            {p.paidAt ? new Date(p.paidAt).toLocaleDateString() : (p.createdAt ? new Date(p.createdAt).toLocaleDateString() : 'N/A')}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            ) : (
+              <Card className="p-12 text-center max-w-lg mx-auto">
+                <EmptyState
+                  icon={CreditCard}
+                  title="No payment records yet"
+                  description="The first three subcourses (Beginner, Intermediate, Advanced) are 100% free. You can unlock Placement Ready interview kits for ₹29 directly inside any course syllabus."
+                  actionText="Browse Subjects"
+                  actionHref="/courses"
+                />
+              </Card>
+            )}
+          </div>
+        )}
+
+        {/* TAB 5: PROFILE */}
         {activeTab === 'profile' && (
-          <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-xs max-w-xl mx-auto space-y-6">
+          <Card className="p-8 max-w-xl mx-auto space-y-6">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-center font-bold text-xl">
-                {user?.name ? user.name.charAt(0).toUpperCase() : 'S'}
-              </div>
+              {user?.avatarUrl ? (
+                <img
+                  src={user.avatarUrl}
+                  alt={user.fullName || 'Student'}
+                  className="w-14 h-14 rounded-2xl object-cover border border-slate-200 shadow-2xs"
+                />
+              ) : (
+                <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-center font-bold text-xl">
+                  {user?.fullName ? user.fullName.charAt(0).toUpperCase() : (user?.name ? user.name.charAt(0).toUpperCase() : 'S')}
+                </div>
+              )}
               <div>
-                <h3 className="text-lg font-bold text-slate-900">{user?.name || 'Student Name'}</h3>
+                <h3 className="text-lg font-bold text-slate-900">{user?.fullName || user?.name || 'Student Name'}</h3>
                 <p className="text-xs text-slate-500 font-mono">{user?.email || 'email@example.com'}</p>
               </div>
             </div>
@@ -402,9 +685,19 @@ export const StudentDashboardPage = () => {
             <div className="space-y-4 pt-4 border-t border-slate-100 text-xs">
               <div className="flex justify-between py-2 border-b border-slate-100">
                 <span className="text-slate-500 font-medium">Account Role:</span>
-                <span className="font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                <Badge variant="primary" size="xs">
                   {user?.role || 'STUDENT'}
+                </Badge>
+              </div>
+              <div className="flex justify-between py-2 border-b border-slate-100">
+                <span className="text-slate-500 font-medium">Authentication Provider:</span>
+                <span className="font-bold text-slate-800">
+                  {user?.authProvider === 'GOOGLE' ? 'Google OAuth' : 'Email / Password'}
                 </span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-slate-100">
+                <span className="text-slate-500 font-medium">Enrolled Subjects:</span>
+                <span className="font-bold text-emerald-700">{totalEnrolled} Tracks</span>
               </div>
               <div className="flex justify-between py-2 border-b border-slate-100">
                 <span className="text-slate-500 font-medium">Membership Status:</span>
@@ -415,7 +708,7 @@ export const StudentDashboardPage = () => {
                 <span className="font-bold text-slate-800">English / Hinglish 🇮🇳</span>
               </div>
             </div>
-          </div>
+          </Card>
         )}
 
       </div>

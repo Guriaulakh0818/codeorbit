@@ -66,6 +66,10 @@ public class Course {
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("orderIndex ASC")
+    private List<Subcourse> subcourses = new ArrayList<>();
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orderIndex ASC")
     private List<CourseModule> modules = new ArrayList<>();
 
     public Course() {
@@ -188,6 +192,14 @@ public class Course {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public List<Subcourse> getSubcourses() {
+        return subcourses;
+    }
+
+    public void setSubcourses(List<Subcourse> subcourses) {
+        this.subcourses = subcourses;
     }
 
     public List<CourseModule> getModules() {

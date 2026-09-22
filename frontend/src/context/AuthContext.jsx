@@ -100,6 +100,24 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Google Login
+  const loginWithGoogle = async (idToken, mockUserData = null) => {
+    setLoading(true);
+    try {
+      const res = await authApi.loginWithGoogle(idToken, mockUserData);
+      if (res.success && res.token) {
+        setToken(res.token);
+        setUser(res.user);
+        localStorage.setItem('codeorbit_jwt', res.token);
+        localStorage.setItem('codeorbit_user', JSON.stringify(res.user));
+        return { success: true, user: res.user, role: res.user.role };
+      }
+      return { success: false, message: res.message || 'Google sign-in failed' };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = () => {
     setToken(null);
     setUser(null);
@@ -115,6 +133,7 @@ export const AuthProvider = ({ children }) => {
       setUser,
       login,
       register,
+      loginWithGoogle,
       logout,
       isAuthenticated: Boolean(token && user),
       isAdmin: user?.role === 'ADMIN',
@@ -134,6 +153,7 @@ export const useAuth = () => {
       loading: false,
       login: async () => ({ success: false }),
       register: async () => ({ success: false }),
+      loginWithGoogle: async () => ({ success: false }),
       logout: () => {},
       isAuthenticated: false,
       isAdmin: false,
