@@ -3,7 +3,6 @@ import {
   GraduationCap, 
   Plus, 
   Search, 
-  Filter, 
   Layers, 
   BookOpen, 
   HelpCircle, 
@@ -13,12 +12,11 @@ import {
   ChevronRight, 
   AlertCircle, 
   RefreshCw, 
-  CheckCircle2, 
-  Clock, 
-  Sparkles,
-  Eye,
   ExternalLink,
-  Languages
+  Sparkles,
+  CheckCircle2,
+  Lock,
+  RotateCcw
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { adminCurriculumApi } from '../../services/adminCurriculumApi';
@@ -27,7 +25,7 @@ import { AdminModuleModal } from './AdminModuleModal';
 import { AdminLessonModal } from './AdminLessonModal';
 import { AdminQuizModal } from './AdminQuizModal';
 
-export const AdminCurriculumManager = () => {
+export const AdminCurriculumManager = ({ onNotify }) => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -71,7 +69,7 @@ export const AdminCurriculumManager = () => {
         setError(res.message || 'Failed to fetch courses.');
       }
     } catch (err) {
-      setError('Could not connect to backend server.');
+      setError('Could not connect to curriculum database.');
     } finally {
       setLoading(false);
     }
@@ -84,6 +82,15 @@ export const AdminCurriculumManager = () => {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     fetchCourses();
+  };
+
+  const handleResetToStandard = () => {
+    if (window.confirm('Reset/Sync curriculum to standard 20 Domains with 4 tiers each?')) {
+      const fresh = adminCurriculumApi.resetToDefaultCurriculum();
+      setCourses(fresh);
+      setExpandedCourses({});
+      if (onNotify) onNotify('Curriculum successfully synchronized to all 20 Domains & 4-tier roadmaps!');
+    }
   };
 
   const toggleCourseExpand = async (courseId) => {
@@ -231,22 +238,32 @@ export const AdminCurriculumManager = () => {
         <div>
           <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2.5">
             <GraduationCap className="w-6 h-6 text-emerald-600" />
-            Curriculum & Subject Tracks
+            20-Domain Technical Curriculum & Roadmaps
           </h2>
           <p className="text-xs text-slate-500 mt-1">
-            Author and publish CS courses, modules, bilingual lessons (English & Hinglish), and interactive quizzes.
+            Author and manage 20 core domains, 4-tier subcourses, modules, bilingual chapters (English & Hinglish), and practice quizzes.
           </p>
         </div>
 
-        <button
-          onClick={() => {
-            setEditingCourse(null);
-            setCourseModalOpen(true);
-          }}
-          className="inline-flex items-center justify-center gap-2 px-4.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95"
-        >
-          <Plus className="w-4 h-4" /> Add New Course Track
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={handleResetToStandard}
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-all border border-slate-200 cursor-pointer"
+            title="Synchronize standard 20 Domains catalogue"
+          >
+            <RotateCcw className="w-3.5 h-3.5" /> Sync Standard 20 Domains
+          </button>
+
+          <button
+            onClick={() => {
+              setEditingCourse(null);
+              setCourseModalOpen(true);
+            }}
+            className="inline-flex items-center justify-center gap-2 px-4.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95"
+          >
+            <Plus className="w-4 h-4" /> Add New Domain
+          </button>
+        </div>
       </div>
 
       {/* Filters & Search */}
@@ -257,24 +274,31 @@ export const AdminCurriculumManager = () => {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search courses by title or slug..."
+            placeholder="Search all 20 domains by title, keyword, or slug..."
             className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 shadow-2xs"
           />
         </form>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto">
+        <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
           <select
             value={trackFilter}
             onChange={(e) => setTrackFilter(e.target.value)}
             className="bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-700 focus:outline-none focus:border-emerald-500 shadow-2xs font-medium"
           >
-            <option value="ALL">All Tracks</option>
-            <option value="DSA">DSA</option>
-            <option value="SYSTEM_DESIGN">System Design</option>
-            <option value="JAVA">Java</option>
-            <option value="PYTHON">Python</option>
-            <option value="WEB_DEV">Web Development</option>
-            <option value="DBMS">DBMS</option>
+            <option value="ALL">All Categories ({courses.length})</option>
+            <option value="LANGUAGES">☕ Languages (Java, Python, C++)</option>
+            <option value="DSA">🧠 DSA</option>
+            <option value="SYSTEM_DESIGN">🏗️ System Design</option>
+            <option value="WEB">🌐 Web & React</option>
+            <option value="BACKEND">🌱 Backend & Spring</option>
+            <option value="DATABASE">🗄️ SQL & DB</option>
+            <option value="CORE_CS">🖥️ Core CS (OS, DBMS, CN)</option>
+            <option value="DEVOPS">🐧 Linux & Git</option>
+            <option value="CLOUD">☁️ Cloud Computing</option>
+            <option value="TESTING">🧪 Testing & QA</option>
+            <option value="SECURITY">🔐 Cyber Security</option>
+            <option value="AI_DATA">🤖 AI, ML & Data Analytics</option>
+            <option value="MOBILE">📱 Flutter Mobile</option>
           </select>
 
           <select
@@ -289,7 +313,7 @@ export const AdminCurriculumManager = () => {
 
           <button
             onClick={fetchCourses}
-            className="p-2.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-slate-500 hover:text-slate-800 transition-colors shadow-2xs cursor-pointer"
+            className="p-2.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-slate-500 hover:text-slate-800 transition-colors shadow-2xs cursor-pointer shrink-0"
             title="Refresh Courses"
           >
             <RefreshCw className="w-4 h-4" />
@@ -308,7 +332,7 @@ export const AdminCurriculumManager = () => {
       {/* Loading Skeleton */}
       {loading && (
         <div className="space-y-4 animate-pulse">
-          {[1, 2, 3].map((n) => (
+          {[1, 2, 3, 4].map((n) => (
             <div key={n} className="bg-white border border-slate-200 rounded-2xl p-6 h-28" />
           ))}
         </div>
@@ -322,8 +346,14 @@ export const AdminCurriculumManager = () => {
           </div>
           <h3 className="text-sm font-bold text-slate-900">No Courses Found</h3>
           <p className="text-xs text-slate-500 max-w-sm mx-auto">
-            Get started by authoring your first Computer Science track for students.
+            Click &quot;Sync Standard 20 Domains&quot; to restore all 20 professional curriculum tracks.
           </p>
+          <button
+            onClick={handleResetToStandard}
+            className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold"
+          >
+            Sync 20 Standard Domains
+          </button>
         </div>
       )}
 
@@ -331,9 +361,9 @@ export const AdminCurriculumManager = () => {
       {!loading && courses.length > 0 && (
         <div className="space-y-4">
           {courses.map((course) => {
-            const isExpanded = !expandedCourses[course.id];
+            const isExpanded = Boolean(expandedCourses[course.id]);
             const details = expandedCourses[course.id];
-            const isDetailLoading = !loadingDetails[course.id];
+            const isDetailLoading = Boolean(loadingDetails[course.id]);
 
             return (
               <div
@@ -349,6 +379,7 @@ export const AdminCurriculumManager = () => {
 
                     <div className="space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-base">{course.iconEmoji || '💻'}</span>
                         <span className="text-sm sm:text-base font-bold text-slate-900">{course.title}</span>
                         
                         {/* Status Badge */}
@@ -403,7 +434,7 @@ export const AdminCurriculumManager = () => {
                         setCourseModalOpen(true);
                       }}
                       className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors cursor-pointer"
-                      title="Edit Course Metadata"
+                      title="Edit Domain Metadata"
                     >
                       <Edit3 className="w-4 h-4" />
                     </button>
@@ -411,7 +442,7 @@ export const AdminCurriculumManager = () => {
                     <button
                       onClick={() => handleDeleteCourse(course.id)}
                       className="p-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl transition-colors cursor-pointer"
-                      title="Delete Course"
+                      title="Delete Domain"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -420,16 +451,49 @@ export const AdminCurriculumManager = () => {
 
                 {/* Expanded Modules & Content Tree */}
                 {isExpanded && (
-                  <div className="border-t border-slate-100 bg-slate-50/70 p-5 sm:p-6 space-y-4">
+                  <div className="border-t border-slate-100 bg-slate-50/70 p-5 sm:p-6 space-y-5">
+                    
+                    {/* 4 Subcourse Tiers Ribbon */}
+                    {details?.subcourses && details.subcourses.length > 0 && (
+                      <div className="p-4 bg-white rounded-xl border border-slate-200 space-y-2">
+                        <div className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold flex items-center justify-between">
+                          <span>4-Tier Roadmap Hierarchy:</span>
+                          <span className="text-emerald-700 font-bold">100% Free Tiers 1-3 • ₹29 Placement Ready</span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                          {details.subcourses.map((sub, sIdx) => (
+                            <div
+                              key={sIdx}
+                              className={`p-2.5 rounded-lg border flex flex-col justify-between ${
+                                sub.curriculumLevel === 'PLACEMENT_READY'
+                                  ? 'bg-amber-50/90 border-amber-200 text-amber-950 font-semibold'
+                                  : 'bg-slate-50 border-slate-200 text-slate-800'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between gap-1">
+                                <span className="font-bold text-[11px] truncate">{sub.title}</span>
+                                {sub.curriculumLevel === 'PLACEMENT_READY' ? (
+                                  <span className="text-[9px] bg-amber-600 text-white px-1.5 py-0.2 rounded font-extrabold">₹29</span>
+                                ) : (
+                                  <span className="text-[9px] bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded font-bold">FREE</span>
+                                )}
+                              </div>
+                              <p className="text-[10px] text-slate-500 line-clamp-1 mt-1">{sub.description}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {isDetailLoading && (
                       <div className="py-6 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
                         <RefreshCw className="w-4 h-4 animate-spin text-emerald-600" /> Loading modules and lessons...
                       </div>
                     )}
 
-                    {!isDetailLoading && details?.modules?.length === 0 && (
-                      <div className="py-6 text-center text-xs text-slate-500 space-y-2">
-                        <p>No modules created in this course track yet.</p>
+                    {!isDetailLoading && (!details?.modules || details.modules.length === 0) && (
+                      <div className="py-6 text-center text-xs text-slate-500 space-y-2 bg-white rounded-xl border border-slate-200 p-6">
+                        <p>No custom modules created yet for this domain.</p>
                         <button
                           onClick={() => {
                             setTargetCourseId(course.id);
@@ -454,6 +518,10 @@ export const AdminCurriculumManager = () => {
                             <Layers className="w-4 h-4 text-emerald-600" />
                             <span className="text-xs font-bold text-slate-900">{mod.title}</span>
                             
+                            <span className="text-[10px] font-mono bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">
+                              {mod.curriculumLevel || 'BEGINNER'}
+                            </span>
+
                             <button
                               onClick={() => handleToggleModuleStatus(course.id, mod.id, mod.status)}
                               className={`px-2 py-0.5 rounded-full text-[9px] font-bold border cursor-pointer ${
@@ -519,10 +587,10 @@ export const AdminCurriculumManager = () => {
                               Lessons ({mod.lessons?.length || 0})
                             </div>
 
-                            {mod.lessons?.length === 0 ? (
+                            {(!mod.lessons || mod.lessons.length === 0) ? (
                               <p className="text-[11px] text-slate-400 italic">No lessons yet.</p>
                             ) : (
-                              mod.lessons?.map((l) => (
+                              mod.lessons.map((l) => (
                                 <div
                                   key={l.id}
                                   className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-2 text-xs"
@@ -530,9 +598,7 @@ export const AdminCurriculumManager = () => {
                                   <div className="flex items-center gap-2 truncate">
                                     <span className="font-semibold text-slate-800 truncate">{l.title}</span>
                                     <span className="text-[10px] text-slate-500 font-mono">{l.estimatedMinutes}m</span>
-                                    {l.hasHinglish && (
-                                      <span className="bg-emerald-100 text-emerald-800 text-[9px] font-bold px-1.5 py-0.5 rounded">HI</span>
-                                    )}
+                                    <span className="bg-emerald-100 text-emerald-800 text-[9px] font-bold px-1.5 py-0.5 rounded">EN+HI</span>
                                   </div>
 
                                   <div className="flex items-center gap-1 flex-shrink-0">
@@ -550,9 +616,11 @@ export const AdminCurriculumManager = () => {
                                         const res = await adminCurriculumApi.getLessonById(l.id);
                                         if (res.success) {
                                           setEditingLesson(res.data);
-                                          setTargetModuleId(mod.id);
-                                          setLessonModalOpen(true);
+                                        } else {
+                                          setEditingLesson(l);
                                         }
+                                        setTargetModuleId(mod.id);
+                                        setLessonModalOpen(true);
                                       }}
                                       className="p-1 text-slate-500 hover:text-slate-800 cursor-pointer"
                                     >
@@ -578,18 +646,17 @@ export const AdminCurriculumManager = () => {
                               Quizzes ({mod.quizzes?.length || 0})
                             </div>
 
-                            {mod.quizzes?.length === 0 ? (
-                              <p className="text-[11px] text-slate-400 italic">No quiz created.</p>
+                            {(!mod.quizzes || mod.quizzes.length === 0) ? (
+                              <p className="text-[11px] text-slate-400 italic">No quizzes yet.</p>
                             ) : (
-                              mod.quizzes?.map((q) => (
+                              mod.quizzes.map((q) => (
                                 <div
                                   key={q.id}
                                   className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-2 text-xs"
                                 >
                                   <div className="flex items-center gap-2 truncate">
                                     <span className="font-semibold text-slate-800 truncate">{q.title}</span>
-                                    <span className="text-[10px] text-slate-500">{q.questionCount} Qs</span>
-                                    <span className="text-[10px] text-emerald-700 font-medium">{q.minPassScorePercentage}% Pass</span>
+                                    <span className="text-[10px] text-slate-500 font-mono">{q.minPassScorePercentage || 80}% Pass</span>
                                   </div>
 
                                   <div className="flex items-center gap-1 flex-shrink-0">
@@ -603,8 +670,13 @@ export const AdminCurriculumManager = () => {
                                     </button>
 
                                     <button
-                                      onClick={() => {
-                                        setEditingQuizId(q.id);
+                                      onClick={async () => {
+                                        const res = await adminCurriculumApi.getQuizById(q.id);
+                                        if (res.success) {
+                                          setEditingQuizId(res.data.id);
+                                        } else {
+                                          setEditingQuizId(q.id);
+                                        }
                                         setTargetQuizModuleId(mod.id);
                                         setQuizModalOpen(true);
                                       }}
@@ -626,12 +698,10 @@ export const AdminCurriculumManager = () => {
                           </div>
 
                         </div>
-
                       </div>
                     ))}
                   </div>
                 )}
-
               </div>
             );
           })}
@@ -639,46 +709,58 @@ export const AdminCurriculumManager = () => {
       )}
 
       {/* Modals */}
-      <AdminCourseModal
-        isOpen={courseModalOpen}
-        onClose={() => setCourseModalOpen(false)}
-        course={editingCourse}
-        onSaved={fetchCourses}
-      />
+      {courseModalOpen && (
+        <AdminCourseModal
+          isOpen={courseModalOpen}
+          onClose={() => setCourseModalOpen(false)}
+          editingCourse={editingCourse}
+          onSaved={() => {
+            fetchCourses();
+            if (onNotify) onNotify('Course saved successfully.');
+          }}
+        />
+      )}
 
-      <AdminModuleModal
-        isOpen={moduleModalOpen}
-        onClose={() => setModuleModalOpen(false)}
-        courseId={targetCourseId}
-        module={editingModule}
-        onSaved={() => refreshCourseDetails(targetCourseId)}
-      />
+      {moduleModalOpen && (
+        <AdminModuleModal
+          isOpen={moduleModalOpen}
+          onClose={() => setModuleModalOpen(false)}
+          courseId={targetCourseId}
+          editingModule={editingModule}
+          onSaved={() => {
+            refreshCourseDetails(targetCourseId);
+            if (onNotify) onNotify('Module saved successfully.');
+          }}
+        />
+      )}
 
-      <AdminLessonModal
-        isOpen={lessonModalOpen}
-        onClose={() => setLessonModalOpen(false)}
-        moduleId={targetModuleId}
-        lesson={editingLesson}
-        onSaved={() => {
-          const cId = Object.keys(expandedCourses).find((cId) =>
-            expandedCourses[cId]?.modules?.some((m) => m.id === targetModuleId)
-          );
-          if (cId) refreshCourseDetails(cId);
-        }}
-      />
+      {lessonModalOpen && (
+        <AdminLessonModal
+          isOpen={lessonModalOpen}
+          onClose={() => setLessonModalOpen(false)}
+          moduleId={targetModuleId}
+          editingLesson={editingLesson}
+          onSaved={() => {
+            if (targetCourseId) refreshCourseDetails(targetCourseId);
+            fetchCourses();
+            if (onNotify) onNotify('Lesson saved successfully.');
+          }}
+        />
+      )}
 
-      <AdminQuizModal
-        isOpen={quizModalOpen}
-        onClose={() => setQuizModalOpen(false)}
-        moduleId={targetQuizModuleId}
-        quizId={editingQuizId}
-        onSaved={() => {
-          const cId = Object.keys(expandedCourses).find((cId) =>
-            expandedCourses[cId]?.modules?.some((m) => m.id === targetQuizModuleId)
-          );
-          if (cId) refreshCourseDetails(cId);
-        }}
-      />
+      {quizModalOpen && (
+        <AdminQuizModal
+          isOpen={quizModalOpen}
+          onClose={() => setQuizModalOpen(false)}
+          moduleId={targetQuizModuleId}
+          quizId={editingQuizId}
+          onSaved={() => {
+            if (targetCourseId) refreshCourseDetails(targetCourseId);
+            fetchCourses();
+            if (onNotify) onNotify('Quiz saved successfully.');
+          }}
+        />
+      )}
 
     </div>
   );
