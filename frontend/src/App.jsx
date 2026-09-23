@@ -1,33 +1,34 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { LearningProgressProvider } from './context/LearningProgressContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
+import { lazyWithRetry } from './utils/lazyWithRetry';
 
-// Code-split route components to minimize initial bundle size and boost page load speed
-const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
-const CoursesPage = lazy(() => import('./pages/CoursesPage').then(m => ({ default: m.CoursesPage })));
-const CourseDetailPage = lazy(() => import('./pages/CourseDetailPage').then(m => ({ default: m.CourseDetailPage })));
-const SubcourseDetailPage = lazy(() => import('./pages/SubcourseDetailPage').then(m => ({ default: m.SubcourseDetailPage })));
-const ModuleDetailPage = lazy(() => import('./pages/ModuleDetailPage').then(m => ({ default: m.ModuleDetailPage })));
-const LessonReaderPage = lazy(() => import('./pages/LessonReaderPage').then(m => ({ default: m.LessonReaderPage })));
-const QuizPlayerPage = lazy(() => import('./pages/QuizPlayerPage').then(m => ({ default: m.QuizPlayerPage })));
-const CertificateVerifyPage = lazy(() => import('./pages/CertificateVerifyPage').then(m => ({ default: m.CertificateVerifyPage })));
-const StudentDashboardPage = lazy(() => import('./pages/StudentDashboardPage').then(m => ({ default: m.StudentDashboardPage })));
-const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage').then(m => ({ default: m.AdminDashboardPage })));
-const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage').then(m => ({ default: m.AdminLoginPage })));
-const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
-const RegisterPage = lazy(() => import('./pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
-const ContactUsPage = lazy(() => import('./pages/ContactUsPage').then(m => ({ default: m.ContactUsPage })));
-const AboutUsPage = lazy(() => import('./pages/AboutUsPage').then(m => ({ default: m.AboutUsPage })));
-const PlacementKitsPage = lazy(() => import('./pages/PlacementKitsPage').then(m => ({ default: m.PlacementKitsPage })));
-const PlacementKitDetailPage = lazy(() => import('./pages/PlacementKitDetailPage').then(m => ({ default: m.PlacementKitDetailPage })));
-const TermsConditionsPage = lazy(() => import('./pages/TermsConditionsPage').then(m => ({ default: m.TermsConditionsPage })));
-const RefundPolicyPage = lazy(() => import('./pages/RefundPolicyPage').then(m => ({ default: m.RefundPolicyPage })));
-const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then(m => ({ default: m.PrivacyPolicyPage })));
-const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
+// Code-split route components with automated recovery from new deployment chunk invalidations
+const HomePage = lazyWithRetry(() => import('./pages/HomePage'));
+const CoursesPage = lazyWithRetry(() => import('./pages/CoursesPage'));
+const CourseDetailPage = lazyWithRetry(() => import('./pages/CourseDetailPage'));
+const SubcourseDetailPage = lazyWithRetry(() => import('./pages/SubcourseDetailPage'));
+const ModuleDetailPage = lazyWithRetry(() => import('./pages/ModuleDetailPage'));
+const LessonReaderPage = lazyWithRetry(() => import('./pages/LessonReaderPage'));
+const QuizPlayerPage = lazyWithRetry(() => import('./pages/QuizPlayerPage'));
+const CertificateVerifyPage = lazyWithRetry(() => import('./pages/CertificateVerifyPage'));
+const StudentDashboardPage = lazyWithRetry(() => import('./pages/StudentDashboardPage'));
+const AdminDashboardPage = lazyWithRetry(() => import('./pages/AdminDashboardPage'));
+const AdminLoginPage = lazyWithRetry(() => import('./pages/AdminLoginPage'));
+const LoginPage = lazyWithRetry(() => import('./pages/LoginPage'));
+const RegisterPage = lazyWithRetry(() => import('./pages/RegisterPage'));
+const ContactUsPage = lazyWithRetry(() => import('./pages/ContactUsPage'));
+const AboutUsPage = lazyWithRetry(() => import('./pages/AboutUsPage'));
+const PlacementKitsPage = lazyWithRetry(() => import('./pages/PlacementKitsPage'));
+const PlacementKitDetailPage = lazyWithRetry(() => import('./pages/PlacementKitDetailPage'));
+const TermsConditionsPage = lazyWithRetry(() => import('./pages/TermsConditionsPage'));
+const RefundPolicyPage = lazyWithRetry(() => import('./pages/RefundPolicyPage'));
+const PrivacyPolicyPage = lazyWithRetry(() => import('./pages/PrivacyPolicyPage'));
+const NotFoundPage = lazyWithRetry(() => import('./pages/NotFoundPage'));
 
 const PageLoader = () => (
   <div className="min-h-[50vh] flex items-center justify-center">

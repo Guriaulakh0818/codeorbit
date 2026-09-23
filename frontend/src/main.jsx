@@ -3,6 +3,16 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
 
+// Global listener for Vite dynamic import preload failures on production deployments
+window.addEventListener('vite:preloadError', (event) => {
+  console.warn('[CodeOrbit] vite:preloadError detected! Auto-reloading to fetch fresh deployment assets...', event);
+  const reloadKey = 'codeorbit_vite_preload_reload';
+  if (!sessionStorage.getItem(reloadKey)) {
+    sessionStorage.setItem(reloadKey, 'true');
+    window.location.reload();
+  }
+});
+
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -10,6 +20,19 @@ class ErrorBoundary extends React.Component {
   }
 
   static getDerivedStateFromError(error) {
+    // If it's a dynamic module import failure, trigger reload immediately
+    const errorMsg = error?.message || '';
+    if (
+      errorMsg.includes('Failed to fetch dynamically imported module') ||
+      errorMsg.includes('Importing a module script failed') ||
+      errorMsg.includes('Loading chunk')
+    ) {
+      const reloadKey = 'codeorbit_eb_chunk_reload';
+      if (!sessionStorage.getItem(reloadKey)) {
+        sessionStorage.setItem(reloadKey, 'true');
+        window.location.reload();
+      }
+    }
     return { hasError: true, error };
   }
 
