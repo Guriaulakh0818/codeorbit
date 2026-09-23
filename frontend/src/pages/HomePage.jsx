@@ -108,7 +108,7 @@ export const HomePage = () => {
     {
       title: 'System Design & Scalability',
       description: 'Distributed architectures, Load Balancers, Caching, Sharding, Message Queues & CAP theorem.',
-      slug: 'system-design-track-2026',
+      slug: 'system-design',
       icon: Server,
       color: 'bg-indigo-50 text-indigo-900 border-indigo-200',
       iconBg: 'bg-indigo-100 text-indigo-900',
@@ -118,7 +118,7 @@ export const HomePage = () => {
     {
       title: 'Core Java for Placements',
       description: 'OOPs concepts, JVM Internals, Garbage Collection, Collections Framework, Multithreading.',
-      slug: 'dsa',
+      slug: 'java',
       icon: Code2,
       color: 'bg-rose-50 text-rose-900 border-rose-200',
       iconBg: 'bg-rose-100 text-rose-900',

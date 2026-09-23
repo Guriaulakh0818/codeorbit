@@ -40,12 +40,14 @@ export const Navbar = () => {
   };
 
   const csSubjects = [
-    { name: 'Data Structures & Algorithms', slug: 'dsa', icon: Terminal, color: 'text-sky-500' },
-    { name: 'Operating Systems', slug: 'operating-systems', icon: Cpu, color: 'text-amber-500' },
-    { name: 'Database Management (DBMS)', slug: 'dbms', icon: Database, color: 'text-emerald-500' },
-    { name: 'Computer Networks', slug: 'computer-networks', icon: Network, color: 'text-indigo-500' },
-    { name: 'System Design & Distributed Systems', slug: 'system-design-track-2026', icon: Server, color: 'text-purple-500' },
-    { name: 'Core Java & Python Programming', slug: 'dsa', icon: Code2, color: 'text-rose-500' }
+    { name: '☕ Java Master Track', slug: 'java', icon: Code2, color: 'text-amber-600' },
+    { name: '🐍 Python Programming Track', slug: 'python', icon: Terminal, color: 'text-emerald-600' },
+    { name: '🧠 Data Structures & Algorithms (DSA)', slug: 'dsa', icon: Terminal, color: 'text-sky-500' },
+    { name: '⚛️ React.js & Frontend Dev', slug: 'react', icon: Code2, color: 'text-cyan-500' },
+    { name: '🌱 Spring & Spring Boot Backend', slug: 'spring-boot', icon: Server, color: 'text-emerald-600' },
+    { name: '🗄️ SQL & Database Engineering', slug: 'sql', icon: Database, color: 'text-indigo-500' },
+    { name: '🏗️ System Design (LLD + HLD)', slug: 'system-design', icon: Server, color: 'text-purple-500' },
+    { name: '☁️ Cloud Computing (AWS / Azure)', slug: 'cloud-computing', icon: Network, color: 'text-blue-500' }
   ];
 
   return (
