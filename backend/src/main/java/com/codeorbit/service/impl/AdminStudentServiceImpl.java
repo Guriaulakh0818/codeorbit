@@ -126,7 +126,7 @@ public class AdminStudentServiceImpl implements AdminStudentService {
         detail.setEmail(user.getEmail());
         detail.setRole(user.getRole() != null ? user.getRole().name() : "STUDENT");
         detail.setJoinedAt(user.getCreatedAt());
-        detail.setAuthProvider(user.getProvider() != null ? user.getProvider().name() : "LOCAL");
+        detail.setAuthProvider(user.getAuthProvider() != null ? user.getAuthProvider().name() : "LOCAL");
         detail.setStatus("ACTIVE");
 
         // 1. Enrolled Courses
@@ -138,7 +138,7 @@ public class AdminStudentServiceImpl implements AdminStudentService {
             scp.setCourseId(c.getId());
             scp.setTitle(c.getTitle());
             scp.setTrack(c.getTrack());
-            scp.setLevel(c.getLevel() != null ? c.getLevel().name() : "BEGINNER");
+            scp.setLevel(c.getDifficultyLevel() != null ? c.getDifficultyLevel() : "BEGINNER");
             scp.setEnrolledAt(se.getEnrolledAt());
 
             long completed = userLessonProgressRepository.countCompletedPublishedLessons(user.getId(), c.getId());
@@ -161,9 +161,9 @@ public class AdminStudentServiceImpl implements AdminStudentService {
                     sqa.setCourseTitle(a.getQuiz().getModule().getCourse().getTitle());
                 }
             }
-            sqa.setScore(a.getScore());
+            sqa.setScore(a.getCorrectAnswers());
             sqa.setTotalQuestions(a.getTotalQuestions());
-            sqa.setPercentage(a.getPercentage());
+            sqa.setPercentage(a.getScorePercentage() != null ? a.getScorePercentage().doubleValue() : 0.0);
             sqa.setPassed(a.isPassed());
             sqa.setSubmittedAt(a.getSubmittedAt());
             return sqa;
@@ -243,10 +243,11 @@ public class AdminStudentServiceImpl implements AdminStudentService {
             cr.setSubject(c.getCourse() != null ? c.getCourse().getTrack() : "Tech");
             cr.setStatus(c.getStatus() != null ? c.getStatus().name() : "ISSUED");
             cr.setIssuedAt(c.getIssuedAt());
-            cr.setPdfUrl(c.getPdfUrl());
-            cr.setVerificationUrl(c.getVerificationUrl());
+            cr.setPdfUrl("/api/certificates/" + c.getId() + "/download");
+            cr.setVerificationUrl("/verify/" + c.getCertificateCode());
             return cr;
         }).collect(Collectors.toList());
+        detail.setCertificates(certDtos);
         detail.setCertificates(certDtos);
 
         return detail;

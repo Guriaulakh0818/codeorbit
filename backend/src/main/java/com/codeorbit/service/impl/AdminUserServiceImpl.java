@@ -31,7 +31,7 @@ public class AdminUserServiceImpl implements AdminUserService {
             s.setFullName(u.getFullName() != null ? u.getFullName() : "Learner");
             s.setEmail(u.getEmail());
             s.setRole(u.getRole() != null ? u.getRole().name() : "STUDENT");
-            s.setAuthProvider(u.getProvider() != null ? u.getProvider().name() : "LOCAL");
+            s.setAuthProvider(u.getAuthProvider() != null ? u.getAuthProvider().name() : "LOCAL");
             s.setCreatedAt(u.getCreatedAt());
             s.setStatus("ACTIVE");
             return s;
@@ -54,7 +54,7 @@ public class AdminUserServiceImpl implements AdminUserService {
             s.setFullName(saved.getFullName() != null ? saved.getFullName() : "Learner");
             s.setEmail(saved.getEmail());
             s.setRole(saved.getRole().name());
-            s.setAuthProvider(saved.getProvider() != null ? saved.getProvider().name() : "LOCAL");
+            s.setAuthProvider(saved.getAuthProvider() != null ? saved.getAuthProvider().name() : "LOCAL");
             s.setCreatedAt(saved.getCreatedAt());
             s.setStatus("ACTIVE");
             return s;

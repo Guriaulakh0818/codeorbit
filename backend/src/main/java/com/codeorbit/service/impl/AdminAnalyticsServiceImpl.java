@@ -86,9 +86,6 @@ public class AdminAnalyticsServiceImpl implements AdminAnalyticsService {
         dto.setPlacementKitRevenue(kitRev);
         dto.setTotalRevenue(totalRevenue);
 
-        // Course completions & active learners
-        long totalEnrollments = studentEnrollmentRepository.count();
-        long completedLessons = userLessonProgressRepository.count();
         long certificatesCount = certificateRepository.count();
 
         dto.setActiveLearners(Math.max(totalUsers, prPaid.size() + certPaid.size()));
@@ -146,7 +143,7 @@ public class AdminAnalyticsServiceImpl implements AdminAnalyticsService {
             dto.setId(c.getId());
             dto.setTitle(c.getTitle());
             dto.setTrack(c.getTrack() != null ? c.getTrack() : "Tech");
-            dto.setLevel(c.getLevel() != null ? c.getLevel().name() : "BEGINNER");
+            dto.setLevel(c.getDifficultyLevel() != null ? c.getDifficultyLevel() : "BEGINNER");
             dto.setStatus(c.getStatus() != null ? c.getStatus().name() : "PUBLISHED");
 
             long enrolled = studentEnrollmentRepository.countByCourseId(c.getId());

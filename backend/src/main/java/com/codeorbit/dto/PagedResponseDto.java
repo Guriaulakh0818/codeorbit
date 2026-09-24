@@ -23,6 +23,17 @@ public class PagedResponseDto<T> {
         this.last = last;
     }
 
+    public PagedResponseDto(org.springframework.data.domain.Page<T> page) {
+        if (page != null) {
+            this.content = page.getContent();
+            this.pageNumber = page.getNumber();
+            this.pageSize = page.getSize();
+            this.totalElements = page.getTotalElements();
+            this.totalPages = page.getTotalPages();
+            this.last = page.isLast();
+        }
+    }
+
     public List<T> getContent() {
         return content;
     }

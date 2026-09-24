@@ -52,7 +52,7 @@ public class AdminReportServiceImpl implements AdminReportService {
                             .append(escapeCsv(u.getFullName())).append(",")
                             .append(escapeCsv(u.getEmail())).append(",")
                             .append(u.getRole()).append(",")
-                            .append(u.getProvider()).append(",")
+                            .append(u.getAuthProvider()).append(",")
                             .append(u.getCreatedAt()).append("\n");
                 }
                 break;
@@ -65,9 +65,9 @@ public class AdminReportServiceImpl implements AdminReportService {
                             .append(escapeCsv(c.getTitle())).append(",")
                             .append(escapeCsv(c.getSlug())).append(",")
                             .append(escapeCsv(c.getTrack())).append(",")
-                            .append(c.getLevel()).append(",")
+                            .append(c.getDifficultyLevel()).append(",")
                             .append(c.getStatus()).append(",")
-                            .append(c.isPaid() ? "29.00" : "0.00").append("\n");
+                            .append(c.getDifficultyLevel() != null && c.getDifficultyLevel().contains("PLACEMENT") ? "29.00" : "0.00").append("\n");
                 }
                 break;
 
@@ -117,7 +117,7 @@ public class AdminReportServiceImpl implements AdminReportService {
                             .append(escapeCsv(c.getCourse() != null ? c.getCourse().getTitle() : "")).append(",")
                             .append(c.getStatus()).append(",")
                             .append(c.getIssuedAt()).append(",")
-                            .append(escapeCsv(c.getVerificationUrl())).append("\n");
+                            .append(escapeCsv("/verify/" + c.getCertificateCode())).append("\n");
                 }
                 break;
 
@@ -128,9 +128,9 @@ public class AdminReportServiceImpl implements AdminReportService {
                     sb.append(a.getId()).append(",")
                             .append(escapeCsv(a.getUser() != null ? a.getUser().getEmail() : "")).append(",")
                             .append(escapeCsv(a.getQuiz() != null ? a.getQuiz().getTitle() : "")).append(",")
-                            .append(a.getScore()).append(",")
+                            .append(a.getCorrectAnswers()).append(",")
                             .append(a.getTotalQuestions()).append(",")
-                            .append(a.getPercentage()).append(",")
+                            .append(a.getScorePercentage()).append(",")
                             .append(a.isPassed()).append(",")
                             .append(a.getSubmittedAt()).append("\n");
                 }

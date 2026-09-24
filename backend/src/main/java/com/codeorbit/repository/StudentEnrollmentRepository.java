@@ -20,4 +20,6 @@ public interface StudentEnrollmentRepository extends JpaRepository<StudentEnroll
     List<StudentEnrollment> findByUserIdWithCourseOrderByEnrolledAtDesc(@Param("userId") Long userId);
 
     long countByUserId(Long userId);
+
+    long countByCourseId(Long courseId);
 }

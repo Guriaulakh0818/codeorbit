@@ -84,8 +84,8 @@ public class AdminCertificateAdminServiceImpl implements AdminCertificateAdminSe
             item.setPaymentStatus("PAID");
             item.setCertificateStatus(c.getStatus() != null ? c.getStatus().name() : "ISSUED");
             item.setIssuedAt(c.getIssuedAt());
-            item.setPdfUrl(c.getPdfUrl());
-            item.setVerificationUrl(c.getVerificationUrl());
+            item.setPdfUrl("/api/certificates/" + c.getId() + "/download");
+            item.setVerificationUrl("/verify/" + c.getCertificateCode());
             items.add(item);
         }
 
