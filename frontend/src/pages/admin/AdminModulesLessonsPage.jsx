@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Layers, 
   BookOpen, 
@@ -14,7 +14,8 @@ import {
   FolderTree,
   Lightbulb,
   Sparkles,
-  RefreshCw
+  RefreshCw,
+  Filter
 } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminModuleModal from '../../components/admin/AdminModuleModal';
@@ -31,11 +32,20 @@ import {
   TECH_DOMAINS 
 } from '../../services/adminCurriculumApi';
 
+const TIERS = [
+  { id: 'ALL', label: 'All 16 Modules', color: 'bg-slate-100 text-slate-700' },
+  { id: 'BEGINNER', label: 'Tier 1: Beginner', color: 'bg-green-50 text-green-800 border-green-200' },
+  { id: 'INTERMEDIATE', label: 'Tier 2: Intermediate', color: 'bg-blue-50 text-blue-800 border-blue-200' },
+  { id: 'ADVANCED', label: 'Tier 3: Advanced', color: 'bg-purple-50 text-purple-800 border-purple-200' },
+  { id: 'PLACEMENT_READY', label: 'Tier 4: Placement Ready (₹29)', color: 'bg-amber-50 text-amber-900 border-amber-200' }
+];
+
 export default function AdminModulesLessonsPage() {
   const [courses, setCourses] = useState([]);
   const [selectedCourseId, setSelectedCourseId] = useState('');
   const [courseDetail, setCourseDetail] = useState(null);
   const [selectedModule, setSelectedModule] = useState(null);
+  const [selectedTier, setSelectedTier] = useState('ALL');
   const [loading, setLoading] = useState(false);
 
   // Modals
@@ -77,7 +87,6 @@ export default function AdminModulesLessonsPage() {
       const detail = await fetchAdminCourseById(id);
       setCourseDetail(detail);
       if (detail?.modules?.length > 0) {
-        // Keep currently selected module if it still exists, else pick first
         setSelectedModule((prev) => {
           if (!prev) return detail.modules[0];
           const found = detail.modules.find((m) => m.id === prev.id);
@@ -123,10 +132,29 @@ export default function AdminModulesLessonsPage() {
     }
   };
 
+  // Filter modules based on selected tier
+  const filteredModules = useMemo(() => {
+    const mods = courseDetail?.modules || [];
+    if (selectedTier === 'ALL') return mods;
+    return mods.filter((m) => m.curriculumLevel === selectedTier);
+  }, [courseDetail, selectedTier]);
+
+  // Tier module counts
+  const tierCounts = useMemo(() => {
+    const mods = courseDetail?.modules || [];
+    return {
+      ALL: mods.length,
+      BEGINNER: mods.filter((m) => m.curriculumLevel === 'BEGINNER').length,
+      INTERMEDIATE: mods.filter((m) => m.curriculumLevel === 'INTERMEDIATE').length,
+      ADVANCED: mods.filter((m) => m.curriculumLevel === 'ADVANCED').length,
+      PLACEMENT_READY: mods.filter((m) => m.curriculumLevel === 'PLACEMENT_READY').length
+    };
+  }, [courseDetail]);
+
   return (
     <AdminLayout 
       title="Modules, Concepts & Chapters Editor"
-      subtitle="Configure module concepts, roadmap tiers, and bilingual chapters synced live with the web app."
+      subtitle="Manage 16 modules per domain (4 Beginner, 4 Intermediate, 4 Advanced, 4 Placement Ready) and their chapters."
     >
       {/* ========================================================================= */}
       {/* 1. COURSE SELECTOR BAR */}
@@ -141,7 +169,7 @@ export default function AdminModulesLessonsPage() {
           >
             {courses.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.iconEmoji || '📘'} {c.title} ({c.track} — {c.difficultyLevel || c.level || 'All Tiers'})
+                {c.iconEmoji || '📘'} {c.title} ({c.track} — 16 Modules)
               </option>
             ))}
           </select>
@@ -149,7 +177,12 @@ export default function AdminModulesLessonsPage() {
 
         <div className="flex items-center gap-2">
           <button
-            onClick={() => { setEditingModule(null); setModuleModalOpen(true); }}
+            onClick={() => { 
+              setEditingModule({
+                curriculumLevel: selectedTier !== 'ALL' ? selectedTier : 'BEGINNER'
+              }); 
+              setModuleModalOpen(true); 
+            }}
             disabled={!selectedCourseId}
             className="py-2.5 px-4 rounded-xl bg-[#4F46E5] text-white text-xs font-bold shadow-xs hover:bg-indigo-700 flex items-center gap-1.5 transition-colors disabled:opacity-50 cursor-pointer"
           >
@@ -160,17 +193,57 @@ export default function AdminModulesLessonsPage() {
       </div>
 
       {/* ========================================================================= */}
-      {/* 2. SPLIT VIEW: MODULES LIST & CHAPTERS LIST */}
+      {/* 2. 4-TIER SELECTOR TABS */}
+      {/* ========================================================================= */}
+      <div className="bg-white p-3 rounded-2xl border border-[#E5E7EB] shadow-xs mb-6 flex items-center gap-2 overflow-x-auto">
+        <span className="text-xs font-bold text-slate-500 flex items-center gap-1 pl-2 pr-1">
+          <Filter className="w-3.5 h-3.5 text-indigo-600" />
+          Filter Tier:
+        </span>
+        {TIERS.map((tier) => (
+          <button
+            key={tier.id}
+            onClick={() => setSelectedTier(tier.id)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+              selectedTier === tier.id
+                ? 'bg-indigo-600 text-white shadow-xs'
+                : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'
+            }`}
+          >
+            <span>{tier.label}</span>
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+              selectedTier === tier.id ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+            }`}>
+              {tierCounts[tier.id] || 0}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 3. SPLIT VIEW: 16 MODULES LIST & CHAPTERS LIST */}
       {/* ========================================================================= */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Left: Modules Tree */}
         <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-xs p-5">
           <div className="flex items-center justify-between pb-3 border-b border-[#E5E7EB] mb-4">
-            <h3 className="text-sm font-bold text-[#111827]">Course Modules</h3>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-50 text-[#4F46E5]">
-              {courseDetail?.modules?.length || 0} Modules
-            </span>
+            <div>
+              <h3 className="text-sm font-bold text-[#111827]">Modules List</h3>
+              <p className="text-[11px] text-slate-400">Showing {filteredModules.length} of {courseDetail?.modules?.length || 0} modules</p>
+            </div>
+            <button
+              onClick={() => {
+                setEditingModule({
+                  curriculumLevel: selectedTier !== 'ALL' ? selectedTier : 'BEGINNER'
+                });
+                setModuleModalOpen(true);
+              }}
+              className="p-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer"
+              title="Add Module"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
           </div>
 
           {loading ? (
@@ -178,13 +251,13 @@ export default function AdminModulesLessonsPage() {
               <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-indigo-600" />
               <span>Loading modules...</span>
             </div>
-          ) : !courseDetail?.modules || courseDetail.modules.length === 0 ? (
+          ) : filteredModules.length === 0 ? (
             <div className="p-8 text-center text-xs text-[#667085]">
-              No modules found. Click "+ Add Module" to start.
+              No modules found for this tier. Click "+ Add Module" to start.
             </div>
           ) : (
-            <div className="space-y-2.5">
-              {courseDetail.modules.map((m, idx) => {
+            <div className="space-y-2.5 max-h-[70vh] overflow-y-auto pr-1">
+              {filteredModules.map((m, idx) => {
                 const isSelected = selectedModule?.id === m.id;
                 return (
                   <div
@@ -204,10 +277,17 @@ export default function AdminModulesLessonsPage() {
                       </span>
                       <div className="truncate flex-1">
                         <p className="font-bold truncate text-slate-900">{m.title}</p>
-                        <div className="flex items-center gap-1.5 mt-1 text-[10px] text-slate-500">
-                          <span className="font-semibold text-indigo-600">{m.curriculumLevel || 'BEGINNER'}</span>
+                        <div className="flex items-center gap-1.5 mt-1 text-[10px]">
+                          <span className={`font-bold px-1.5 py-0.2 rounded text-[9px] ${
+                            m.curriculumLevel === 'BEGINNER' ? 'bg-green-100 text-green-800' :
+                            m.curriculumLevel === 'INTERMEDIATE' ? 'bg-blue-100 text-blue-800' :
+                            m.curriculumLevel === 'ADVANCED' ? 'bg-purple-100 text-purple-800' :
+                            'bg-amber-100 text-amber-800'
+                          }`}>
+                            {m.curriculumLevel?.replace('_', ' ')}
+                          </span>
                           <span>•</span>
-                          <span>{m.lessons?.length || 0} Chapters</span>
+                          <span className="text-slate-500">{m.lessons?.length || 0} Chapters</span>
                         </div>
                         {m.description && (
                           <p className="text-[10px] text-slate-400 truncate mt-1">
@@ -251,8 +331,13 @@ export default function AdminModulesLessonsPage() {
                   {selectedModule ? selectedModule.title : 'Select a Module'}
                 </h3>
                 {selectedModule && (
-                  <span className="text-[10px] font-mono font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 px-2 py-0.5 rounded">
-                    {selectedModule.curriculumLevel || 'BEGINNER'}
+                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
+                    selectedModule.curriculumLevel === 'BEGINNER' ? 'bg-green-100 text-green-800' :
+                    selectedModule.curriculumLevel === 'INTERMEDIATE' ? 'bg-blue-100 text-blue-800' :
+                    selectedModule.curriculumLevel === 'ADVANCED' ? 'bg-purple-100 text-purple-800' :
+                    'bg-amber-100 text-amber-900'
+                  }`}>
+                    {selectedModule.curriculumLevel?.replace('_', ' ')}
                   </span>
                 )}
               </div>

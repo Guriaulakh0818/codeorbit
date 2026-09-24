@@ -2,7 +2,7 @@ import { API_BASE, getAuthHeaders, fetchWithTimeout } from './apiConfig';
 import { CURRICULUM_DATA, TECH_DOMAINS } from '../data/curriculumData';
 
 const ADMIN_CURRICULUM_BASE = `${API_BASE}/admin/curriculum`;
-const STORAGE_KEY = 'codeorbit_admin_curriculum_cache_v2';
+const STORAGE_KEY = 'codeorbit_admin_curriculum_cache_v3';
 
 // Helper to get local data initialized from CURRICULUM_DATA
 function getLocalCurriculumStore() {
@@ -10,7 +10,7 @@ function getLocalCurriculumStore() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length >= 20) {
+      if (Array.isArray(parsed) && parsed.length >= 10) {
         return parsed;
       }
     }
