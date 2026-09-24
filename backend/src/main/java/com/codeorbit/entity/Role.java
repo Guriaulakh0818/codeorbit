@@ -2,5 +2,8 @@ package com.codeorbit.entity;
 
 public enum Role {
     STUDENT,
-    ADMIN
+    ADMIN,
+    SUPER_ADMIN,
+    CONTENT_MANAGER,
+    SUPPORT
 }

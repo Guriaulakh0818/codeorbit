@@ -136,7 +136,10 @@ export const AuthProvider = ({ children }) => {
       loginWithGoogle,
       logout,
       isAuthenticated: Boolean(token && user),
-      isAdmin: user?.role === 'ADMIN',
+      isAdmin: ['ADMIN', 'SUPER_ADMIN', 'CONTENT_MANAGER', 'SUPPORT'].includes(user?.role),
+      isSuperAdmin: user?.role === 'SUPER_ADMIN',
+      isContentManager: user?.role === 'CONTENT_MANAGER',
+      isSupport: user?.role === 'SUPPORT',
       isStudent: user?.role === 'STUDENT'
     }}>
       {children}

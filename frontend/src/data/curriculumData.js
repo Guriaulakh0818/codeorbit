@@ -551,4 +551,27 @@ public class HelloWorld {
   }
 ];
 
+export const TECH_DOMAINS = [
+  { id: 'JAVA', name: 'Java', icon: '☕' },
+  { id: 'PYTHON', name: 'Python', icon: '🐍' },
+  { id: 'CPP', name: 'C++', icon: '💻' },
+  { id: 'WEB', name: 'Web Dev', icon: '🌐' },
+  { id: 'REACT', name: 'React', icon: '⚛️' },
+  { id: 'SPRING', name: 'Spring Boot', icon: '☕' },
+  { id: 'NODE', name: 'Node.js', icon: '🟢' },
+  { id: 'DSA', name: 'DSA', icon: '📊' },
+  { id: 'DBMS', name: 'DBMS & SQL', icon: '🗄️' },
+  { id: 'SYSTEM_DESIGN', name: 'System Design', icon: '🏗️' },
+  { id: 'OS', name: 'Operating Systems', icon: '⚙️' },
+  { id: 'NETWORKS', name: 'Computer Networks', icon: '🌐' },
+  { id: 'DEVOPS', name: 'DevOps & Docker', icon: '🐳' },
+  { id: 'CLOUD', name: 'Cloud Computing', icon: '☁️' },
+  { id: 'AI_ML', name: 'AI & Machine Learning', icon: '🤖' },
+  { id: 'CYBERSECURITY', name: 'Cybersecurity', icon: '🔒' },
+  { id: 'GIT', name: 'Git & GitHub', icon: '🐙' },
+  { id: 'LINUX', name: 'Linux Mastery', icon: '🐧' },
+  { id: 'DATA_ANALYTICS', name: 'Data Analytics', icon: '📈' },
+  { id: 'FLUTTER', name: 'Flutter & Mobile', icon: '📱' }
+];
+
 export default CURRICULUM_DATA;

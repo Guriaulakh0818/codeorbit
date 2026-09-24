@@ -3,6 +3,7 @@
  * Configurable via VITE_API_BASE_URL (defaults to '/api' for Vite dev proxy and production reverse proxy)
  */
 export const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+export const API_BASE_URL = API_BASE;
 
 export const getAuthToken = () => {
   return localStorage.getItem('codeorbit_jwt');

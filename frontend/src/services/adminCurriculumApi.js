@@ -491,4 +491,33 @@ export const adminCurriculumApi = {
   }
 };
 
+export { TECH_DOMAINS } from '../data/curriculumData';
+
+export const fetchAdminCourses = async (params) => {
+  const res = await adminCurriculumApi.getCourses(params);
+  return {
+    content: res.data || [],
+    totalElements: res.totalElements || (res.data ? res.data.length : 0),
+    totalPages: res.totalPages || 1
+  };
+};
+
+export const fetchAdminCourseById = async (id) => {
+  const res = await adminCurriculumApi.getCourseById(id);
+  return res.data;
+};
+
+export const createCourse = (data) => adminCurriculumApi.createCourse(data);
+export const updateCourse = (id, data) => adminCurriculumApi.updateCourse(id, data);
+export const deleteCourse = (id) => adminCurriculumApi.deleteCourse(id);
+export const updateCourseStatus = (id, status) => adminCurriculumApi.updateCourseStatus(id, status);
+
+export const createModule = (courseId, data) => adminCurriculumApi.createModule(courseId, data);
+export const updateModule = (moduleId, data) => adminCurriculumApi.updateModule(moduleId, data);
+export const deleteModule = (moduleId) => adminCurriculumApi.deleteModule(moduleId);
+
+export const createLesson = (moduleId, data) => adminCurriculumApi.createLesson(moduleId, data);
+export const updateLesson = (lessonId, data) => adminCurriculumApi.updateLesson(lessonId, data);
+export const deleteLesson = (lessonId) => adminCurriculumApi.deleteLesson(lessonId);
+
 export default adminCurriculumApi;

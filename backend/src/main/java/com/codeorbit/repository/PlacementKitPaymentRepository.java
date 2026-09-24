@@ -20,4 +20,8 @@ public interface PlacementKitPaymentRepository extends JpaRepository<PlacementKi
     Optional<PlacementKitPayment> findByUserIdAndPlacementKitIdAndStatus(Long userId, Long placementKitId, PaymentStatus status);
 
     boolean existsByUserIdAndPlacementKitIdAndStatus(Long userId, Long placementKitId, PaymentStatus status);
+
+    long countByStatus(PaymentStatus status);
+
+    List<PlacementKitPayment> findByStatus(PaymentStatus status);
 }

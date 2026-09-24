@@ -21,4 +21,8 @@ public interface UserQuizAttemptRepository extends JpaRepository<UserQuizAttempt
 
     @Query("SELECT a FROM UserQuizAttempt a WHERE a.user.id = :userId AND a.quiz.module.course.id = :courseId ORDER BY a.submittedAt DESC")
     List<UserQuizAttempt> findRecentAttemptsByCourse(@Param("userId") Long userId, @Param("courseId") Long courseId);
+
+    List<UserQuizAttempt> findByUserIdOrderBySubmittedAtDesc(Long userId);
+
+    long countByUserId(Long userId);
 }

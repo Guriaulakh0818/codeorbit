@@ -24,4 +24,8 @@ public interface PlacementReadyPaymentRepository extends JpaRepository<Placement
     List<PlacementReadyPayment> findByUserIdWithDetailsOrderByCreatedAtDesc(@Param("userId") Long userId);
 
     Optional<PlacementReadyPayment> findByUserAndCourseAndSubcourse(User user, Course course, com.codeorbit.entity.Subcourse subcourse);
+
+    long countByStatus(com.codeorbit.entity.PaymentStatus status);
+
+    List<PlacementReadyPayment> findByStatus(com.codeorbit.entity.PaymentStatus status);
 }

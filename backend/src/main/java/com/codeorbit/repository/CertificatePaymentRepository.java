@@ -29,4 +29,8 @@ public interface CertificatePaymentRepository extends JpaRepository<CertificateP
     Optional<CertificatePayment> findByUserIdAndCourseIdAndStatus(Long userId, Long courseId, PaymentStatus status);
 
     boolean existsByUserIdAndCourseIdAndStatus(Long userId, Long courseId, PaymentStatus status);
+
+    long countByStatus(PaymentStatus status);
+
+    List<CertificatePayment> findByStatus(PaymentStatus status);
 }
