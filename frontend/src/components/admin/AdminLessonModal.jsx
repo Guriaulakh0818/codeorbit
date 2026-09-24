@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, AlertCircle, RefreshCw, BookOpen, Eye, Code2, Languages } from 'lucide-react';
+import { X, Save, AlertCircle, RefreshCw, BookOpen, Eye, Code2, Languages, Sparkles, FileText } from 'lucide-react';
 import { adminCurriculumApi } from '../../services/adminCurriculumApi';
 import { MarkdownRenderer } from '../MarkdownRenderer';
 
@@ -8,8 +8,8 @@ export const AdminLessonModal = ({ isOpen, onClose, moduleId, lesson, onSaved })
     title: '',
     slug: '',
     estimatedMinutes: 15,
-    orderIndex: 0,
-    status: 'DRAFT',
+    orderIndex: 1,
+    status: 'PUBLISHED',
     contentEn: '',
     contentHinglish: '',
     hinglishStatus: 'MISSING',
@@ -29,11 +29,11 @@ export const AdminLessonModal = ({ isOpen, onClose, moduleId, lesson, onSaved })
         title: lesson.title || '',
         slug: lesson.slug || '',
         estimatedMinutes: lesson.estimatedMinutes || 15,
-        orderIndex: lesson.orderIndex || 0,
-        status: lesson.status || 'DRAFT',
+        orderIndex: lesson.orderIndex || 1,
+        status: lesson.status || 'PUBLISHED',
         contentEn: lesson.contentEn || '',
         contentHinglish: lesson.contentHinglish || '',
-        hinglishStatus: lesson.hinglishStatus || 'MISSING',
+        hinglishStatus: lesson.hinglishStatus || 'PUBLISHED',
         codeSnippetJava: lesson.codeSnippetJava || '',
         codeSnippetCpp: lesson.codeSnippetCpp || '',
         codeSnippetPython: lesson.codeSnippetPython || ''
@@ -43,14 +43,14 @@ export const AdminLessonModal = ({ isOpen, onClose, moduleId, lesson, onSaved })
         title: '',
         slug: '',
         estimatedMinutes: 15,
-        orderIndex: 0,
-        status: 'DRAFT',
-        contentEn: '# Lesson Overview\n\nExplain the concept clearly here...\n\n### Key Principles\n* Point 1\n* Point 2\n',
-        contentHinglish: '',
-        hinglishStatus: 'MISSING',
-        codeSnippetJava: '',
-        codeSnippetCpp: '',
-        codeSnippetPython: ''
+        orderIndex: 1,
+        status: 'PUBLISHED',
+        contentEn: `# Chapter Overview\n\nExplain the core concept, syntax, architecture, and step-by-step logic here...\n\n### Key Concepts Covered\n- Concept 1\n- Concept 2\n- Code Walkthrough\n\n\`\`\`java\npublic class Solution {\n    public static void main(String[] args) {\n        System.out.println("Hello CodeOrbit!");\n    }\n}\n\`\`\``,
+        contentHinglish: `# Chapter Ka Introduction 🇮🇳\n\nYahan concept ko aasan Hindi + English (Hinglish) me explain karein...\n\n### Important Points\n- Point 1\n- Point 2\n`,
+        hinglishStatus: 'PUBLISHED',
+        codeSnippetJava: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello World");\n    }\n}',
+        codeSnippetCpp: '#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello World" << endl;\n    return 0;\n}',
+        codeSnippetPython: 'def main():\n    print("Hello World")\n\nif __name__ == "__main__":\n    main()'
       });
     }
     setError(null);
@@ -77,21 +77,17 @@ export const AdminLessonModal = ({ isOpen, onClose, moduleId, lesson, onSaved })
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.title.trim() || !formData.slug.trim() || !formData.contentEn.trim()) {
-      setError('Title, slug, and English content are required.');
+      setError('Chapter title, slug, and English content are required.');
       return;
     }
 
     setSaving(true);
     setError(null);
 
-    // Auto-compute hinglish status if text provided
+    // Auto-compute hinglish status
     const payload = { ...formData };
     if (payload.contentHinglish && payload.contentHinglish.trim().length > 10) {
-      if (payload.hinglishStatus === 'MISSING') {
-        payload.hinglishStatus = 'PUBLISHED';
-      }
-    } else {
-      payload.hinglishStatus = 'MISSING';
+      payload.hinglishStatus = 'PUBLISHED';
     }
 
     try {
@@ -106,7 +102,7 @@ export const AdminLessonModal = ({ isOpen, onClose, moduleId, lesson, onSaved })
         onSaved();
         onClose();
       } else {
-        setError(res.message || 'Failed to save lesson.');
+        setError(res.message || 'Failed to save chapter.');
       }
     } catch (err) {
       setError('Server connection error.');
@@ -118,8 +114,8 @@ export const AdminLessonModal = ({ isOpen, onClose, moduleId, lesson, onSaved })
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/60 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-200">
-      <div className="relative w-full max-w-4xl bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 my-6 max-h-[92vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="relative w-full max-w-4xl bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[92vh] flex flex-col">
         
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-100 flex-shrink-0">
@@ -129,9 +125,11 @@ export const AdminLessonModal = ({ isOpen, onClose, moduleId, lesson, onSaved })
             </div>
             <div>
               <h2 className="text-lg font-bold text-slate-900">
-                {lesson ? 'Edit Lesson' : 'Create New Lesson'}
+                {lesson ? 'Edit Chapter / Lesson' : 'Add Chapter / Lesson to Module'}
               </h2>
-              <p className="text-xs text-slate-500">Bilingual lesson content (English + Hinglish), code snippets, and publishing</p>
+              <p className="text-xs text-slate-500">
+                Write concept explanations, bilingual Hinglish content, and code snippets
+              </p>
             </div>
           </div>
           <button
@@ -149,56 +147,66 @@ export const AdminLessonModal = ({ isOpen, onClose, moduleId, lesson, onSaved })
           </div>
         )}
 
-        {/* Scrollable Form Content */}
-        <form onSubmit={handleSubmit} className="space-y-5 text-xs flex-1 overflow-y-auto pr-1">
+        {/* Form Body */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto space-y-5 text-xs pr-1">
           
-          {/* Metadata Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-slate-700 font-semibold mb-1">Lesson Title *</label>
+          {/* Metadata Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
+            
+            <div className="sm:col-span-6">
+              <label className="block text-slate-700 font-semibold mb-1">
+                Chapter / Lesson Title *
+              </label>
               <input
                 type="text"
                 value={formData.title}
                 onChange={handleTitleChange}
-                placeholder="e.g. 1.1 Introduction to Time & Space Complexity"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-emerald-500"
+                placeholder="e.g. 1.1 Introduction to Java & JVM Architecture"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-emerald-500 font-medium"
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-slate-700 font-semibold mb-1">Slug (URL identifier) *</label>
+            <div className="sm:col-span-3">
+              <label className="block text-slate-700 font-semibold mb-1">
+                Slug (URL Identifier) *
+              </label>
               <input
                 type="text"
                 value={formData.slug}
                 onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                placeholder="e.g. time-and-space-complexity"
+                placeholder="e.g. java-intro-jvm"
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-mono placeholder-slate-400 focus:bg-white focus:outline-none focus:border-emerald-500"
                 required
               />
             </div>
-          </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="block text-slate-700 font-semibold mb-1">Est. Minutes</label>
+            <div className="sm:col-span-3">
+              <label className="block text-slate-700 font-semibold mb-1">
+                Reading Time (Mins)
+              </label>
               <input
                 type="number"
                 min="1"
+                max="180"
                 value={formData.estimatedMinutes}
-                onChange={(e) => setFormData({ ...formData, estimatedMinutes: parseInt(e.target.value, 10) || 1 })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500"
+                onChange={(e) => setFormData({ ...formData, estimatedMinutes: parseInt(e.target.value, 10) || 15 })}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-mono focus:bg-white focus:outline-none focus:border-emerald-500"
               />
             </div>
 
+          </div>
+
+          {/* Row 2: Status & Order */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div>
-              <label className="block text-slate-700 font-semibold mb-1">Order Index</label>
+              <label className="block text-slate-700 font-semibold mb-1">Chapter Order #</label>
               <input
                 type="number"
-                min="0"
+                min="1"
                 value={formData.orderIndex}
-                onChange={(e) => setFormData({ ...formData, orderIndex: parseInt(e.target.value, 10) || 0 })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500"
+                onChange={(e) => setFormData({ ...formData, orderIndex: parseInt(e.target.value, 10) || 1 })}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-mono focus:bg-white focus:outline-none focus:border-emerald-500"
               />
             </div>
 
@@ -207,32 +215,48 @@ export const AdminLessonModal = ({ isOpen, onClose, moduleId, lesson, onSaved })
               <select
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500 font-semibold"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-semibold focus:bg-white focus:outline-none focus:border-emerald-500"
               >
-                <option value="DRAFT">DRAFT</option>
-                <option value="PUBLISHED">PUBLISHED</option>
+                <option value="PUBLISHED">PUBLISHED (Live)</option>
+                <option value="DRAFT">DRAFT (Hidden)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-slate-700 font-semibold mb-1">Hinglish Mode</label>
+              <select
+                value={formData.hinglishStatus}
+                onChange={(e) => setFormData({ ...formData, hinglishStatus: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-semibold focus:bg-white focus:outline-none focus:border-emerald-500"
+              >
+                <option value="PUBLISHED">Available (EN + HI)</option>
+                <option value="MISSING">English Only</option>
               </select>
             </div>
           </div>
 
-          {/* Tab Navigation for Content & Code */}
-          <div className="border border-slate-200 rounded-2xl bg-slate-50 p-1.5 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5">
+          {/* Editor Tabs Navigation */}
+          <div className="border-b border-slate-200 flex items-center justify-between pt-2">
+            <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => setActiveTab('en')}
-                className={`px-3.5 py-1.5 rounded-xl font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
-                  activeTab === 'en' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                className={`pb-2.5 px-3 font-bold flex items-center gap-1.5 border-b-2 transition-all cursor-pointer ${
+                  activeTab === 'en'
+                    ? 'border-emerald-600 text-emerald-700'
+                    : 'border-transparent text-slate-500 hover:text-slate-900'
                 }`}
               >
-                English Content *
+                <BookOpen className="w-3.5 h-3.5" /> English Content (Markdown) *
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveTab('hinglish')}
-                className={`px-3.5 py-1.5 rounded-xl font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
-                  activeTab === 'hinglish' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                className={`pb-2.5 px-3 font-bold flex items-center gap-1.5 border-b-2 transition-all cursor-pointer ${
+                  activeTab === 'hinglish'
+                    ? 'border-emerald-600 text-emerald-700'
+                    : 'border-transparent text-slate-500 hover:text-slate-900'
                 }`}
               >
                 <Languages className="w-3.5 h-3.5" /> Hinglish Content 🇮🇳
@@ -241,8 +265,10 @@ export const AdminLessonModal = ({ isOpen, onClose, moduleId, lesson, onSaved })
               <button
                 type="button"
                 onClick={() => setActiveTab('code')}
-                className={`px-3.5 py-1.5 rounded-xl font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
-                  activeTab === 'code' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                className={`pb-2.5 px-3 font-bold flex items-center gap-1.5 border-b-2 transition-all cursor-pointer ${
+                  activeTab === 'code'
+                    ? 'border-emerald-600 text-emerald-700'
+                    : 'border-transparent text-slate-500 hover:text-slate-900'
                 }`}
               >
                 <Code2 className="w-3.5 h-3.5" /> Code Snippets
@@ -252,84 +278,61 @@ export const AdminLessonModal = ({ isOpen, onClose, moduleId, lesson, onSaved })
             <button
               type="button"
               onClick={() => setActiveTab('preview')}
-              className={`px-3 py-1.5 rounded-xl font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
-                activeTab === 'preview' ? 'bg-slate-800 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+              className={`pb-2.5 px-3 font-bold flex items-center gap-1.5 border-b-2 transition-all cursor-pointer ${
+                activeTab === 'preview'
+                  ? 'border-indigo-600 text-indigo-700'
+                  : 'border-transparent text-slate-500 hover:text-slate-900'
               }`}
             >
               <Eye className="w-3.5 h-3.5" /> Live Preview
             </button>
           </div>
 
-          {/* TAB 1: English Content */}
+          {/* Editor Panels */}
           {activeTab === 'en' && (
-            <div className="space-y-1.5 animate-in fade-in duration-150">
-              <div className="flex items-center justify-between text-slate-500">
-                <span className="font-semibold">English Lesson Content (Markdown Supported)</span>
-                <span className="text-[11px]">Supports headings, bullet lists, math, and code blocks</span>
-              </div>
+            <div className="space-y-2">
+              <label className="block text-slate-700 font-semibold">English Lesson Content (Full Markdown)</label>
               <textarea
                 rows="14"
                 value={formData.contentEn}
                 onChange={(e) => setFormData({ ...formData, contentEn: e.target.value })}
-                placeholder="# Introduction..."
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-mono text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-emerald-500 leading-relaxed"
+                placeholder="# Lesson Title\n\nExplain your concept in detail here..."
+                className="w-full font-mono bg-slate-900 text-emerald-400 border border-slate-800 rounded-2xl p-4 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 leading-relaxed"
                 required
               />
             </div>
           )}
 
-          {/* TAB 2: Hinglish Content */}
           {activeTab === 'hinglish' && (
-            <div className="space-y-2 animate-in fade-in duration-150">
-              <div className="flex items-center justify-between text-slate-500">
-                <span className="font-semibold text-emerald-700 flex items-center gap-1.5">
-                  <Languages className="w-4 h-4" /> Hinglish Explanation (Conversational Hindi-English)
-                </span>
-                <span className="text-[11px]">Students can switch with 1-click in the reader</span>
-              </div>
+            <div className="space-y-2">
+              <label className="block text-slate-700 font-semibold">Hinglish Explanation (Hindi + English Romanized Markdown)</label>
               <textarea
                 rows="14"
                 value={formData.contentHinglish}
                 onChange={(e) => setFormData({ ...formData, contentHinglish: e.target.value })}
-                placeholder="# Concept ko aasaani se samjhte hain...
-
-Time complexity ka matlab hota hai ki algorithm input size ke badhne par kitna time leta hai..."
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-mono text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-emerald-500 leading-relaxed"
+                placeholder="# Chapter Introduction 🇮🇳\n\nIs concept ko simple hinglish me samjhayein..."
+                className="w-full font-mono bg-slate-900 text-amber-300 border border-slate-800 rounded-2xl p-4 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 leading-relaxed"
               />
             </div>
           )}
 
-          {/* TAB 3: Code Snippets */}
           {activeTab === 'code' && (
-            <div className="space-y-3 animate-in fade-in duration-150">
-              <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
-                <button
-                  type="button"
-                  onClick={() => setActiveCodeLang('java')}
-                  className={`px-3 py-1 rounded-lg font-bold text-xs cursor-pointer ${
-                    activeCodeLang === 'java' ? 'bg-amber-100 text-amber-800' : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  Java ☕
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveCodeLang('cpp')}
-                  className={`px-3 py-1 rounded-lg font-bold text-xs cursor-pointer ${
-                    activeCodeLang === 'cpp' ? 'bg-sky-100 text-sky-800' : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  C++ ⚡
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveCodeLang('python')}
-                  className={`px-3 py-1 rounded-lg font-bold text-xs cursor-pointer ${
-                    activeCodeLang === 'python' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  Python 🐍
-                </button>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                {['java', 'cpp', 'python'].map((lang) => (
+                  <button
+                    key={lang}
+                    type="button"
+                    onClick={() => setActiveCodeLang(lang)}
+                    className={`px-3 py-1 rounded-lg font-mono text-[11px] font-bold uppercase transition-colors cursor-pointer ${
+                      activeCodeLang === lang
+                        ? 'bg-slate-900 text-white'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    {lang}
+                  </button>
+                ))}
               </div>
 
               {activeCodeLang === 'java' && (
@@ -337,13 +340,8 @@ Time complexity ka matlab hota hai ki algorithm input size ke badhne par kitna t
                   rows="12"
                   value={formData.codeSnippetJava}
                   onChange={(e) => setFormData({ ...formData, codeSnippetJava: e.target.value })}
-                  placeholder="// Java Implementation
-public class Solution {
-    public static void main(String[] args) {
-        // ...
-    }
-}"
-                  className="w-full bg-slate-900 border border-slate-800 rounded-2xl p-4 font-mono text-xs text-emerald-300 placeholder-slate-600 focus:outline-none focus:border-emerald-500 leading-relaxed"
+                  placeholder="// Java implementation"
+                  className="w-full font-mono bg-slate-900 text-sky-300 border border-slate-800 rounded-2xl p-4 text-xs focus:outline-none focus:ring-2 focus:ring-sky-500 leading-relaxed"
                 />
               )}
 
@@ -352,14 +350,8 @@ public class Solution {
                   rows="12"
                   value={formData.codeSnippetCpp}
                   onChange={(e) => setFormData({ ...formData, codeSnippetCpp: e.target.value })}
-                  placeholder="// C++ Implementation
-#include <iostream>
-using namespace std;
-
-int main() {
-    return 0;
-}"
-                  className="w-full bg-slate-900 border border-slate-800 rounded-2xl p-4 font-mono text-xs text-sky-300 placeholder-slate-600 focus:outline-none focus:border-sky-500 leading-relaxed"
+                  placeholder="// C++ implementation"
+                  className="w-full font-mono bg-slate-900 text-cyan-300 border border-slate-800 rounded-2xl p-4 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500 leading-relaxed"
                 />
               )}
 
@@ -368,50 +360,58 @@ int main() {
                   rows="12"
                   value={formData.codeSnippetPython}
                   onChange={(e) => setFormData({ ...formData, codeSnippetPython: e.target.value })}
-                  placeholder="# Python Implementation
-def solve():
-    pass
-
-if __name__ == '__main__':
-    solve()"
-                  className="w-full bg-slate-900 border border-slate-800 rounded-2xl p-4 font-mono text-xs text-emerald-300 placeholder-slate-600 focus:outline-none focus:border-emerald-500 leading-relaxed"
+                  placeholder="# Python implementation"
+                  className="w-full font-mono bg-slate-900 text-emerald-300 border border-slate-800 rounded-2xl p-4 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 leading-relaxed"
                 />
               )}
             </div>
           )}
 
-          {/* TAB 4: Live Preview */}
           {activeTab === 'preview' && (
-            <div className="border border-slate-200 rounded-2xl p-6 bg-slate-50 min-h-[300px] animate-in fade-in">
-              <MarkdownRenderer content={formData.contentEn || '*No content entered yet.*'} />
+            <div className="p-5 bg-white border border-slate-200 rounded-2xl min-h-[300px] overflow-y-auto">
+              <h1 className="text-xl font-bold text-slate-900 mb-2">{formData.title || 'Chapter Title'}</h1>
+              <div className="flex items-center gap-3 text-slate-500 text-[11px] mb-4 pb-3 border-b border-slate-100 font-mono">
+                <span>⏱ {formData.estimatedMinutes} mins read</span>
+                <span>•</span>
+                <span>Order #{formData.orderIndex}</span>
+              </div>
+              <div className="prose prose-sm max-w-none text-slate-800 leading-relaxed">
+                <MarkdownRenderer content={formData.contentEn || '*No markdown content entered.*'} />
+              </div>
             </div>
           )}
 
           {/* Footer Actions */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 flex-shrink-0">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition-colors cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all shadow-xs disabled:opacity-50 cursor-pointer"
-            >
-              {saving ? (
-                <>
-                  <RefreshCw className="w-4 h-4 animate-spin" /> Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4" /> Save Lesson
-                </>
-              )}
-            </button>
+          <div className="flex items-center justify-between pt-4 border-t border-slate-100 flex-shrink-0">
+            <span className="text-[11px] text-slate-400">
+              Saving will sync directly with the Chapter Reader on www.codeorbit.online.
+            </span>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={saving}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all shadow-xs disabled:opacity-50 cursor-pointer"
+              >
+                {saving ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" /> Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" /> Save Chapter
+                  </>
+                )}
+              </button>
+            </div>
           </div>
+
         </form>
 
       </div>

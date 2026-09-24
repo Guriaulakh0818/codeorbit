@@ -1,5 +1,5 @@
 import { API_BASE, getAuthHeaders, fetchWithTimeout } from './apiConfig';
-import { CURRICULUM_DATA } from '../data/curriculumData';
+import { CURRICULUM_DATA, TECH_DOMAINS } from '../data/curriculumData';
 
 const ADMIN_CURRICULUM_BASE = `${API_BASE}/admin/curriculum`;
 const STORAGE_KEY = 'codeorbit_admin_curriculum_cache_v2';
@@ -233,6 +233,47 @@ export const adminCurriculumApi = {
     list = list.filter((c) => String(c.id) !== String(courseId));
     saveLocalCurriculumStore(list);
     return { success: true, message: 'Course deleted successfully.' };
+  },
+
+  // ==========================================
+  // SUBCOURSES / TIERS & CONCEPTS
+  // ==========================================
+
+  async updateSubcourse(courseId, subcourseId, payload) {
+    try {
+      const res = await fetchWithTimeout(`${ADMIN_CURRICULUM_BASE}/subcourses/${subcourseId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders()
+        },
+        body: JSON.stringify(payload)
+      }, 3000);
+      if (res.ok) {
+        const json = await res.json();
+        return { success: true, data: json.data, message: json.message };
+      }
+    } catch (e) {
+      // fallback
+    }
+
+    const list = getLocalCurriculumStore();
+    for (const c of list) {
+      if (String(c.id) === String(courseId) || c.slug === String(courseId)) {
+        if (!c.subcourses) c.subcourses = [];
+        const sub = c.subcourses.find((s) => String(s.id) === String(subcourseId) || s.slug === String(subcourseId) || s.curriculumLevel === payload.curriculumLevel);
+        if (sub) {
+          Object.assign(sub, payload);
+          saveLocalCurriculumStore(list);
+          return { success: true, data: sub, message: 'Tier concepts updated successfully.' };
+        } else {
+          c.subcourses.push({ id: Date.now(), ...payload });
+          saveLocalCurriculumStore(list);
+          return { success: true, data: payload, message: 'Tier concepts added successfully.' };
+        }
+      }
+    }
+    return { success: false, message: 'Course not found.' };
   },
 
   // ==========================================
@@ -491,7 +532,7 @@ export const adminCurriculumApi = {
   }
 };
 
-export { TECH_DOMAINS } from '../data/curriculumData';
+export { TECH_DOMAINS, getLocalCurriculumStore };
 
 export const fetchAdminCourses = async (params) => {
   const res = await adminCurriculumApi.getCourses(params);
@@ -512,6 +553,8 @@ export const updateCourse = (id, data) => adminCurriculumApi.updateCourse(id, da
 export const deleteCourse = (id) => adminCurriculumApi.deleteCourse(id);
 export const updateCourseStatus = (id, status) => adminCurriculumApi.updateCourseStatus(id, status);
 
+export const updateSubcourse = (courseId, subcourseId, data) => adminCurriculumApi.updateSubcourse(courseId, subcourseId, data);
+
 export const createModule = (courseId, data) => adminCurriculumApi.createModule(courseId, data);
 export const updateModule = (moduleId, data) => adminCurriculumApi.updateModule(moduleId, data);
 export const deleteModule = (moduleId) => adminCurriculumApi.deleteModule(moduleId);
@@ -521,3 +564,4 @@ export const updateLesson = (lessonId, data) => adminCurriculumApi.updateLesson(
 export const deleteLesson = (lessonId) => adminCurriculumApi.deleteLesson(lessonId);
 
 export default adminCurriculumApi;
+

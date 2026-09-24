@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, AlertCircle, RefreshCw, Layers } from 'lucide-react';
+import { X, Save, AlertCircle, RefreshCw, Layers, Sparkles, BookOpen } from 'lucide-react';
 import { adminCurriculumApi } from '../../services/adminCurriculumApi';
 
 export const AdminModuleModal = ({ isOpen, onClose, courseId, module, onSaved }) => {
@@ -7,8 +7,9 @@ export const AdminModuleModal = ({ isOpen, onClose, courseId, module, onSaved })
     title: '',
     slug: '',
     description: '',
-    orderIndex: 0,
-    status: 'DRAFT'
+    curriculumLevel: 'BEGINNER',
+    orderIndex: 1,
+    status: 'PUBLISHED'
   });
 
   const [saving, setSaving] = useState(false);
@@ -20,16 +21,18 @@ export const AdminModuleModal = ({ isOpen, onClose, courseId, module, onSaved })
         title: module.title || '',
         slug: module.slug || '',
         description: module.description || '',
-        orderIndex: module.orderIndex || 0,
-        status: module.status || 'DRAFT'
+        curriculumLevel: module.curriculumLevel || 'BEGINNER',
+        orderIndex: module.orderIndex || 1,
+        status: module.status || 'PUBLISHED'
       });
     } else {
       setFormData({
         title: '',
         slug: '',
         description: '',
-        orderIndex: 0,
-        status: 'DRAFT'
+        curriculumLevel: 'BEGINNER',
+        orderIndex: 1,
+        status: 'PUBLISHED'
       });
     }
     setError(null);
@@ -98,9 +101,9 @@ export const AdminModuleModal = ({ isOpen, onClose, courseId, module, onSaved })
             </div>
             <div>
               <h2 className="text-lg font-bold text-slate-900">
-                {module ? 'Edit Course Module' : 'Add Course Module'}
+                {module ? 'Edit Course Module & Concepts' : 'Add Course Module'}
               </h2>
-              <p className="text-xs text-slate-500">Manage chapter grouping and topic structure</p>
+              <p className="text-xs text-slate-500">Configure module concepts, level tier, and chapter groupings</p>
             </div>
           </div>
           <button
@@ -126,44 +129,65 @@ export const AdminModuleModal = ({ isOpen, onClose, courseId, module, onSaved })
               type="text"
               value={formData.title}
               onChange={handleTitleChange}
-              placeholder="e.g. Module 1: Algorithmic Complexity & Foundations"
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-emerald-500"
+              placeholder="e.g. Level 1: Java Programming Foundations"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-emerald-500 font-medium"
               required
-            />
-          </div>
-
-          <div>
-            <label className="block text-slate-700 font-semibold mb-1">Slug (Module Identifier) *</label>
-            <input
-              type="text"
-              value={formData.slug}
-              onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-              placeholder="e.g. foundations-and-complexity"
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-mono placeholder-slate-400 focus:bg-white focus:outline-none focus:border-emerald-500"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-slate-700 font-semibold mb-1">Description</label>
-            <textarea
-              rows="3"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="What topics are covered in this module..."
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-emerald-500"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-slate-700 font-semibold mb-1">Order Index</label>
+              <label className="block text-slate-700 font-semibold mb-1">Tier / Curriculum Level</label>
+              <select
+                value={formData.curriculumLevel}
+                onChange={(e) => setFormData({ ...formData, curriculumLevel: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500 font-semibold"
+              >
+                <option value="BEGINNER">Tier 1: Beginner</option>
+                <option value="INTERMEDIATE">Tier 2: Intermediate</option>
+                <option value="ADVANCED">Tier 3: Advanced</option>
+                <option value="PLACEMENT_READY">Tier 4: Placement Ready (₹29)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-slate-700 font-semibold mb-1">Slug (Module Identifier) *</label>
+              <input
+                type="text"
+                value={formData.slug}
+                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                placeholder="e.g. java-programming-foundations"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-mono placeholder-slate-400 focus:bg-white focus:outline-none focus:border-emerald-500"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-slate-700 font-semibold mb-1">
+              Concepts & Topics Covered in this Module *
+            </label>
+            <p className="text-[11px] text-slate-500 mb-1.5">
+              List the key concepts, syntax, core topics, and learning objectives for this module.
+            </p>
+            <textarea
+              rows="4"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="e.g. Java syntax, primitive types, control statements, loops, methods, arrays, memory architecture..."
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-emerald-500 leading-relaxed"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-slate-700 font-semibold mb-1">Order Index (Module #)</label>
               <input
                 type="number"
-                min="0"
+                min="1"
                 value={formData.orderIndex}
-                onChange={(e) => setFormData({ ...formData, orderIndex: parseInt(e.target.value, 10) || 0 })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500"
+                onChange={(e) => setFormData({ ...formData, orderIndex: parseInt(e.target.value, 10) || 1 })}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500 font-mono"
               />
             </div>
 
@@ -174,8 +198,8 @@ export const AdminModuleModal = ({ isOpen, onClose, courseId, module, onSaved })
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500 font-semibold"
               >
-                <option value="DRAFT">DRAFT</option>
-                <option value="PUBLISHED">PUBLISHED</option>
+                <option value="PUBLISHED">PUBLISHED (Live on Web)</option>
+                <option value="DRAFT">DRAFT (Hidden)</option>
               </select>
             </div>
           </div>
@@ -200,7 +224,7 @@ export const AdminModuleModal = ({ isOpen, onClose, courseId, module, onSaved })
                 </>
               ) : (
                 <>
-                  <Save className="w-4 h-4" /> Save Module
+                  <Save className="w-4 h-4" /> Save Module & Concepts
                 </>
               )}
             </button>

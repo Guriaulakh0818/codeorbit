@@ -1,5 +1,5 @@
 import { API_BASE, getAuthHeaders, fetchWithTimeout } from './apiConfig';
-import { CURRICULUM_DATA } from '../data/curriculumData';
+import { getLocalCurriculumStore } from './adminCurriculumApi';
 
 export const coursesApi = {
   /**
@@ -38,11 +38,12 @@ export const coursesApi = {
         }
       }
     } catch (e) {
-      // fallback to static curriculum data below
+      // fallback to synchronized curriculum store below
     }
 
-    // Local Dataset Fallback
-    let filtered = [...CURRICULUM_DATA];
+    // Live Synchronized Dataset Fallback
+    const store = getLocalCurriculumStore();
+    let filtered = [...store];
     if (track && track !== 'ALL') {
       filtered = filtered.filter((c) => c.track?.toUpperCase() === track.toUpperCase());
     }
@@ -84,8 +85,9 @@ export const coursesApi = {
       // fallback below
     }
 
-    // Fallback from local dataset
-    const course = CURRICULUM_DATA.find((c) => c.slug === slug);
+    // Live Synchronized Dataset Fallback
+    const store = getLocalCurriculumStore();
+    const course = store.find((c) => c.slug === slug || String(c.id) === String(slug));
     if (course) {
       return { success: true, data: course };
     }
@@ -138,11 +140,12 @@ export const coursesApi = {
       // fallback below
     }
 
-    // Fallback from local dataset
-    const course = CURRICULUM_DATA.find((c) => c.slug === courseSlug);
+    // Live Synchronized Dataset Fallback
+    const store = getLocalCurriculumStore();
+    const course = store.find((c) => c.slug === courseSlug || String(c.id) === String(courseSlug));
     if (course && course.modules) {
       for (const mod of course.modules) {
-        const foundLesson = (mod.lessons || []).find((l) => l.slug === lessonSlug);
+        const foundLesson = (mod.lessons || []).find((l) => l.slug === lessonSlug || String(l.id) === String(lessonSlug));
         if (foundLesson) {
           const activeContent = isHinglishRequested
             ? (foundLesson.contentHinglish || foundLesson.contentEn)
@@ -205,11 +208,12 @@ export const coursesApi = {
       // fallback below
     }
 
-    // Fallback from local dataset
-    const course = CURRICULUM_DATA.find((c) => c.slug === courseSlug);
+    // Fallback from live dataset
+    const store = getLocalCurriculumStore();
+    const course = store.find((c) => c.slug === courseSlug || String(c.id) === String(courseSlug));
     if (course && course.modules) {
       for (const mod of course.modules) {
-        const foundQuiz = (mod.quizzes || []).find((q) => q.slug === quizSlug);
+        const foundQuiz = (mod.quizzes || []).find((q) => q.slug === quizSlug || String(q.id) === String(quizSlug));
         if (foundQuiz) {
           const localizedQuestions = (foundQuiz.questions || []).map((q) => ({
             id: q.id,
