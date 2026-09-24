@@ -30,7 +30,6 @@ public class AdminStudentServiceImpl implements AdminStudentService {
     private final PlacementReadyPaymentRepository placementReadyPaymentRepository;
     private final CertificatePaymentRepository certificatePaymentRepository;
     private final PlacementKitPaymentRepository placementKitPaymentRepository;
-    private final CourseRepository courseRepository;
 
     public AdminStudentServiceImpl(
             UserRepository userRepository,
@@ -41,8 +40,7 @@ public class AdminStudentServiceImpl implements AdminStudentService {
             OrderRepository orderRepository,
             PlacementReadyPaymentRepository placementReadyPaymentRepository,
             CertificatePaymentRepository certificatePaymentRepository,
-            PlacementKitPaymentRepository placementKitPaymentRepository,
-            CourseRepository courseRepository
+            PlacementKitPaymentRepository placementKitPaymentRepository
     ) {
         this.userRepository = userRepository;
         this.studentEnrollmentRepository = studentEnrollmentRepository;
@@ -53,7 +51,6 @@ public class AdminStudentServiceImpl implements AdminStudentService {
         this.placementReadyPaymentRepository = placementReadyPaymentRepository;
         this.certificatePaymentRepository = certificatePaymentRepository;
         this.placementKitPaymentRepository = placementKitPaymentRepository;
-        this.courseRepository = courseRepository;
     }
 
     @Override
@@ -107,12 +104,18 @@ public class AdminStudentServiceImpl implements AdminStudentService {
                     totalSpent = totalSpent.add(BigDecimal.valueOf(cp.getAmountPaise()).divide(BigDecimal.valueOf(100)));
                 }
             }
+            List<PlacementKitPayment> kits = placementKitPaymentRepository.findByUserIdOrderByCreatedAtDesc(u.getId());
+            for (PlacementKitPayment kp : kits) {
+                if (kp.getStatus() == PaymentStatus.PAID) {
+                    totalSpent = totalSpent.add(BigDecimal.valueOf(kp.getAmountPaise()).divide(BigDecimal.valueOf(100)));
+                }
+            }
             s.setTotalSpent(totalSpent);
             return s;
         }).collect(Collectors.toList());
 
         Page<AdminStudentDto.Summary> page = new PageImpl<>(content, pageable, totalElements);
-        return new PagedResponseDto<>(page);
+        return new PagedResponseDto<>(page.getContent(), page.getNumber(), page.getSize(), page.getTotalElements(), page.getTotalPages(), page.isLast());
     }
 
     @Override

@@ -213,6 +213,6 @@ public class AdminPaymentServiceImpl implements AdminPaymentService {
         List<AdminPaymentDto.TransactionItem> paged = filtered.subList(fromIndex, toIndex);
 
         Page<AdminPaymentDto.TransactionItem> page = new PageImpl<>(paged, pageable, totalElements);
-        return new PagedResponseDto<>(page);
+        return new PagedResponseDto<>(page.getContent(), page.getNumber(), page.getSize(), page.getTotalElements(), page.getTotalPages(), page.isLast());
     }
 }

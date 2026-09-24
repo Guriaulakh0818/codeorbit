@@ -105,6 +105,6 @@ public class AdminPlacementReadyServiceImpl implements AdminPlacementReadyServic
         List<AdminPlacementReadyDto.EntitlementItem> paged = filtered.subList(fromIndex, toIndex);
 
         Page<AdminPlacementReadyDto.EntitlementItem> page = new PageImpl<>(paged, pageable, totalElements);
-        return new PagedResponseDto<>(page);
+        return new PagedResponseDto<>(page.getContent(), page.getNumber(), page.getSize(), page.getTotalElements(), page.getTotalPages(), page.isLast());
     }
 }

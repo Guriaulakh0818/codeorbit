@@ -110,6 +110,6 @@ public class AdminCertificateAdminServiceImpl implements AdminCertificateAdminSe
         List<AdminCertificateDto.CertificateItem> paged = filtered.subList(fromIndex, toIndex);
 
         Page<AdminCertificateDto.CertificateItem> page = new PageImpl<>(paged, pageable, totalElements);
-        return new PagedResponseDto<>(page);
+        return new PagedResponseDto<>(page.getContent(), page.getNumber(), page.getSize(), page.getTotalElements(), page.getTotalPages(), page.isLast());
     }
 }

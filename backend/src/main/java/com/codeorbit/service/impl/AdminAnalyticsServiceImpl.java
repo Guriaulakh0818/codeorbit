@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -23,8 +22,6 @@ public class AdminAnalyticsServiceImpl implements AdminAnalyticsService {
     private final CertificatePaymentRepository certificatePaymentRepository;
     private final PlacementKitPaymentRepository placementKitPaymentRepository;
     private final StudentEnrollmentRepository studentEnrollmentRepository;
-    private final UserLessonProgressRepository userLessonProgressRepository;
-    private final UserQuizAttemptRepository userQuizAttemptRepository;
     private final CourseRepository courseRepository;
     private final CertificateRepository certificateRepository;
 
@@ -35,8 +32,6 @@ public class AdminAnalyticsServiceImpl implements AdminAnalyticsService {
             CertificatePaymentRepository certificatePaymentRepository,
             PlacementKitPaymentRepository placementKitPaymentRepository,
             StudentEnrollmentRepository studentEnrollmentRepository,
-            UserLessonProgressRepository userLessonProgressRepository,
-            UserQuizAttemptRepository userQuizAttemptRepository,
             CourseRepository courseRepository,
             CertificateRepository certificateRepository
     ) {
@@ -46,8 +41,6 @@ public class AdminAnalyticsServiceImpl implements AdminAnalyticsService {
         this.certificatePaymentRepository = certificatePaymentRepository;
         this.placementKitPaymentRepository = placementKitPaymentRepository;
         this.studentEnrollmentRepository = studentEnrollmentRepository;
-        this.userLessonProgressRepository = userLessonProgressRepository;
-        this.userQuizAttemptRepository = userQuizAttemptRepository;
         this.courseRepository = courseRepository;
         this.certificateRepository = certificateRepository;
     }
