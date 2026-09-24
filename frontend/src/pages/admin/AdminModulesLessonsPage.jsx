@@ -139,6 +139,17 @@ export default function AdminModulesLessonsPage() {
     return mods.filter((m) => m.curriculumLevel === selectedTier);
   }, [courseDetail, selectedTier]);
 
+  // Auto-sync selectedModule when tier or filteredModules change
+  useEffect(() => {
+    if (filteredModules.length > 0) {
+      if (!selectedModule || !filteredModules.some((m) => m.id === selectedModule.id)) {
+        setSelectedModule(filteredModules[0]);
+      }
+    } else {
+      setSelectedModule(null);
+    }
+  }, [filteredModules]);
+
   // Tier module counts
   const tierCounts = useMemo(() => {
     const mods = courseDetail?.modules || [];
@@ -227,10 +238,14 @@ export default function AdminModulesLessonsPage() {
         
         {/* Left: Modules Tree */}
         <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-xs p-5">
-          <div className="flex items-center justify-between pb-3 border-b border-[#E5E7EB] mb-4">
+          <div className="flex items-center justify-between pb-3 border-b border-[#E5E7EB] mb-3">
             <div>
               <h3 className="text-sm font-bold text-[#111827]">Modules List</h3>
-              <p className="text-[11px] text-slate-400">Showing {filteredModules.length} of {courseDetail?.modules?.length || 0} modules</p>
+              <p className="text-[11px] text-slate-400">
+                {selectedTier === 'ALL'
+                  ? `Showing all ${filteredModules.length} modules`
+                  : `Showing ${filteredModules.length} ${selectedTier.replace('_', ' ')} modules`}
+              </p>
             </div>
             <button
               onClick={() => {
@@ -244,6 +259,68 @@ export default function AdminModulesLessonsPage() {
             >
               <Plus className="w-3.5 h-3.5" />
             </button>
+          </div>
+
+          {/* Dedicated Tier Selector Box inside Modules Card */}
+          <div className="mb-4 bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5 text-indigo-600" />
+                Select Tier / Level:
+              </label>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800">
+                {selectedTier === 'ALL' ? 'All (16)' : `${tierCounts[selectedTier] || 0} Modules`}
+              </span>
+            </div>
+
+            {/* Select Dropdown */}
+            <select
+              value={selectedTier}
+              onChange={(e) => setSelectedTier(e.target.value)}
+              className="w-full py-2 px-3 rounded-lg border border-slate-300 bg-white text-xs font-bold text-slate-800 shadow-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer"
+            >
+              <option value="ALL">🌐 All Tiers ({tierCounts.ALL || 16} Modules)</option>
+              <option value="BEGINNER">🟢 Beginner Level ({tierCounts.BEGINNER || 4} Modules)</option>
+              <option value="INTERMEDIATE">🔵 Intermediate Level ({tierCounts.INTERMEDIATE || 4} Modules)</option>
+              <option value="ADVANCED">🟣 Advanced Level ({tierCounts.ADVANCED || 4} Modules)</option>
+              <option value="PLACEMENT_READY">🚀 Placement Ready ({tierCounts.PLACEMENT_READY || 4} Modules)</option>
+            </select>
+
+            {/* Quick 4 Tier Toggle Buttons */}
+            <div className="grid grid-cols-2 gap-1.5 pt-1">
+              {TIERS.filter((t) => t.id !== 'ALL').map((tier) => {
+                const active = selectedTier === tier.id;
+                return (
+                  <button
+                    key={tier.id}
+                    type="button"
+                    onClick={() => setSelectedTier(tier.id)}
+                    className={`py-1.5 px-2.5 rounded-lg text-[11px] font-bold text-left flex items-center justify-between transition-all cursor-pointer ${
+                      active
+                        ? 'bg-indigo-600 text-white shadow-xs'
+                        : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
+                    }`}
+                  >
+                    <span className="truncate">{tier.label.replace(' Level', '')}</span>
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono shrink-0 ${
+                      active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                    }`}>
+                      {tierCounts[tier.id] || 0}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {selectedTier !== 'ALL' && (
+              <button
+                type="button"
+                onClick={() => setSelectedTier('ALL')}
+                className="w-full text-center text-[10px] font-bold text-indigo-600 hover:text-indigo-800 pt-1 hover:underline cursor-pointer block"
+              >
+                ← Show All {tierCounts.ALL || 16} Modules
+              </button>
+            )}
           </div>
 
           {loading ? (
