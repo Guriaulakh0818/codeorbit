@@ -39,9 +39,9 @@ app:
   admin:
     bootstrap:
       enabled: ${ADMIN_BOOTSTRAP_ENABLED:false}
-      email: ${ADMIN_BOOTSTRAP_EMAIL:admin@codeorbit.dev}
-      password: ${ADMIN_BOOTSTRAP_PASSWORD:Admin@CodeOrbit2026!}
-      name: ${ADMIN_BOOTSTRAP_NAME:CodeOrbit Academy Admin}
+      email: ${ADMIN_BOOTSTRAP_EMAIL:gurvinderaulakh497@gmail.com}
+      password: ${ADMIN_BOOTSTRAP_PASSWORD:SaniyaBatra@68182#}
+      name: ${ADMIN_BOOTSTRAP_NAME:Gurvinder Singh}
 
 codeorbit:
   seed-demo-data: ${SEED_DEMO_DATA:true}

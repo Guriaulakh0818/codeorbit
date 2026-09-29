@@ -96,39 +96,13 @@ public class DataInitializer implements CommandLineRunner {
             );
             userRepository.save(guriAdmin);
             logger.info("Admin account seeded: gurvinderaulakh497@gmail.com");
-        }
-
-        if (!userRepository.existsByEmailIgnoreCase("aulakhg652@gmail.com")) {
-            User aulakhAdmin = new User(
-                    "Gurvinder Aulakh",
-                    "aulakhg652@gmail.com",
-                    passwordEncoder.encode("SaniyaBatra@68182#"),
-                    Role.ADMIN
-            );
-            userRepository.save(aulakhAdmin);
-            logger.info("Admin account seeded: aulakhg652@gmail.com");
-        }
-
-        if (!userRepository.existsByEmailIgnoreCase(adminEmail)) {
-            User admin = new User(
-                    adminName,
-                    adminEmail.trim().toLowerCase(),
-                    passwordEncoder.encode(adminPassword),
-                    Role.ADMIN
-            );
-            userRepository.save(admin);
-            logger.info("Default Store Admin account successfully created ({})", adminEmail);
-        }
-
-        if (!userRepository.existsByEmailIgnoreCase("admin@codeorbit.online")) {
-            User onlineAdmin = new User(
-                    "CodeOrbit Central Admin",
-                    "admin@codeorbit.online",
-                    passwordEncoder.encode("SaniyaBatra@68182#"),
-                    Role.ADMIN
-            );
-            userRepository.save(onlineAdmin);
-            logger.info("Admin account seeded: admin@codeorbit.online");
+        } else {
+            userRepository.findByEmailIgnoreCase("gurvinderaulakh497@gmail.com").ifPresent(u -> {
+                if (u.getRole() != Role.ADMIN) {
+                    u.setRole(Role.ADMIN);
+                    userRepository.save(u);
+                }
+            });
         }
     }
 

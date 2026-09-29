@@ -61,9 +61,7 @@ export const authApi = {
       // Allow re-register or update
     }
 
-    const isAdminEmail = cleanEmail.includes('admin') || 
-                         cleanEmail === 'gurvinderaulakh497@gmail.com' || 
-                         cleanEmail === 'aulakhg652@gmail.com';
+    const isAdminEmail = cleanEmail === 'gurvinderaulakh497@gmail.com';
 
     const fallbackUser = {
       id: existing ? existing.id : Date.now(),
@@ -123,25 +121,23 @@ export const authApi = {
     const existing = users.find((u) => u.email.toLowerCase() === cleanEmail);
 
     let fullName = cleanEmail.split('@')[0];
-    // Capitalize name neatly (e.g. "aulakhg652" -> "Aulakh G")
     fullName = fullName.charAt(0).toUpperCase() + fullName.slice(1);
 
-    const isKnownAdmin = cleanEmail.includes('admin') || 
-                         cleanEmail === 'gurvinderaulakh497@gmail.com' || 
-                         cleanEmail === 'aulakhg652@gmail.com';
+    const isKnownAdmin = cleanEmail === 'gurvinderaulakh497@gmail.com';
+    const assignedRole = isKnownAdmin ? 'ADMIN' : 'STUDENT';
 
     const fallbackUser = {
       id: existing ? existing.id : Date.now(),
       fullName: existing?.fullName || fullName,
       email: cleanEmail,
-      role: isKnownAdmin ? 'ADMIN' : (existing?.role || 'STUDENT')
+      role: assignedRole
     };
 
     const token = `co_auth_${btoa(cleanEmail)}_${Date.now()}`;
     
     if (existing) {
-      if (isKnownAdmin && existing.role !== 'ADMIN') {
-        existing.role = 'ADMIN';
+      if (existing.role !== assignedRole) {
+        existing.role = assignedRole;
         saveLocalUsers(users);
       }
     } else {
