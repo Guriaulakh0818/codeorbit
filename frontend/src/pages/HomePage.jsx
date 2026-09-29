@@ -26,28 +26,27 @@ import {
   Check
 } from 'lucide-react';
 import { coursesApi } from '../services/coursesApi';
+import { CURRICULUM_DATA } from '../data/curriculumData';
 import { SeoHead } from '../components/seo/SeoHead';
 import { AdSlot } from '../components/ads/AdSlot';
 import { Button, Card, CardContent, Badge, SectionHeader } from '../components/ui';
 
 export const HomePage = () => {
   const navigate = useNavigate();
-  const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [courses, setCourses] = useState(() => CURRICULUM_DATA || []);
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [openFaq, setOpenFaq] = useState({ 0: true });
 
   useEffect(() => {
     async function loadFeaturedCourses() {
       try {
-        const res = await coursesApi.getCourses({ page: 0, size: 6 });
-        if (res.success && res.data) {
+        const res = await coursesApi.getCourses({ page: 0, size: 20 });
+        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
           setCourses(res.data);
         }
       } catch (err) {
-        console.error('Failed to load courses on homepage', err);
-      } finally {
-        setLoading(false);
+        console.warn('Failed to load courses from API, using fallback store', err);
       }
     }
     loadFeaturedCourses();
@@ -64,68 +63,66 @@ export const HomePage = () => {
     setOpenFaq(prev => ({ ...prev, [index]: !prev[index] }));
   };
 
-  const coreTracks = [
-    {
-      title: 'Data Structures & Algorithms',
-      description: 'Arrays, Linked Lists, Trees, Graphs, Dynamic Programming & 250+ LeetCode patterns.',
-      slug: 'dsa',
+  const COURSE_META_MAP = {
+    'java': {
+      icon: Code2,
+      iconBg: 'bg-rose-100 text-rose-700',
+      topics: '60+ Topics'
+    },
+    'python': {
       icon: Terminal,
-      color: 'bg-emerald-50 text-emerald-800 border-emerald-200',
-      iconBg: 'bg-emerald-100 text-emerald-800',
-      badge: '100% FREE',
-      topics: '120+ Topics'
+      iconBg: 'bg-amber-100 text-amber-800',
+      topics: '55+ Topics'
     },
-    {
-      title: 'Operating Systems',
-      description: 'Processes, Threads, CPU Scheduling, Concurrency, Virtual Memory & Deadlocks.',
-      slug: 'operating-systems',
+    'cpp': {
       icon: Cpu,
-      color: 'bg-amber-50 text-amber-900 border-amber-200',
-      iconBg: 'bg-amber-100 text-amber-900',
-      badge: '100% FREE',
-      topics: '45+ Topics'
-    },
-    {
-      title: 'Database Management (DBMS)',
-      description: 'SQL queries, Normalization, ACID properties, Indexing & B-Trees, Transactions.',
-      slug: 'dbms',
-      icon: Database,
-      color: 'bg-teal-50 text-teal-900 border-teal-200',
-      iconBg: 'bg-teal-100 text-teal-900',
-      badge: '100% FREE',
+      iconBg: 'bg-blue-100 text-blue-700',
       topics: '50+ Topics'
     },
-    {
-      title: 'Computer Networks',
-      description: 'OSI 7-Layer Model, TCP/IP, Subnetting, Routing Protocols, DNS, HTTP/3, WebSockets.',
-      slug: 'computer-networks',
-      icon: Network,
-      color: 'bg-sky-50 text-sky-900 border-sky-200',
-      iconBg: 'bg-sky-100 text-sky-900',
-      badge: '100% FREE',
-      topics: '40+ Topics'
+    'web-development': {
+      icon: Globe2,
+      iconBg: 'bg-cyan-100 text-cyan-800',
+      topics: '70+ Topics'
     },
-    {
-      title: 'System Design & Scalability',
-      description: 'Distributed architectures, Load Balancers, Caching, Sharding, Message Queues & CAP theorem.',
-      slug: 'system-design',
+    'react': {
+      icon: Sparkles,
+      iconBg: 'bg-sky-100 text-sky-700',
+      topics: '50+ Topics'
+    },
+    'spring-boot': {
       icon: Server,
-      color: 'bg-indigo-50 text-indigo-900 border-indigo-200',
-      iconBg: 'bg-indigo-100 text-indigo-900',
-      badge: '100% FREE',
-      topics: '35+ Topics'
-    },
-    {
-      title: 'Core Java for Placements',
-      description: 'OOPs concepts, JVM Internals, Garbage Collection, Collections Framework, Multithreading.',
-      slug: 'java',
-      icon: Code2,
-      color: 'bg-rose-50 text-rose-900 border-rose-200',
-      iconBg: 'bg-rose-100 text-rose-900',
-      badge: '100% FREE',
+      iconBg: 'bg-emerald-100 text-emerald-800',
       topics: '60+ Topics'
+    },
+    'nodejs': {
+      icon: Layers,
+      iconBg: 'bg-lime-100 text-lime-800',
+      topics: '45+ Topics'
+    },
+    'dsa': {
+      icon: Terminal,
+      iconBg: 'bg-emerald-100 text-emerald-800',
+      topics: '120+ Topics'
+    },
+    'operating-systems': {
+      icon: Cpu,
+      iconBg: 'bg-violet-100 text-violet-800',
+      topics: '45+ Topics'
+    },
+    'dbms': {
+      icon: Database,
+      iconBg: 'bg-teal-100 text-teal-800',
+      topics: '50+ Topics'
     }
-  ];
+  };
+
+  const getCourseMeta = (course) => {
+    return COURSE_META_MAP[course.slug] || {
+      icon: BookOpen,
+      iconBg: 'bg-emerald-100 text-emerald-800',
+      topics: `${course.modules?.length || 16} Modules`
+    };
+  };
 
   const faqs = [
     {
@@ -218,10 +215,10 @@ export const HomePage = () => {
           {/* Quick Subject Tags */}
           <div className="flex flex-wrap items-center justify-center gap-2 pt-1 text-xs">
             <span className="text-slate-500 font-mono text-[11px]">Popular Subjects:</span>
-            {['DSA', 'Operating Systems', 'DBMS', 'Computer Networks', 'System Design', 'Java', 'Python'].map((tag, idx) => (
+            {['Java', 'Python', 'C++', 'Web Dev', 'React', 'Spring Boot', 'Node.js', 'DSA', 'Operating Systems', 'DBMS'].map((tag, idx) => (
               <Link
                 key={idx}
-                to={`/courses?search=${encodeURIComponent(tag)}`}
+                to={`/courses?search=${encodeURIComponent(tag === 'Web Dev' ? 'web' : tag)}`}
                 className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 hover:border-emerald-300 text-slate-600 hover:text-emerald-700 transition-all shadow-2xs text-xs font-medium"
               >
                 {tag}
@@ -247,30 +244,38 @@ export const HomePage = () => {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {coreTracks.map((sub, idx) => {
-            const IconComponent = sub.icon;
+          {courses.map((course, idx) => {
+            const meta = getCourseMeta(course);
+            const IconComponent = meta.icon;
             return (
               <Link
-                key={idx}
-                to={`/courses/${sub.slug}`}
+                key={course.id || course.slug || idx}
+                to={`/courses/${course.slug}`}
                 className="group p-6 rounded-2xl bg-white border border-slate-200 hover:border-emerald-300 transition-all duration-200 hover:-translate-y-1 shadow-2xs hover:shadow-md flex flex-col justify-between space-y-6"
               >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <div className={`p-3 rounded-xl ${sub.iconBg} group-hover:scale-105 transition-transform`}>
-                      <IconComponent className="w-6 h-6" />
+                    <div className="flex items-center gap-3">
+                      <div className={`p-3 rounded-xl ${meta.iconBg} group-hover:scale-105 transition-transform`}>
+                        <IconComponent className="w-6 h-6" />
+                      </div>
+                      {course.iconEmoji && (
+                        <span className="text-xl" role="img" aria-label={course.title}>
+                          {course.iconEmoji}
+                        </span>
+                      )}
                     </div>
                     <Badge variant="primary" dot={true}>
-                      {sub.topics}
+                      {meta.topics}
                     </Badge>
                   </div>
 
                   <div className="space-y-1.5">
                     <h3 className="text-lg font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">
-                      {sub.title}
+                      {course.title}
                     </h3>
-                    <p className="text-xs text-slate-600 leading-relaxed">
-                      {sub.description}
+                    <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">
+                      {course.shortDescription || course.description}
                     </p>
                   </div>
                 </div>
