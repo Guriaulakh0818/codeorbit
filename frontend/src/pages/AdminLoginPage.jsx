@@ -35,6 +35,12 @@ export const AdminLoginPage = () => {
     }
   }, [isAdmin, navigate]);
 
+  // Ensure fields are strictly empty and not pre-populated on mount
+  useEffect(() => {
+    setEmail('');
+    setPassword('');
+  }, []);
+
   const validateForm = () => {
     const errs = {};
     if (!email.trim()) {
@@ -107,9 +113,9 @@ export const AdminLoginPage = () => {
             <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5">
               <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
               <div className="space-y-1">
-                <p className="font-semibold">Logged in as Student: {user.email}</p>
+                <p className="font-semibold">Logged in with a Student Session</p>
                 <p className="text-amber-700 text-[11px]">
-                  Sign in with administrator credentials below to access the management console.
+                  Sign in with your authorized administrator credentials below to access the management console.
                 </p>
               </div>
             </div>
@@ -124,7 +130,7 @@ export const AdminLoginPage = () => {
           )}
 
           {/* Login Form */}
-          <form onSubmit={handleAdminLoginSubmit} className="space-y-4.5 text-xs">
+          <form onSubmit={handleAdminLoginSubmit} className="space-y-4.5 text-xs" autoComplete="off">
             {/* Email Field */}
             <div className="space-y-1.5">
               <label className="text-slate-700 font-semibold block">
@@ -134,7 +140,9 @@ export const AdminLoginPage = () => {
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
                 <input
                   type="email"
-                  placeholder="admin@codeorbit.dev"
+                  id="admin_account_email"
+                  name="admin_account_email"
+                  placeholder="Enter administrator email"
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
@@ -142,7 +150,12 @@ export const AdminLoginPage = () => {
                     if (serverError) setServerError(null);
                   }}
                   disabled={loading}
-                  autoComplete="email"
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck="false"
+                  data-lpignore="true"
+                  data-form-type="other"
                   className={`w-full bg-slate-50 border rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all ${
                     errors.email ? 'border-rose-400 ring-2 ring-rose-500/10' : 'border-slate-200 focus:border-emerald-500'
                   }`}
@@ -162,7 +175,9 @@ export const AdminLoginPage = () => {
                 <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••••••"
+                  id="admin_account_secret"
+                  name="admin_account_secret"
+                  placeholder="Enter administrator password"
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
@@ -170,7 +185,9 @@ export const AdminLoginPage = () => {
                     if (serverError) setServerError(null);
                   }}
                   disabled={loading}
-                  autoComplete="current-password"
+                  autoComplete="new-password"
+                  data-lpignore="true"
+                  data-form-type="other"
                   className={`w-full bg-slate-50 border rounded-xl pl-10 pr-10 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all ${
                     errors.password ? 'border-rose-400 ring-2 ring-rose-500/10' : 'border-slate-200 focus:border-emerald-500'
                   }`}

@@ -13,7 +13,8 @@ import {
   ShieldCheck,
   ChevronRight,
   ExternalLink,
-  Plus
+  Plus,
+  Briefcase
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';

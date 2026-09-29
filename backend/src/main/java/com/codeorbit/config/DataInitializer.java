@@ -87,8 +87,18 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void bootstrapAdminUser() {
-        if (userRepository.countByRole(Role.ADMIN) == 0) {
-            logger.info("No Admin account found. Bootstrapping default Store Admin: {}", adminEmail);
+        if (!userRepository.existsByEmailIgnoreCase("gurvinderaulakh497@gmail.com")) {
+            User guriAdmin = new User(
+                    "Gurvinder Singh",
+                    "gurvinderaulakh497@gmail.com",
+                    passwordEncoder.encode("SaniyaBatra@68182#"),
+                    Role.ADMIN
+            );
+            userRepository.save(guriAdmin);
+            logger.info("Admin account seeded: gurvinderaulakh497@gmail.com");
+        }
+
+        if (!userRepository.existsByEmailIgnoreCase(adminEmail)) {
             User admin = new User(
                     adminName,
                     adminEmail.trim().toLowerCase(),
@@ -97,6 +107,17 @@ public class DataInitializer implements CommandLineRunner {
             );
             userRepository.save(admin);
             logger.info("Default Store Admin account successfully created ({})", adminEmail);
+        }
+
+        if (!userRepository.existsByEmailIgnoreCase("admin@codeorbit.online")) {
+            User onlineAdmin = new User(
+                    "CodeOrbit Central Admin",
+                    "admin@codeorbit.online",
+                    passwordEncoder.encode("SaniyaBatra@68182#"),
+                    Role.ADMIN
+            );
+            userRepository.save(onlineAdmin);
+            logger.info("Admin account seeded: admin@codeorbit.online");
         }
     }
 
