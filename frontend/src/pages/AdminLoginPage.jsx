@@ -70,13 +70,15 @@ export const AdminLoginPage = () => {
       setLoading(false);
 
       if (res.success) {
-        if (res.role === 'ADMIN' || res.user?.role === 'ADMIN') {
+        const role = res.role || res.user?.role;
+        const isAdminRole = ['ADMIN', 'SUPER_ADMIN', 'CONTENT_MANAGER', 'SUPPORT'].includes(role);
+        if (isAdminRole) {
           navigate('/admin/dashboard', { replace: true });
         } else {
-          setServerError('Access Restricted: This account does not possess Administrator privileges. Please login with an authorized Admin account.');
+          setServerError(`Access Restricted: This account (${email.trim()}) is registered as ${role || 'STUDENT'}, not an Administrator. Please enter your Administrator credentials.`);
         }
       } else {
-        setServerError(res.message || 'Invalid administrator credentials. Please check and try again.');
+        setServerError(res.message || 'Invalid administrator credentials. Please check your email and master password, then try again.');
       }
     } catch (err) {
       setLoading(false);
@@ -110,14 +112,23 @@ export const AdminLoginPage = () => {
           
           {/* User currently logged in as non-admin notice */}
           {user && !isAdmin && (
-            <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <p className="font-semibold">Logged in with a Student Session</p>
-                <p className="text-amber-700 text-[11px]">
-                  Sign in with your authorized administrator credentials below to access the management console.
-                </p>
+            <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start justify-between gap-2.5">
+              <div className="flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="font-semibold">Logged in with a Student Session</p>
+                  <p className="text-amber-700 text-[11px]">
+                    Sign in with administrator credentials below to access the management console.
+                  </p>
+                </div>
               </div>
+              <button
+                type="button"
+                onClick={() => logout()}
+                className="text-xs text-amber-800 hover:text-amber-950 underline font-semibold cursor-pointer shrink-0 ml-2"
+              >
+                Sign out
+              </button>
             </div>
           )}
 

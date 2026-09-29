@@ -98,6 +98,17 @@ public class DataInitializer implements CommandLineRunner {
             logger.info("Admin account seeded: gurvinderaulakh497@gmail.com");
         }
 
+        if (!userRepository.existsByEmailIgnoreCase("aulakhg652@gmail.com")) {
+            User aulakhAdmin = new User(
+                    "Gurvinder Aulakh",
+                    "aulakhg652@gmail.com",
+                    passwordEncoder.encode("SaniyaBatra@68182#"),
+                    Role.ADMIN
+            );
+            userRepository.save(aulakhAdmin);
+            logger.info("Admin account seeded: aulakhg652@gmail.com");
+        }
+
         if (!userRepository.existsByEmailIgnoreCase(adminEmail)) {
             User admin = new User(
                     adminName,
