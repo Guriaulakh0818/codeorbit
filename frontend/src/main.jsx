@@ -42,8 +42,15 @@ class ErrorBoundary extends React.Component {
   }
 
   handleReset = () => {
-    localStorage.clear();
+    // Preserve admin curriculum draft cache so course edits are NEVER wiped by accident!
+    const curriculumBackup = localStorage.getItem('codeorbit_admin_curriculum_cache_v3');
     sessionStorage.clear();
+    localStorage.removeItem('codeorbit_eb_chunk_reload');
+    localStorage.removeItem('codeorbit_jwt');
+    localStorage.removeItem('codeorbit_user');
+    if (curriculumBackup) {
+      localStorage.setItem('codeorbit_admin_curriculum_cache_v3', curriculumBackup);
+    }
     window.location.href = '/';
   };
 
